@@ -1,34 +1,36 @@
 from flask import Flask, request, render_template, redirect
-import csv
+import sqlite3
 import os 
 
 app = Flask(__name__)
 
-# In-memory user database (will be populated from CSV)
-database = {}
+# Initialize database connection
+def initialize_db():
+    conn = sqlite3.connect('user_info.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            username TEXT PRIMARY KEY,
+            password TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
-# Function to load users from CSV and create the file if it doesn't exist
-def initialize_csv():
-    if not os.path.exists('user_info.csv'):
-        # Create the CSV file with headers if it doesn't exist
-        with open('user_info.csv', 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(["Username", "Password"])
-    else:
-        # Load existing users into the in-memory database from CSV
-        with open('user_info.csv', 'r') as file:
-            reader = csv.reader(file)
-            # Check if the CSV is empty except for the header
-            if not any(reader):  # Check if there are no rows after the header
-                return  # Exit the function if the file is empty
-            #next(reader)  # Skip the header
-            for row in reader:
-                if len(row) == 2:  # Check for valid username and password rows
-                    username, password = row
-                    database[username] = password
+# Call this function on app start
+initialize_db()
 
-# Initialize the CSV and the database on app start
-initialize_csv()
+# Function to load users from the database
+def load_users():
+    conn = sqlite3.connect('user_info.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT username, password FROM users')
+    users = cursor.fetchall()
+    conn.close()
+    return {username: password for username, password in users}
+
+# In-memory user database (will be populated from the database)
+database = load_users()
 
 @app.route('/')
 def hello_world():
@@ -46,17 +48,19 @@ def signup():
         if pwd != confirm_pwd:
             return render_template('signup.html', info='Passwords do not match')
         
-        # Check if the user already exists in the in-memory database
+        # Check if the user already exists in the database
         if name1 in database:
             return render_template('login.html', info='User already exists')
         else:
-            # Add the new user to the in-memory database
-            database[name1] = pwd
+            # Add the new user to the database
+            conn = sqlite3.connect('user_info.db')
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (name1, pwd))
+            conn.commit()
+            conn.close()
             
-            # Save the new user to the CSV file
-            with open('user_info.csv', 'a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow([name1, pwd])
+            # Reload users into memory
+            database[name1] = pwd
             
             # After successful signup, redirect the user to the login page
             return redirect('/form_login')
@@ -70,7 +74,7 @@ def login():
         name1 = request.form['username']
         pwd = request.form['password']
         
-        # Check if the user exists in the in-memory database
+        # Check if the user exists in the database
         if name1 not in database:
             return render_template('login.html', info='Invalid User')
         elif database[name1] != pwd:
@@ -82,4 +86,4 @@ def login():
         return render_template('login.html')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
