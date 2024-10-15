@@ -21,7 +21,7 @@ def initialize_csv():
             # Check if the CSV is empty except for the header
             if not any(reader):  # Check if there are no rows after the header
                 return  # Exit the function if the file is empty
-            next(reader)  # Skip the header
+            #next(reader)  # Skip the header
             for row in reader:
                 if len(row) == 2:  # Check for valid username and password rows
                     username, password = row
