@@ -1,89 +1,76 @@
-from flask import Flask, request, render_template, redirect
-import sqlite3
-import os 
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+import csv
+import os
 
 app = Flask(__name__)
+app.secret_key = '123456'  # Change this to a random secret key
 
-# Initialize database connection
-def initialize_db():
-    conn = sqlite3.connect('user_info.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            username TEXT PRIMARY KEY,
-            password TEXT NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
+# Function to read users from CSV
+def read_users_from_csv():
+    if not os.path.exists('user_info.csv'):
+        return []
+    with open('user_info.csv', mode='r') as file:
+        csv_reader = csv.reader(file)
+        return [row for row in csv_reader]
 
-# Call this function on app start
-initialize_db()
-
-# Function to load users from the database
-def load_users():
-    conn = sqlite3.connect('user_info.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT username, password FROM users')
-    users = cursor.fetchall()
-    conn.close()
-    return {username: password for username, password in users}
-
-# In-memory user database (will be populated from the database)
-database = load_users()
+# Function to write user to CSV
+def write_user_to_csv(username, password):
+    with open('user_info.csv', mode='a', newline='') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerow([username, password])
 
 @app.route('/')
-def hello_world():
-    return render_template("login.html")
+def home():
+    return render_template('login.html')
 
-# Signup route
-@app.route('/form_signup', methods=['POST', 'GET'])
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        name1 = request.form['username']
-        pwd = request.form['password']
-        confirm_pwd = request.form['confirm-password']
-        
-        # Check if passwords match
-        if pwd != confirm_pwd:
-            return render_template('signup.html', info='Passwords do not match')
-        
-        # Check if the user already exists in the database
-        if name1 in database:
-            return render_template('login.html', info='User already exists')
-        else:
-            # Add the new user to the database
-            conn = sqlite3.connect('user_info.db')
-            cursor = conn.cursor()
-            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (name1, pwd))
-            conn.commit()
-            conn.close()
-            
-            # Reload users into memory
-            database[name1] = pwd
-            
-            # After successful signup, redirect the user to the login page
-            return redirect('/form_login')
-    else:
-        return render_template('signup.html')
+        username = request.form['username']
+        password = request.form['password']
+        users = read_users_from_csv()
 
-# Login route
-@app.route('/form_login', methods=['POST', 'GET'])
+        # Check if user already exists
+        for user in users:
+            if user[0] == username:
+                flash('Username already exists!', 'error')
+                return redirect(url_for('signup'))
+
+        write_user_to_csv(username, password)
+        flash('Signup successful! Please log in.', 'success')
+        return redirect(url_for('home'))
+
+    return render_template('signup.html')
+
+@app.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        name1 = request.form['username']
-        pwd = request.form['password']
-        
-        # Check if the user exists in the database
-        if name1 not in database:
-            return render_template('login.html', info='Invalid User')
-        elif database[name1] != pwd:
-            return render_template('login.html', info='Invalid Password')
-        else:
-            # Render the home page after successful login
-            return render_template('home.html', name=name1)
-    else:
-        return render_template('login.html')
+    username = request.form['username']
+    password = request.form['password']
+    users = read_users_from_csv()
+
+    for user in users:
+        if user[0] == username and user[1] == password:
+            session['username'] = username  # Store username in session
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))  # Redirect to the dashboard/homepage
+
+    flash('Invalid username or password', 'error')
+    return redirect(url_for('home'))
+
+@app.route('/dashboard')
+def dashboard():
+    # Ensure the user is logged in before accessing this page
+    if 'username' not in session:
+        flash('You need to log in first!', 'error')
+        return redirect(url_for('home'))
+
+    return render_template('dashboard.html', username=session['username'])
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)  # Remove user from session
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)

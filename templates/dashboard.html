@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Dashboard</title>
 </head>
 <body>
-    <h2>Sign Up</h2>
+    <h1>Welcome, {{ username }}!</h1>
+    <p>This is your homepage after logging in.</p>
+    <p><a href="/logout">Logout</a></p>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul>
@@ -16,11 +19,5 @@
             </ul>
         {% endif %}
     {% endwith %}
-    <form method="POST" action="/signup">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Sign Up</button>
-    </form>
-    <p>Already have an account? <a href="/">Login</a></p>
 </body>
 </html>
