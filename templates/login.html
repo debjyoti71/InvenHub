@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+    <style>
+        body {
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+
+    <form action="/form_login" method="post">
+        <h2>Login</h2>
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username"><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password"><br><br>
+        <input type="submit" value="Login">
+    </form>
+
+    <p>{{ info }}</p>
+
+    <!-- Sign up message and link -->
+    <p>Don't have an account? <a href="/form_signup">Sign up</a></p>
+
+</body>
+</html>

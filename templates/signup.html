@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up Page</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Sign Up</h1>
+        <form action="/form_signup" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+            <label for="confirm-password">Confirm Password:</label>
+            <input type="password" id="confirm-password" name="confirm-password" required><br><br>
+            <input type="submit" value="Sign Up">
+        </form>
+        <p>{{ info }}</p>
+        <p>Already have an account? <a href="/form_login">Login</a></p>
+    </div>
+</body>
+</html>
