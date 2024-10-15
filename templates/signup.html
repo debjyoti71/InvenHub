@@ -6,21 +6,13 @@
     <title>Sign Up</title>
 </head>
 <body>
-    <h2>Sign Up</h2>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-            {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    <form method="POST" action="/signup">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
+    <h1>Sign Up</h1>
+    <form method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" name="password" required>
         <button type="submit">Sign Up</button>
     </form>
-    <p>Already have an account? <a href="/">Login</a></p>
 </body>
 </html>

@@ -1,3 +1,4 @@
+<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,17 +8,11 @@
 </head>
 <body>
     <h1>Welcome, {{ username }}!</h1>
-    <p>This is your homepage after logging in.</p>
-    <p><a href="/logout">Logout</a></p>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-            {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    {% if username == 'admin' %}
+        <a href="{{ url_for('view_users') }}">View Users</a><br>
+    {% endif %}
+    
+    <a href="{{ url_for('logout') }}">Logout</a>
 </body>
 </html>
