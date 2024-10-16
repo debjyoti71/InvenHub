@@ -45,7 +45,7 @@ def signup():
         session['user'] = first_name
         session['email'] = email  # Store email in session
 
-        return redirect('/dashboard')
+        return redirect(url_for('login'))
     
     return render_template('signup.html')
 
