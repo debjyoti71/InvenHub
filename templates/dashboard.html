@@ -1,16 +1,32 @@
-<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <style>
+        body {
+            background-color: #c8e6c9;
+            color: #333;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        a {
+            color: #388e3c;
+            font-weight: bold;
+            margin: 10px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <h1>Welcome, {{ username }}!</h1>
 
-    {% if username == 'admin' %}
-        <a href="{{ url_for('view_users') }}">View Users</a><br>
+    {% if email == 'debjyoti2ghosh@gmail.com' %}  <!-- Check if the logged-in user is admin -->
+        <a href="{{ url_for('view_users') }}">View Users</a> | 
     {% endif %}
     
     <a href="{{ url_for('logout') }}">Logout</a>

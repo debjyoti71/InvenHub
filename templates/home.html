@@ -4,10 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <style>
+        body {
+            background-color: #f0f8ff;
+            color: #333;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Home Page</h1>
-    <p><a href="/signup">Sign Up</a></p>
-    <p><a href="/login">Log In</a></p>
+    <h1>Welcome to the Login System</h1>
+    <a href="{{ url_for('signup') }}">Sign Up</a> | 
+    <a href="{{ url_for('login') }}">Login</a>
 </body>
 </html>

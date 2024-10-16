@@ -3,22 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Users</title>
+    <title>User List</title>
+    <style>
+        body {
+            background-color: #e3f2fd;
+            color: #333;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            width: 50%;
+        }
+        table, th, td {
+            border: 1px solid #2196f3;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #bbdefb;
+        }
+        a {
+            color: #1976d2;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Users</h1>
-    <table border="1">
-        <tr>
-            <th>Username</th>
-            <th>Password</th>
-        </tr>
-        {% for user in users %}
-        <tr>
-            <td>{{ user[0] }}</td>
-            <td>{{ user[1] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    {% if users %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Password</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user[0] }}</td>
+                        <td>{{ user[1] }}</td>
+                        <td>{{ user[2] }}</td>
+                        <td>{{ user[3] }}</td>
+                        <td>{{ user[4] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody> <!-- Add this closing tag -->
+        </table>
+    {% else %}
+        <p>No users found.</p> <!-- Optional: Message if no users are available -->
+    {% endif %} <!-- Close the if statement -->
     <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 </body>
 </html>
