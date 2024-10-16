@@ -66,7 +66,7 @@ def login():
         with open(CSV_FILE, mode='r') as file:
             reader = csv.reader(file)
             # Skip the header row
-            next(reader)
+            #next(reader)
             for row in reader:
                 # Check the correct indexes based on your CSV structure
                 if row[2] == username and row[4] == password:  # row[2] is Email, row[4] is Password
@@ -103,10 +103,15 @@ def view_users():
         with open(CSV_FILE, mode='r') as file:
             reader = csv.reader(file)
             # Skip the header row
-            #next(reader)  
-            users = list(reader)
+            #next(reader)  # Skip the header
+            for row in reader:
+                # Skip the row if it contains the allowed user's email
+                if row[2] == 'debjyoti2ghosh@gmail.com':  # Assuming email is in the 3rd column
+                    continue
+                users.append(row)  # Add other users to the list
 
     return render_template('view_users.html', users=users)
+
 
 # Logout
 @app.route('/logout')
@@ -117,3 +122,4 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
