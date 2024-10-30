@@ -1,34 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <style>
-        body {
-            background-color: #c8e6c9;
-            color: #333;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-        }
-        a {
-            color: #388e3c;
-            font-weight: bold;
-            margin: 10px;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+        <link rel="stylesheet" href="/static/css/dashboard.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
-<body>
-    <h1>Welcome, {{ username }}!</h1>
 
-    {% if email == 'debjyoti2ghosh@gmail.com' %}  <!-- Check if the logged-in user is admin -->
-        <a href="{{ url_for('view_users') }}">View Users</a> | 
-    {% endif %}
-    
-    <a href="{{ url_for('logout') }}">Logout</a>
+<body>
+    <div class="wrapper">
+        <aside id="sidebar">
+            <div class="d-flex">
+                <button class="toggle-btn" type="button">
+                    <i class="lni lni-grid-alt"></i>
+                </button>
+                <div class="sidebar-logo">
+                    <a href="#">InvenHub</a>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i><img height="20px" width="20px" src="/static/images/icons8-home (2).svg" alt=""></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i><img height="20px" width="20px" src="/static/images/icons8-inventory-50.png" alt="warehouse-1"/></i>
+                        <span>Inventory</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i><img height="20px" width="20px" src="/static/images/icons8-graph-48.png" alt="warehouse-1"/></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i><img height="20px" width="20px" src="/static/images/icons8-order-50.png" alt="warehouse-1"/></i>
+                        <span>Orders</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i><img height="20px" width="20px" src="/static/images/icons8-plus.svg" alt="warehouse-1"/></i>
+                        <span>New Sale</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link">
+                    <i><img height="20px" width="20px" src="/static/images/icons8-settings.svg" alt="warehouse-1"/></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link">
+                    <a href="{{ url_for('logout') }}" class="sidebar-link">
+                    <i><img height="20px" width="20px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+        <div class="main">
+            <div class="row justify-content-center align-items-center" style="height: 8vh; background-color: #c2ddf5;">
+                <div class="col-10">
+                    <div class="row justify-content-center align-items-center">
+                        <div class="col"></div>
+                        <div class="col-5" style="height: auto;">
+                            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                        </div>
+                        <div class="col-1"><button class="btn" id="btnn" type="submit">Search</button></div>
+                        <div class="col-5"></div>
+                    </div>
+                </div>
+                <div class="col"></div>
+                <div class="col"></div>
+                <div class="col"></div>
+                <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
+                    <a href="#">
+                        <i><img height="30px" width="30px" src="/static/images/icons8-notification (3).svg" alt="warehouse-1"/></i>
+                    </a>
+                </div>
+                <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
+                    <a href="#">
+                        <i><img height="30px" width="30px" src="/static/images/icons8-account-50.png" alt="warehouse-1"/></i>
+                    </a>
+                </div>
+                <div class="col"></div>
+            </div>
+            <div class="row" style="height: 100%;">
+                <div class="col-8" style="background-color: #c2ddf5;">
+                    <div class="row" style="height: 100%;">
+                        <div class="col"></div>
+                        <div class="col-11">
+                            <div class="row" style="height: 25%;">
+                                <div class="col-12 mb-3" id="border"><h5 style="margin-top: 10px;">Sales Overview</h5></div>
+                              </div>
+                              <div class="row" style="height:43%;">
+                                <div class="col-12 mb-3" id="border"><h5 style="margin-top: 10px;">Sales & Purchase</h5></div>
+                              </div>
+                              <div class="row" style="height: 22%;">
+                                <div class="col-12" id="border"><h5 style="margin-top: 10px;">Top Selling Stock</h5></div>
+                              </div>
+                        </div>
+                        <div class="col"></div>
+                    </div>
+                </div>
+                <div class="col-4" style="background-color: #c2ddf5;">
+                    <div class="row" style="height: 100%;">
+                        <div class="col-11">
+                            <div class="row" style="height: 40%;">
+                                <div class="col-12 mb-3" id="border"><h5 style="margin-top: 10px;">Inventory Summary</h5></div>
+                              </div>
+                              <div class="row" style="height:52% ;">
+                                <div class="col-12 mb-3" id="border"><h5 style="margin-top: 10px;">Low Quantity Stock</h5></div>
+                              </div>
+                        </div>
+                        <div class="col"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+    <script src="/static/js/dashboard.js"></script>
 </body>
 </html>
