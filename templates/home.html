@@ -3,28 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Inventory Management System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        /* Custom CSS */
         body {
-            background-color: #f0f8ff;
-            color: #333;
             font-family: Arial, sans-serif;
+        }
+        .hero {
+            background: #007bff;
+            color: #fff;
+            padding: 100px 0;
             text-align: center;
-            padding: 50px;
         }
-        a {
-            color: #007bff;
-            text-decoration: none;
+        .features, .cta, .pricing, .steps, .testimonials, .contact, footer {
+            padding: 50px 0;
+        }
+        #btn {
+            border: 2px solid white;
+            border-radius: 5px;
+        }
+        #btn:hover {
+            background-color: white;
+            color: black;
+            border-radius: 5px;
+        }
+        h5 {
             font-weight: bold;
-        }
-        a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to the Login System</h1>
-    <a href="{{ url_for('signup') }}">Sign Up</a> | 
-    <a href="{{ url_for('login') }}">Login</a>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">InvenHub</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+                <li class="nav-item"><a class="nav-link" href="#testimonials">Testimonials</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                <li class="nav-item"><a class="nav-link ml-2 mr-2" id="btn" href="{{ url_for('signup') }}">Sign Up</a></li>
+                <li class="nav-item"><a class="nav-link" id="btn" href="{{ url_for('login') }}">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container">
+            <h1>Comprehensive Inventory Management System</h1>
+            <p>Streamline inventory tracking, barcode generation, sales management, and predictive analysis.</p>
+            <a href="#features" class="btn btn-light mt-4">Learn More</a>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="text-center">Key Features</h2>
+            <div class="row text-center mt-4">
+                <div class="col-md-4">
+                    <h5>Product Addition & Barcode Generation</h5>
+                    <p>Add products with details and generate unique barcodes instantly for easy tracking and labeling.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Real-time Inventory Tracking</h5>
+                    <p>Scan barcodes to update stock in real-time and receive low-stock alerts for timely restocking.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Sales & Transaction Management</h5>
+                    <p>Automate sales recording, bill generation, and calculate profits to track business success.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Comprehensive Reporting</h5>
+                    <p>Generate weekly or monthly reports on sales, stock levels, and profitability for business insights.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Predictive Sales Analysis (ML-Powered)</h5>
+                    <p>Use historical data to forecast future demand, optimize stock, and gain personalized insights.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Cloud-Based Backend System</h5>
+                    <p>Securely store data with real-time synchronization between the mobile app and backend.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action (CTA) Section -->
+    <section class="cta text-center bg-primary text-white">
+        <div class="container">
+            <h2>Ready to Simplify Your Inventory?</h2>
+            <p>Sign up now to manage your inventory effectively and boost profitability!</p>
+            <a href="{{ url_for('signup') }}" class="btn btn-light">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <h2 class="text-center">Pricing Plans</h2>
+            <div class="row text-center mt-4">
+                <div class="col-md-4">
+                    <h4>Basic</h4>
+                    <p>$10/month</p>
+                    <ul class="list-unstyled">
+                        <li>Basic Features</li>
+                        <li>Email Support</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary">Select Plan</a>
+                </div>
+                <div class="col-md-4">
+                    <h4>Pro</h4>
+                    <p>$25/month</p>
+                    <ul class="list-unstyled">
+                        <li>All Features</li>
+                        <li>Priority Support</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary">Select Plan</a>
+                </div>
+                <div class="col-md-4">
+                    <h4>Enterprise</h4>
+                    <p>Contact Us</p>
+                    <ul class="list-unstyled">
+                        <li>Custom Features</li>
+                        <li>Dedicated Support</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Steps Section -->
+    <section id="steps" class="steps">
+        <div class="container">
+            <h2 class="text-center">How It Works</h2>
+            <div class="row text-center mt-4">
+                <div class="col-md-4">
+                    <h5>Step 1</h5>
+                    <p>Sign up and set up your inventory details.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Step 2</h5>
+                    <p>Track items in real-time with automated alerts.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Step 3</h5>
+                    <p>Analyze inventory data and make informed decisions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials bg-light">
+        <div class="container text-center">
+            <h2>What Our Clients Say</h2>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <blockquote class="blockquote">
+                        <p>"This system saved us countless hours each week!"</p>
+                        <footer class="blockquote-footer">Alex Johnson, Store Manager</footer>
+                    </blockquote>
+                </div>
+                <div class="col-md-4">
+                    <blockquote class="blockquote">
+                        <p>"Efficient and easy to use - our inventory has never been so organized."</p>
+                        <footer class="blockquote-footer">Megan Smith, Warehouse Director</footer>
+                    </blockquote>
+                </div>
+                <div class="col-md-4">
+                    <blockquote class="blockquote">
+                        <p>"Highly recommend for businesses of any size!"</p>
+                        <footer class="blockquote-footer">John Doe, Retailer</footer>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="text-center">Contact Us</h2>
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-8">
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="name" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea class="form-control" id="message" rows="4" placeholder="Enter your message"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2024 InvenHub. All Rights Reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
