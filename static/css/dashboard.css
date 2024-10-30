@@ -32,23 +32,23 @@ body {
     min-height: 100vh;
     width: 100%;
     overflow: hidden;
-    transition: all 0.35s ease-in-out;
+    transition: margin-left 0.35s ease; /* Smooth transition for main content */
     background-color: #fafbfe;
 }
 
 #sidebar {
-    width: 70px;
+    width: 70px; /* Collapsed width */
     min-width: 70px;
     z-index: 1000;
-    transition: all .25s ease-in-out;
     background-color: #0e2238;
     display: flex;
     flex-direction: column;
+    transition: width 0.35s ease; /* Smooth transition for sidebar width */
+    overflow: hidden; /* Hide any overflowing content */
 }
 
-#sidebar.expand {
-    width: 260px;
-    min-width: 260px;
+#sidebar:hover {
+    width: 260px; /* Expanded width on hover */
 }
 
 .toggle-btn {
@@ -65,6 +65,8 @@ body {
 
 .sidebar-logo {
     margin: auto 0;
+    display: flex; /* Ensure proper alignment */
+    align-items: center; /* Center logos vertically */
 }
 
 .sidebar-logo a {
@@ -73,106 +75,85 @@ body {
     font-weight: 600;
 }
 
-#sidebar:not(.expand) .sidebar-logo,
-#sidebar:not(.expand) a.sidebar-link span {
-    display: none;
-}
-
 .sidebar-nav {
     padding: 2rem 0;
     flex: 1 1 auto;
 }
 
 a.sidebar-link {
-    padding: .625rem 1.625rem;
+    padding: .625rem 1.625rem; /* Original padding */
     color: #FFF;
-    display: block;
-    font-size: 0.9rem;
+    display: flex; /* Changed to flex to align items */
+    align-items: center; /* Center items vertically */
+    font-size: rem;
     white-space: nowrap;
-    border-left: 3px solid transparent;
+    border-left: 5px solid transparent;
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+#sidebar:not(.expand) a.sidebar-link {
+    padding-left: 15px; /* Adjust padding when collapsed */
+}
+
+#sidebar.expand a.sidebar-link {
+    padding-left: 7px; /* Additional left padding when expanded */
+    align-items: center;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, .075);
+    border-left: 3px solid #3b7ddd;
 }
 
 .sidebar-link i {
-    font-size: 1.1rem;
+    font-size: 1.15rem; /* Increased icon size */
     margin-right: .75rem;
-}
-
-a.sidebar-link:hover {
-    background-color: rgba(255, 255, 255, .075);
-    border-left: 3px solid #3b7ddd;
 }
 
 .sidebar-item {
     position: relative;
 }
 
-#sidebar:not(.expand) .sidebar-item .sidebar-dropdown {
-    position: absolute;
-    top: 0;
-    left: 70px;
-    background-color: #0e2238;
-    padding: 0;
-    min-width: 15rem;
-    display: none;
-}
-
-#sidebar:not(.expand) .sidebar-item:hover .has-dropdown+.sidebar-dropdown {
-    display: block;
-    max-height: 15em;
-    width: 100%;
-    opacity: 1;
-}
-
-#sidebar.expand .sidebar-link[data-bs-toggle="collapse"]::after {
-    border: solid;
-    border-width: 0 .075rem .075rem 0;
-    content: "";
-    display: inline-block;
-    padding: 2px;
-    position: absolute;
-    right: 1.5rem;
-    top: 1.4rem;
-    transform: rotate(-135deg);
-    transition: all .2s ease-out;
-}
-
-#sidebar.expand .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
-    transform: rotate(45deg);
-    transition: all .2s ease-out;
-}
-  #border{
+#border {
     border-radius: 8px;
     background-color: #f2f8fd;
-  }
-  p{
+}
+
+p {
     color: black;
     font-size: 1.5rem;
-  }
-  #tab{
-    background-color: #59a8a5;
-    color: black;
-  }
-
-  #tab:hover {
-    background-color: #317070;
-    border-radius: 10px;
-  }
-  #tab:hover p{
-    color: white;
-  }
-
-  #act {
-    background-color: #317070;
-    border-radius: 10px;
-  }
-  #act p{
-    color: white;
-  }
-#btnn{
-    border:2px solid #174875;
-    color: #174875;
 }
-#btnn:hover{
+
+#btnn {
+    border: 2px solid #174875;
+    color: #174875;
+    border-radius: 8px; /* Added border radius */
+    transition: all 0.3s ease; /* Smooth transition */
+}
+
+#btnn:hover {
     background-color: #174875;
     color: white;
+}
+
+/* Additional styles for the sidebar and buttons */
+.sidebar-footer {
+    padding: 10px;
+}
+
+.sidebar-footer a {
+    display: flex;
+    align-items: center;
+    color: #FFF;
+}
+
+/* Transition effect on hover */
+#sidebar {
+    transition: width 0.3s ease; /* Adjust the duration for smoother effect */
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        display: none; /* Hide sidebar on smaller screens */
+    }
 }
