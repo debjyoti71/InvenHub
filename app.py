@@ -1,20 +1,32 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import csv
-import os
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = '123456'  # Change this to a random secret key
 
+# Configure the SQLite database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user_info.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# Define the User model
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    phone = db.Column(db.String(15), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
+# Create the database and tables
+with app.app_context():
+    db.create_all()
+
 # Define the specific user who can view other users
 ALLOWED_USER = 'debjyoti2ghosh@gmail.com'
 PREDEFINED_PASSWORD = '321'  # Set the predefined password for admin
-CSV_FILE = 'static/user_info.csv'
-
-# Ensure the CSV file exists with headers
-if not os.path.exists(CSV_FILE):
-    with open(CSV_FILE, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['First Name', 'Last Name', 'Email', 'Phone', 'Password'])
 
 # Route for home page
 @app.route('/')
@@ -36,10 +48,17 @@ def signup():
         if password != confirm_password:
             return "Passwords do not match!", 400
 
-        # Save user data to CSV
-        with open(CSV_FILE, 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([first_name, last_name, email, phone, password])
+        # Hash the password before saving
+        hashed_password = generate_password_hash(password)
+
+        # Save user data to the database
+        new_user = User(first_name=first_name, last_name=last_name, email=email, phone=phone, password=hashed_password)
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return "Email already exists!", 400
 
         # Store the user's first name and email in the session
         session['user'] = first_name
@@ -53,28 +72,28 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
 
         # Check for the predefined admin credentials
-        if username == ALLOWED_USER and password == PREDEFINED_PASSWORD:
+        if email == ALLOWED_USER and password == PREDEFINED_PASSWORD:
             session['user'] = 'Admin'  # Store 'Admin' as the display name for admin
             session['email'] = ALLOWED_USER  # Store admin email in session
             return redirect(url_for('dashboard'))
 
-        # Check if the user exists in the CSV
-        with open(CSV_FILE, mode='r') as file:
-            reader = csv.reader(file)
-            # Skip the header row
-            #next(reader)
-            for row in reader:
-                # Check the correct indexes based on your CSV structure
-                if row[2] == username and row[4] == password:  # row[2] is Email, row[4] is Password
-                    session['user'] = row[0]  # Store the first name in the session
-                    session['email'] = row[2]  # Store the user's email in the session
-                    return redirect(url_for('dashboard'))
+        # Check if the user exists in the database
+        user = User.query.filter_by(email=email).first()
+        if user:
+            if user and check_password_hash(user.password, password):  # Check the hashed password
+                session['user'] = user.first_name  # Store the first name in the session
+                session['email'] = user.email  # Store the user's email in the session
+                return redirect(url_for('dashboard'))
+            else:
+                    return 'Incorrect password, try again.'
+        else:
+            return 'Email does not exist.'
+            
 
-        return "Invalid credentials, please try again."
 
     return render_template('login.html')
 
@@ -85,33 +104,20 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session['user'], email=session['email'])
 
+# # View users (only accessible to admin)
+# @app.route('/view_users')
+# def view_users():
+#     # Check if the user is logged in
+#     if 'user' not in session:
+#         return redirect(url_for('login'))
 
-# View users (only accessible to admin)
-@app.route('/view_users')
-def view_users():
-    # Check if the user is logged in
-    if 'user' not in session:
-        return redirect(url_for('login'))
+#     # Check if the logged-in user is allowed to view the users
+#     if session['email'] != ALLOWED_USER:  # Check email instead of user name
+#         return "You are not authorized to view this page.", 403  # Return a 403 Forbidden status
 
-    # Check if the logged-in user is allowed to view the users
-    if session['email'] != ALLOWED_USER:  # Check email instead of user name
-        return "You are not authorized to view this page.", 403  # Return a 403 Forbidden status
+#     users = User.query.filter(User.email != 'debjyoti2ghosh@gmail.com').all()  # Exclude allowed user
 
-    users = []
-    # Read the users from the CSV
-    if os.path.exists(CSV_FILE):
-        with open(CSV_FILE, mode='r') as file:
-            reader = csv.reader(file)
-            # Skip the header row
-            #next(reader)  # Skip the header
-            for row in reader:
-                # Skip the row if it contains the allowed user's email
-                if row[2] == 'debjyoti2ghosh@gmail.com':  # Assuming email is in the 3rd column
-                    continue
-                users.append(row)  # Add other users to the list
-
-    return render_template('view_users.html', users=users)
-
+#     return render_template('view_users.html', users=users)
 
 # Logout
 @app.route('/logout')
@@ -122,4 +128,3 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
