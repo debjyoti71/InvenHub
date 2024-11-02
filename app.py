@@ -104,20 +104,20 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session['user'], email=session['email'])
 
-# # View users (only accessible to admin)
-# @app.route('/view_users')
-# def view_users():
-#     # Check if the user is logged in
-#     if 'user' not in session:
-#         return redirect(url_for('login'))
+@app.route('/6007')
+def view_users():
+    # Check if the user is logged in
+    if 'user' not in session:
+        return redirect(url_for('login'))
 
-#     # Check if the logged-in user is allowed to view the users
-#     if session['email'] != ALLOWED_USER:  # Check email instead of user name
-#         return "You are not authorized to view this page.", 403  # Return a 403 Forbidden status
+    # Check if the logged-in user is allowed to view the users
+    if session['email'] != ALLOWED_USER:
+        return "You are not authorized to view this page.", 403
 
-#     users = User.query.filter(User.email != 'debjyoti2ghosh@gmail.com').all()  # Exclude allowed user
+    # Retrieve all users except the admin user
+    users = User.query.all()  # Retrieve all users without excluding anyone
 
-#     return render_template('view_users.html', users=users)
+    return render_template('view_users.html', users=users)
 
 # Logout
 @app.route('/logout')

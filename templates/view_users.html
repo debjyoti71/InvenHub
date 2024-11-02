@@ -15,7 +15,7 @@
         table {
             margin: 0 auto;
             border-collapse: collapse;
-            width: 50%;
+            width: 80%;
         }
         table, th, td {
             border: 1px solid #2196f3;
@@ -37,32 +37,34 @@
     </style>
 </head>
 <body>
+    <h2>User List</h2>
     {% if users %}
-        <table class="table table-striped">
+        <table>
             <thead>
                 <tr>
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Email</th>
                     <th>Phone</th>
-                    <th>Password</th>
+                    <th>Password (Hashed)</th>
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
                     <tr>
-                        <td>{{ user[0] }}</td>
-                        <td>{{ user[1] }}</td>
-                        <td>{{ user[2] }}</td>
-                        <td>{{ user[3] }}</td>
-                        <td>{{ user[4] }}</td>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone }}</td>
+                        <td>{{ user.password }}</td>
                     </tr>
                 {% endfor %}
-            </tbody> <!-- Add this closing tag -->
+            </tbody>
         </table>
     {% else %}
-        <p>No users found.</p> <!-- Optional: Message if no users are available -->
-    {% endif %} <!-- Close the if statement -->
+        <p>No users found.</p>
+    {% endif %}
+    <br>
     <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 </body>
 </html>
