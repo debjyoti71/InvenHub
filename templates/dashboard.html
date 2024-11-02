@@ -11,7 +11,7 @@
         integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
         <link rel="stylesheet" href="/static/css/dashboard.css">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-    </head>
+</head>
 
 <body>
     <div class="wrapper">
@@ -85,15 +85,25 @@
                 <div class="col"></div>
                 <div class="col"></div>
                 <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
-                    <a href="#">
-                        <i><img height="30px" width="30px" src="/static/images/icons8-notification (3).svg" alt="warehouse-1"/></i>
-                    </a>
+                    <div class="dropdown dropleft">
+                        <a class="notification-icon position-relative" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i><img height="30px" width="30px" src="/static/images/icons8-notification (3).svg" alt=""></i>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="notificationDropdown">
+                            <li class="dropdown-header">Notifications</li>
+                            <li><a class="dropdown-item" href="#">New message received</a></li>
+                            <li><a class="dropdown-item" href="#">Server alert</a></li>
+                            <li><a class="dropdown-item" href="#">Update available</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center" href="#">View all</a></li>
+                        </ul>
+                </div>
                 </div>
                 <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
                     <a href="#">
                         <i><img height="30px" width="30px" src="/static/images/icons8-account-50.png" alt="warehouse-1"/></i>
                     </a>
-                </div>
+                    </div>
                 <div class="col"></div>
             </div>
             <div class="row" style="height: 100%;">
