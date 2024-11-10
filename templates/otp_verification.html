@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Email OTP Verification</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .otp-container {
+      margin-top: 50px;
+    }
+    .otp-box {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .otp-input {
+      font-size: 20px;
+      text-align: center;
+      border-radius: 5px;
+      height: 50px;
+      width: 50px;
+      margin: 0 5px;
+    }
+    .otp-header {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .resend-link {
+      margin-top: 20px;
+      display: block;
+      text-align: center;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container otp-container d-flex justify-content-center align-items-center">
+    <div class="otp-box col-md-6 col-lg-4">
+      <h2 class="text-center otp-header">OTP Verification</h2>
+      <p class="text-center">Enter the OTP sent to your email</p>
+      
+      <form id="otpForm" action="/verify_otp" method="POST">
+        <div class="form-group d-flex justify-content-center">
+          <input type="text" name="otp1" maxlength="1" class="form-control otp-input" required aria-label="OTP digit 1">
+          <input type="text" name="otp2" maxlength="1" class="form-control otp-input" required aria-label="OTP digit 2">
+          <input type="text" name="otp3" maxlength="1" class="form-control otp-input" required aria-label="OTP digit 3">
+          <input type="text" name="otp4" maxlength="1" class="form-control otp-input" required aria-label="OTP digit 4">
+          <input type="text" name="otp5" maxlength="1" class="form-control otp-input" required aria-label="OTP digit 5">
+          <input type="text" name="otp6" maxlength="1" class="form-control otp-input" required aria-label="OTP digit 6">
+        </div>
+        
+        <button type="submit" class="btn btn-primary submit-btn">Verify OTP</button>
+        
+        <a href="/resend_otp" class="resend-link">Didn't receive the OTP? Resend</a>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <!-- Optional JavaScript for auto-focus, tabbing, and combining inputs -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const inputs = document.querySelectorAll('.otp-input');
+      const otpForm = document.getElementById('otpForm');
+      
+      // Move focus to the next input on typing
+      inputs.forEach((input, index) => {
+        input.addEventListener('input', function() {
+          if (this.value.length === 1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+          }
+        });
+      });
+      
+      // Combine OTP input values into one hidden field on submit
+      otpForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        let otpCode = '';
+        inputs.forEach(input => otpCode += input.value);
+        
+        // Create a hidden input to store combined OTP
+        const hiddenOtpInput = document.createElement('input');
+        hiddenOtpInput.type = 'hidden';
+        hiddenOtpInput.name = 'otp';
+        hiddenOtpInput.value = otpCode;
+        otpForm.appendChild(hiddenOtpInput);
+
+        otpForm.submit();
+      });
+    });
+  </script>
+
+</body>
+</html>
