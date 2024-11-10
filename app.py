@@ -40,6 +40,12 @@ def home():
 
 @app.route('/7006')
 def config():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    if session['email'] != app.config['ALLOWED_USER']:
+        return "You are not authorized to view this page.", 403
+    
     secret_key = os.getenv('SECRET_KEY')
     database_url = os.getenv('DATABASE_URL')
     mail_username = os.getenv('MAIL_USERNAME')
