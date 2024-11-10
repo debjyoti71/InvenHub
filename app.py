@@ -6,25 +6,18 @@ from flask_mail import Mail, Message
 import random
 from dotenv import load_dotenv
 import os
+from config import Config  # Import your Config class
 
 # Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = '123456'  # Change this to a random secret key
 
-# Configure the SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user_info.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Use Config class for configuration
+app.config.from_object(Config)
+
+# Initialize the database and mail
 db = SQLAlchemy(app)
-
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-
 mail = Mail(app)
 
 # Define the User model
@@ -39,10 +32,6 @@ class User(db.Model):
 # Create the database and tables
 with app.app_context():
     db.create_all()
-
-# Fetch the allowed user and predefined password from environment variables
-ALLOWED_USER = os.getenv('ALLOWED_USER')
-PREDEFINED_PASSWORD = os.getenv('PREDEFINED_PASSWORD')
 
 # Route for home page
 @app.route('/')
@@ -91,12 +80,11 @@ def send_otp():
     session['otp'] = otp  # Store OTP in session
 
     # Send OTP to user’s email
-    msg = Message('Your OTP Code', sender='your-email@gmail.com', recipients=[email])
+    msg = Message('Your OTP Code', sender=app.config['MAIL_USERNAME'], recipients=[email])
     msg.body = f'Your OTP code is: {otp}'
     mail.send(msg)
     
     return redirect(url_for('verify_otp'))
-
 
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
@@ -136,7 +124,6 @@ def verify_otp():
 
     return render_template('otp_verification.html')
 
-
 # Handle login form submission
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -145,9 +132,9 @@ def login():
         password = request.form['password']
 
         # Check for the predefined admin credentials
-        if email == ALLOWED_USER and password == PREDEFINED_PASSWORD:
+        if email == app.config['ALLOWED_USER'] and password == app.config['PREDEFINED_PASSWORD']:
             session['user'] = 'Admin'  # Store 'Admin' as the display name for admin
-            session['email'] = ALLOWED_USER  # Store admin email in session
+            session['email'] = app.config['ALLOWED_USER']  # Store admin email in session
             return redirect(url_for('dashboard'))
 
         # Check if the user exists in the database
@@ -173,36 +160,29 @@ def dashboard():
 
 @app.route('/6007')
 def view_users():
-    # Check if the user is logged in
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    # Check if the logged-in user is allowed to view the users
-    if session['email'] != ALLOWED_USER:
+    if session['email'] != app.config['ALLOWED_USER']:
         return "You are not authorized to view this page.", 403
 
-    # Retrieve all users except the admin user
-    users = User.query.all()  # Retrieve all users without excluding anyone
+    users = User.query.all()
 
     return render_template('view_users.html', users=users)
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    # Check if the user is logged in
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    # Check if the logged-in user is allowed to delete users
-    if session['email'] != ALLOWED_USER:
+    if session['email'] != app.config['ALLOWED_USER']:
         return "You are not authorized to delete users.", 403
 
-    # Retrieve the user to be deleted
     user = User.query.get(user_id)
     if not user:
         flash("User not found.")
         return redirect(url_for('view_users'))
 
-    # Delete the user
     try:
         db.session.delete(user)
         db.session.commit()
@@ -213,11 +193,10 @@ def delete_user(user_id):
 
     return redirect(url_for('view_users'))
 
-# Logout
 @app.route('/logout')
 def logout():
     session.pop('user', None)
-    session.pop('email', None)  # Clear email from session
+    session.pop('email', None)
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
