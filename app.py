@@ -1,9 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, session ,flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 import random
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = '123456'  # Change this to a random secret key
@@ -15,8 +20,8 @@ db = SQLAlchemy(app)
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'sparksofficial.bd@gmail.com'
-app.config['MAIL_PASSWORD'] = 'ktiy ghvz qbno lzwp'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
@@ -35,9 +40,9 @@ class User(db.Model):
 with app.app_context():
     db.create_all()
 
-# Define the specific user who can view other users
-ALLOWED_USER = 'debjyoti2ghosh@gmail.com'
-PREDEFINED_PASSWORD = '321'  # Set the predefined password for admin
+# Fetch the allowed user and predefined password from environment variables
+ALLOWED_USER = os.getenv('ALLOWED_USER')
+PREDEFINED_PASSWORD = os.getenv('PREDEFINED_PASSWORD')
 
 # Route for home page
 @app.route('/')

@@ -45,6 +45,17 @@
 </head>
 <body>
     <h2>User List</h2>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="color: red; font-weight: bold;">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     {% if users %}
         <table>
             <thead>
@@ -77,6 +88,7 @@
     {% else %}
         <p>No users found.</p>
     {% endif %}
+    
     <br>
     <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 </body>
