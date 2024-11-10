@@ -38,6 +38,29 @@ with app.app_context():
 def home():
     return render_template('home.html')
 
+@app.route('/7006')
+def config():
+    secret_key = os.getenv('SECRET_KEY')
+    database_url = os.getenv('DATABASE_URL')
+    mail_username = os.getenv('MAIL_USERNAME')
+    mail_password = os.getenv('MAIL_PASSWORD')
+    allowed_user = os.getenv('ALLOWED_USER')
+    predefined_password = os.getenv('PREDEFINED_PASSWORD')
+    
+    return f"""
+        <h1>Environment Variables</h1>
+        <ul>
+            <li><strong>SECRET_KEY:</strong> {secret_key}</li>
+            <li><strong>DATABASE_URL:</strong> {database_url}</li>
+            <li><strong>MAIL_USERNAME:</strong> {mail_username}</li>
+            <li><strong>MAIL_PASSWORD:</strong> {mail_password}</li>
+            <li><strong>ALLOWED_USER:</strong> {allowed_user}</li>
+            <li><strong>PREDEFINED_PASSWORD:</strong> {predefined_password}</li>
+        </ul>
+    """
+
+
+
 # Handle signup form submission
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
