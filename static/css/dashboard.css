@@ -135,12 +135,6 @@ p {
     background-color: #174875;
     color: white;
 }
-
-/* Additional styles for the sidebar and buttons */
-.sidebar-footer {
-    padding: 10px;
-}
-
 .sidebar-footer a {
     display: flex;
     align-items: center;
@@ -156,4 +150,31 @@ p {
     #sidebar {
         display: none; /* Hide sidebar on smaller screens */
     }
+}
+/* Style for the notification icon and dropdown positioning */
+/* Position the dropdown on the left side */
+.dropleft .dropdown-menu {
+    left: auto;
+    right: 100%; /* Position the dropdown to the left */
+    top: 0; /* Align it with the icon */
+    transform: translateX(-10px); /* Adjust as needed for alignment */
+    min-width: 200px; /* Adjust width if necessary */
+}
+
+/* Additional styling */
+.notification-icon {
+    cursor: pointer;
+}
+
+.dropdown-menu a {
+    color: #333;
+    text-decoration: none;
+}
+
+.dropdown-menu .dropdown-header {
+    font-weight: bold;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f0f0f0;
 }
