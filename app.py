@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 import random
 from dotenv import load_dotenv
 import os
 from config import Config  # Import your Config class
+from models import db, User, Store, Product
+import csv 
+from datetime import datetime
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,20 +19,17 @@ app = Flask(__name__)
 # Use Config class for configuration
 app.config.from_object(Config)
 
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'csv'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 # Initialize the database and mail
-db = SQLAlchemy(app)
+db.init_app(app)
 mail = Mail(app)
 
-# Define the User model
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    phone = db.Column(db.String(15), nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-
-# Create the database and tables
 with app.app_context():
     db.create_all()
 
@@ -65,6 +65,15 @@ def config():
         </ul>
     """
 
+# Helper functions for authentication
+def check_admin(email, password):
+    return email == app.config['ALLOWED_USER'] and password == app.config['PREDEFINED_PASSWORD']
+
+def authenticate_user(email, password):
+    user = User.query.filter_by(email=email).first()
+    if user and check_password_hash(user.password, password):
+        return user
+    return None
 
 
 # Handle signup form submission
@@ -186,6 +195,21 @@ def dashboard():
     if 'user' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session['user'], email=session['email'])
+
+@app.route('/account')
+def account():
+    if 'user' not in session:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+    
+    email = session['email']
+    user = User.query.filter_by(email=email).first()
+    
+    if user is None:
+        return redirect(url_for('dashboard'))  # If user doesn't exist, redirect to login
+    
+    stores = user.stores
+    
+    return render_template('account_details.html', username=session['user'], email=session['email'], user=user, store=stores)
 
 @app.route('/6007')
 def view_users():
