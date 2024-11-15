@@ -193,15 +193,13 @@ button {
                                         </div>
                                         <div class="info-row">
                                             <strong>Store Address:</strong> <span id="storeAddress">{{ store.store_address }}</span>
+                                        </div>                                                                   
+                                        <div class="info-row">
+                                            <strong>GST Number:</strong> <span id="gstNumber">{{ store.gstNumber }}</span>
                                         </div>
-                                            
-                                <!-- </div>
-                                <div class="info-row">
-                                    <strong>GST Number:</strong> <span id="gstNumber">{{ user.gst_number }}</span>
-                                </div>
-                                <div class="info-row">
-                                    <strong>Store Type:</strong> <span id="storeType">{{ user.store_type }}</span>
-                                </div> -->
+                                        <div class="info-row">
+                                            <strong>Store Type:</strong> <span id="storeType">{{ store.store_type }}</span>
+                                        </div>
 
                                     {% endfor %}
                                 {% endif %}
