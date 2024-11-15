@@ -190,7 +190,7 @@ def dashboard():
 
 @app.route('/add_store', methods=['GET'])
 def add_store_form():
-    return render_template('business_profile.html')  # HTML file for the add store form
+    return render_template('add_store.html')  # HTML file for the add store form
 
 @app.route('/add_store', methods=['POST'])
 def add_store():
