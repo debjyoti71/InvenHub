@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash,jsonify
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -18,14 +18,6 @@ app = Flask(__name__)
 
 # Use Config class for configuration
 app.config.from_object(Config)
-
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'csv'}
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 # Initialize the database and mail
 db.init_app(app)
 mail = Mail(app)
@@ -150,7 +142,7 @@ def verify_otp():
                     db.session.commit()
                     session['user'] = user_data['first_name']
                     session['email'] = user_data['email']
-                    return redirect(url_for('dashboard'))
+                    return redirect(url_for('add_store_form'))
 
                 except IntegrityError:
                     db.session.rollback()
@@ -181,7 +173,7 @@ def login():
             if user and check_password_hash(user.password, password):  # Check the hashed password
                 session['user'] = user.first_name  # Store the first name in the session
                 session['email'] = user.email  # Store the user's email in the session
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('add_store_form'))
             else:
                 return 'Incorrect password, try again.'
         else:
@@ -196,6 +188,56 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session['user'], email=session['email'])
 
+@app.route('/add_store', methods=['GET'])
+def add_store_form():
+    return render_template('business_profile.html')  # HTML file for the add store form
+
+@app.route('/add_store', methods=['POST'])
+def add_store():
+    print("Form data received:", request.form)  # Debugging line
+
+    store_name = request.form.get('store_name')
+    store_address = request.form.get('store_address')
+    owner_name = request.form.get('owner_name')
+    gstNumber = request.form.get('gstNumber')
+    business_email = request.form.get('business_email')
+
+    print("Store Name:", store_name)
+    print("Store Address:", store_address)
+    print("Owner Name:", owner_name)
+    print("GST Number:", gstNumber)
+    print("Business Email:", business_email)
+
+    # Check if all fields are provided
+    if store_name and store_address and owner_name and gstNumber and business_email:
+        try:
+            # Create new store
+            new_store = Store(store_name=store_name, store_address=store_address, owner_name=owner_name, gstNumber=gstNumber, business_email=business_email)
+            db.session.add(new_store)
+            db.session.commit()
+            db.session.flush()
+
+            # Assuming the current user is logged in, associate the store with the logged-in user
+            current_user = User.query.filter_by(email=session.get('email')).first()  # Get the current logged-in user
+            if current_user:
+                current_user.stores.append(new_store)  # Associate the new store with the user
+                db.session.commit()
+                flash("Store added and associated with you successfully!", "success")
+                return redirect(url_for('dashboard'))
+            else:
+                print("User not found!", "error")
+                flash("User not found!", "error")       
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occurred: {e}", "error")
+            return redirect(url_for('add_store_form'))
+        
+        return redirect(url_for('dashboard'))
+    else:
+        print("All fields are required!", "error")
+        flash("All fields are required!", "error")
+        return redirect(url_for('add_store_form'))
+
 @app.route('/account')
 def account():
     if 'user' not in session:
@@ -205,11 +247,15 @@ def account():
     user = User.query.filter_by(email=email).first()
     
     if user is None:
-        return redirect(url_for('dashboard'))  # If user doesn't exist, redirect to login
+        return redirect(url_for('dashboard'))  # If user doesn't exist, redirect to dashboard
     
-    stores = user.stores
+    stores = user.stores  # Fetch all stores associated with the user
     
-    return render_template('account_details.html', username=session['user'], email=session['email'], user=user, store=stores)
+    # Debugging statement to see the stores
+    print("Stores:", stores)
+
+    return render_template('account_details.html', username=session['user'], email=session['email'], user=user, stores=stores)
+
 
 @app.route('/6007')
 def view_users():
@@ -218,10 +264,26 @@ def view_users():
 
     if session['email'] != app.config['ALLOWED_USER']:
         return "You are not authorized to view this page.", 403
-
+    
+    # Fetch all users and stores from the database
     users = User.query.all()
+    stores = Store.query.all()
+    
+    # Debug: Print the number of users and stores fetched
+    print(f"Total users found: {len(users)}")
+    print(f"Total stores found: {len(stores)}")
 
-    return render_template('view_users.html', users=users)
+    # Debug: Iterate over the users and print the associated stores
+    for user in users:
+        print(f"User: {user.first_name} {user.last_name}, Stores: {[store.store_name for store in user.stores]}")
+    
+    # Debug: Print the list of stores
+    print("Stores List:")
+    for store in stores:
+        print(f"Store ID: {store.id}, Name: {store.store_name}, Address: {store.store_address}")
+    
+    return render_template('view_users.html', users=users, stores=stores)
+
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
@@ -237,14 +299,62 @@ def delete_user(user_id):
         return redirect(url_for('view_users'))
 
     try:
+        # Step 1: Remove the user-store association
+        for store in user.stores:
+            store.users.remove(user)
+
+            # Step 2: Delete related categories and products
+            for category in store.categories:
+                # Delete related products
+                for product in category.products:
+                    db.session.delete(product)
+                # Then delete the category itself
+                db.session.delete(category)
+
+            # Optionally delete the store
+            db.session.delete(store)
+        
+        # Step 3: Finally, delete the user
         db.session.delete(user)
         db.session.commit()
-        flash("User deleted successfully.")
+        flash("User, associated stores, categories, and products deleted successfully.")
     except Exception as e:
         db.session.rollback()
-        flash("An error occurred while deleting the user.")
+        flash(f"An error occurred while deleting the user: {e}")
 
     return redirect(url_for('view_users'))
+
+
+@app.route('/delete_store/<int:store_id>', methods=['POST'])
+def delete_store(store_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    if session['email'] != app.config['ALLOWED_USER']:
+        return "You are not authorized to perform this action.", 403
+    
+    store = Store.query.get(store_id)
+    if store:
+        try:
+            # Step 1: Delete related products
+            for category in store.categories:
+                for product in category.products:
+                    db.session.delete(product)
+                # Step 2: Delete categories
+                db.session.delete(category)
+            
+            # Step 3: Finally, delete the store
+            db.session.delete(store)
+            db.session.commit()
+            flash('Store and related products and categories deleted successfully', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occurred while deleting the store: {e}", 'error')
+    else:
+        flash('Store not found', 'error')
+    
+    return redirect(url_for('view_users'))
+
 
 @app.route('/logout')
 def logout():

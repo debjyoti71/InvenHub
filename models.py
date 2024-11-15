@@ -25,7 +25,11 @@ class Store(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     store_name = db.Column(db.String(50), nullable=False)
     store_address = db.Column(db.String(100), nullable=False)
-    profit = db.Column(db.Integer, nullable=False)
+    owner_name = db.Column(db.String(50), nullable=False)
+    business_email = db.Column(db.String(50), nullable=False)
+    gstNumber = db.Column(db.Integer, nullable=False)
+    store_type = db.Column(db.String(100), nullable=False,default='Retail')
+    profit = db.Column(db.Integer, nullable=False,default=0)
     categories = db.relationship('Category', backref='store', lazy=True, cascade='all, delete-orphan')  # Cascade delete
 
 # Category model

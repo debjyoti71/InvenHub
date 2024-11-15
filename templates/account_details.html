@@ -71,7 +71,7 @@ button {
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ url_for('dashboard') }}" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-home (2).svg" alt=""></i>
                         <span style="margin-left: 20px;">Dashboard</span>
                     </a>
@@ -108,7 +108,7 @@ button {
                 </a>
             </div>
             <div class="sidebar-footer">
-                <a href="" class="sidebar-link">
+                <a href="{{ url_for('logout') }}" class="sidebar-link">
                     <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
                     <span style="margin-left: 20px;">Logout</span>
                 </a>
@@ -186,14 +186,15 @@ button {
                         <div class="col-11 mt-3">
                             <div>
                                 <div class="section-title mb-3">Business Details</div>
-                                <div class="info-row">
-                                    <strong>Store Name:</strong> <span id="storeName">{{ store.store_name }}</span>
-                                </div>
-                                <div class="info-row">
-                                    <strong>Owner's Name:</strong> <span id="ownerName">{{ user.first_name }}</span>
-                                </div>
-                                <div class="info-row">
-                                    <strong>Store Address:</strong> <span id="storeAddress">{{ store.store_address }}</span>
+                                {% if stores %}
+                                    {% for store in stores %}
+                                        <div class="info-row">
+                                            <strong>Store Name:</strong> <span id="storeName">{{ store.store_name }}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <strong>Store Address:</strong> <span id="storeAddress">{{ store.store_address }}</span>
+                                        </div>
+                                            
                                 <!-- </div>
                                 <div class="info-row">
                                     <strong>GST Number:</strong> <span id="gstNumber">{{ user.gst_number }}</span>
@@ -201,6 +202,9 @@ button {
                                 <div class="info-row">
                                     <strong>Store Type:</strong> <span id="storeType">{{ user.store_type }}</span>
                                 </div> -->
+
+                                    {% endfor %}
+                                {% endif %}
                                 <div class="text-center edit-btn">
                                     <button class="btn btn-primary" onclick="enableEditing()">Edit</button>
                                 </div>

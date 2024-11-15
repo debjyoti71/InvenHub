@@ -54,7 +54,7 @@ button {
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ url_for('dashboard') }}" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-home (2).svg" alt=""></i>
                         <span style="margin-left: 20px;">Dashboard</span>
                     </a>
@@ -91,7 +91,7 @@ button {
                 </a>
             </div>
             <div class="sidebar-footer">
-                <a href="" class="sidebar-link">
+                <a href="{{ url_for('logout') }}" class="sidebar-link">
                     <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
                     <span style="margin-left: 20px;">Logout</span>
                 </a>
@@ -136,38 +136,35 @@ button {
                 <div class="col mt-4">
                     <div class="row justify-content-center">
                         <div class="col-10">
-        <form id="businessForm" onsubmit="return validateForm()">
-            <div class="mb-3">
-                <label for="storeName" class="form-label">Store Name</label>
-                <input type="text" class="form-control" id="storeName" placeholder="Enter Store Name" required>
-                <div id="storeNameError" class="invalid-feedback">Store name is required.</div>
-            </div>
-            
-            <div class="mb-3">
-                <label for="ownerName" class="form-label">Owner's Name</label>
-                <input type="text" class="form-control" id="ownerName" placeholder="Enter Owner's Name" required>
-                <div id="ownerNameError" class="invalid-feedback">Owner's name is required.</div>
-            </div>
-
-            <div class="mb-3">
-                <label for="email" class="form-label">Business Email ( Leave blank if same as account email. ) </label>
-                <input type="email" class="form-control" id="email" placeholder="Enter Business Email">
-                <div id="emailError" class="invalid-feedback">Please provide a valid email.</div>
-            </div>
-
-            <div class="mb-3">
-                <label for="phone" class="form-label">GST Number ( Optional )</label>
-                <input type="text" class="form-control" id="phone" placeholder="Enter GST Number">
-                <div id="phoneError" class="invalid-feedback">Please provide a valid GST number.</div>
-            </div>
-
-            <div class="mb-5">
-                <label for="address" class="form-label">Business Address</label>
-                <textarea class="form-control" id="address" rows="3" placeholder="Enter Business Address" required></textarea>
-                <div id="addressError" class="invalid-feedback">Address is required.</div>
-            </div>
-
-            <button type="submit" class="btn w-100" id="btn">Submit</button>
+                            <form id="addStoreForm" method="post" action="/add_store">
+                                <div class="mb-3">
+                                    <label for="store_name" class="form-label">Store Name</label>
+                                    <input type="text" class="form-control" id="store_name" name="store_name" placeholder="Enter Store Name" required>
+                                </div>
+                            
+                                <div class="mb-3">
+                                    <label for="owner_name" class="form-label">Owner's Name</label>
+                                    <input type="text" class="form-control" id="owner_name" name="owner_name" placeholder="Enter Owner's Name" required>
+                                </div>
+                            
+                                <div class="mb-3">
+                                    <label for="business_email" class="form-label">Business Email</label>
+                                    <input type="email" class="form-control" id="business_email" name="business_email" placeholder="Enter Business Email">
+                                </div>
+                            
+                                <div class="mb-3">
+                                    <label for="gstNumber" class="form-label">GST Number</label>
+                                    <input type="text" class="form-control" id="gstNumber" name="gstNumber" placeholder="Enter GST Number">
+                                </div>
+                            
+                                <div class="mb-5">
+                                    <label for="store_address" class="form-label">Business Address</label>
+                                    <textarea class="form-control" id="store_address" name="store_address" rows="3" placeholder="Enter Business Address" required></textarea>
+                                </div>
+                            
+                                <button type="submit" class="btn w-100" id="btn">Submit</button>
+                            </form>
+                            
         </form>
                         </div>
                     </div>
