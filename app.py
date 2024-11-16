@@ -378,7 +378,8 @@ def view_users():
             "name": store.store_name,
             "address": store.store_address,
             "owner": None,
-            "employees": []
+            "employees": [],
+            "store_code" : store.unique_code
         }
 
         for user in store.users:

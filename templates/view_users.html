@@ -119,6 +119,7 @@
                         <th>Store Location</th>
                         <th>Owner</th>
                         <th>Employees</th>
+                        <th>Store Code</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -127,7 +128,7 @@
                         <tr>
                             <td>{{ store.name }}</td>
                             <td>{{ store.address }}</td>
-                            <td>{{ store.owner if store.owner else "No Owner Assigned" }}</td>
+                            <td>{{ store.owner | default("No Owner Assigned") }}</td>
                             <td>
                                 {% if store.employees %}
                                     <ul>
@@ -139,6 +140,7 @@
                                     No Employees
                                 {% endif %}
                             </td>
+                            <td>{{ store.store_code }}</td>
                             <td>
                                 <form action="{{ url_for('delete_store', store_id=store.id) }}" method="POST" style="display:inline;">
                                     <button type="submit" class="delete-btn">Delete Store</button>
@@ -146,7 +148,7 @@
                             </td>
                         </tr>
                     {% endfor %}
-                </tbody>
+                </tbody>    
             </table>
         </div>
     {% else %}
