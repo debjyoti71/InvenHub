@@ -4,8 +4,6 @@ tempCodeRunnerFile
 # Ignore environment variables and configuration files with sensitive data
 .env
 
-# Ignore database file
-user_info.db
 
 # Ignore compiled Python files
 *.pyc
