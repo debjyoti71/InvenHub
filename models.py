@@ -1,13 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import uuid  # To generate unique store codes
 
 # Initialize the SQLAlchemy instance
 db = SQLAlchemy()
 
-# Association table to link Users and Stores in a many-to-many relationship
+# Association table to link Users and Stores with an additional role field
 user_store = db.Table('user_store',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('store_id', db.Integer, db.ForeignKey('store.id'), primary_key=True)
+    db.Column('store_id', db.Integer, db.ForeignKey('store.id'), primary_key=True),
+    db.Column('role', db.String(20), nullable=False,default='Owner')  # Role can be 'Owner' or 'Employee'
 )
 
 # User model
@@ -28,8 +30,9 @@ class Store(db.Model):
     owner_name = db.Column(db.String(50), nullable=False)
     business_email = db.Column(db.String(50), nullable=False)
     gstNumber = db.Column(db.Integer, nullable=False)
-    store_type = db.Column(db.String(100), nullable=False,default='Retail')
-    profit = db.Column(db.Integer, nullable=False,default=0)
+    store_type = db.Column(db.String(100), nullable=False, default='Retail')
+    profit = db.Column(db.Integer, nullable=False, default=0)
+    unique_code = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))  # Unique store code
     categories = db.relationship('Category', backref='store', lazy=True, cascade='all, delete-orphan')  # Cascade delete
 
 # Category model
@@ -38,7 +41,6 @@ class Category(db.Model):
     category_name = db.Column(db.String(50), nullable=False)
     store_id = db.Column(db.Integer, db.ForeignKey('store.id'), nullable=False)  # Foreign key to link Category to a Store
     products = db.relationship('Product', backref='category', lazy=True, cascade='all, delete-orphan')  # Cascade delete
-
 
 # Product model
 class Product(db.Model):

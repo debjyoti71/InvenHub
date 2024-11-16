@@ -7,7 +7,7 @@ import random
 from dotenv import load_dotenv
 import os
 from config import Config  # Import your Config class
-from models import db, User, Store, Product
+from models import db, User, Store, Product , user_store
 import csv 
 from datetime import datetime
 
@@ -194,14 +194,17 @@ def add_store_form():
 
 @app.route('/add_store', methods=['POST'])
 def add_store():
-    print("Form data received:", request.form)  # Debugging line
+    # Debugging: print form data
+    print("Form data received:", request.form)
 
+    # Get form data
     store_name = request.form.get('store_name')
     store_address = request.form.get('store_address')
     owner_name = request.form.get('owner_name')
     gstNumber = request.form.get('gstNumber')
     business_email = request.form.get('business_email')
 
+    # Debugging: print individual form fields
     print("Store Name:", store_name)
     print("Store Address:", store_address)
     print("Owner Name:", owner_name)
@@ -212,31 +215,113 @@ def add_store():
     if store_name and store_address and owner_name and gstNumber and business_email:
         try:
             # Create new store
-            new_store = Store(store_name=store_name, store_address=store_address, owner_name=owner_name, gstNumber=gstNumber, business_email=business_email)
+            new_store = Store(
+                store_name=store_name,
+                store_address=store_address,
+                owner_name=owner_name,
+                gstNumber=gstNumber,
+                business_email=business_email
+            )
+
+            # Debugging: print the store object to verify its creation
+            print("New Store Object Created:", new_store)
+
+            # Add the new store to the session
             db.session.add(new_store)
-            db.session.commit()
-            db.session.flush()
+
+            # Debugging: Check if store is in the session
+            print("Store added to session:", new_store in db.session)
+
+            db.session.commit()  # Commit the new store to the database
+
+            # Debugging: Print all stores to verify if it was saved
+            all_stores = Store.query.all()
+            print("All Stores in DB:", all_stores)
 
             # Assuming the current user is logged in, associate the store with the logged-in user
             current_user = User.query.filter_by(email=session.get('email')).first()  # Get the current logged-in user
             if current_user:
-                current_user.stores.append(new_store)  # Associate the new store with the user
-                db.session.commit()
-                flash("Store added and associated with you successfully!", "success")
+                print("Current User Found:", current_user)
+
+                # Check if there is already an association between user and store
+                association = db.session.query(user_store).filter_by(user_id=current_user.id, store_id=new_store.id).first()
+                if not association:  # Only create the association if it does not exist
+                    # Create association between the user and the store
+                    db.session.execute(user_store.insert().values(user_id=current_user.id, store_id=new_store.id, role="Owner"))
+                    db.session.commit()
+
+                    print("User associated with store as Owner")
+
+                flash("Store added and associated with you as the Owner successfully!", "success")
                 return redirect(url_for('dashboard'))
             else:
-                print("User not found!", "error")
-                flash("User not found!", "error")       
+                flash("No user found or not logged in", "error")
+                return redirect(url_for('login'))  # Redirect to login if the user is not found
+
+        except Exception as e:
+            db.session.rollback()  # Rollback any changes if there's an error
+            print("Error occurred:", e)
+            flash(f"An error occurred while adding the store: {e}", "error")
+            return redirect(url_for('add_store_form'))
+
+    else:
+        flash("All fields are required for adding a new store!", "error")
+        return redirect(url_for('add_store_form'))
+
+
+@app.route('/join_store', methods=['GET', 'POST'])
+def join_store():
+    if request.method == 'GET':
+        # Render the join store form
+        return render_template('join_store.html')
+
+    elif request.method == 'POST':
+        # Handle form submission for joining a store
+        store_code = request.form.get('store_code')
+        current_user = User.query.filter_by(email=session.get('email')).first()
+
+        if not current_user:
+            flash("User not found or not logged in!", "error")
+            return redirect(url_for('join_store'))
+
+        if not store_code:
+            flash("Store code is required to join a store!", "error")
+            return redirect(url_for('join_store'))
+
+        try:
+            # Find the store by unique code
+            store_to_join = Store.query.filter_by(unique_code=store_code).first()
+
+            if store_to_join:
+                # Check if the user is already associated with this store
+                if store_to_join not in current_user.stores:
+                    # Associate the store with the current user as "Employee"
+                    current_user.stores.append(store_to_join)
+                    association = db.session.query(user_store).filter_by(
+                        user_id=current_user.id, store_id=store_to_join.id
+                    ).first()
+                    if association:
+                        db.session.execute(
+                            user_store.update().where(
+                                (user_store.c.user_id == current_user.id) &
+                                (user_store.c.store_id == store_to_join.id)
+                            ).values(role="Employee")
+                        )
+                    db.session.commit()
+
+                    flash(f"You have successfully joined the store '{store_to_join.store_name}' as an Employee!", "success")
+                    return redirect(url_for('dashboard'))
+                else:
+                    flash("You are already associated with this store!", "warning")
+            else:
+                flash("Invalid store code. Please check and try again.", "error")
+
         except Exception as e:
             db.session.rollback()
             flash(f"An error occurred: {e}", "error")
-            return redirect(url_for('add_store_form'))
-        
-        return redirect(url_for('dashboard'))
-    else:
-        print("All fields are required!", "error")
-        flash("All fields are required!", "error")
-        return redirect(url_for('add_store_form'))
+
+        return redirect(url_for('join_store'))
+
 
 @app.route('/account')
 def account():
@@ -264,26 +349,38 @@ def view_users():
 
     if session['email'] != app.config['ALLOWED_USER']:
         return "You are not authorized to view this page.", 403
-    
+
     # Fetch all users and stores from the database
     users = User.query.all()
     stores = Store.query.all()
-    
-    # Debug: Print the number of users and stores fetched
-    print(f"Total users found: {len(users)}")
-    print(f"Total stores found: {len(stores)}")
 
-    # Debug: Iterate over the users and print the associated stores
-    for user in users:
-        print(f"User: {user.first_name} {user.last_name}, Stores: {[store.store_name for store in user.stores]}")
-    
-    # Debug: Print the list of stores
-    print("Stores List:")
+    # Prepare store details with owners and employees
+    store_details = []
     for store in stores:
-        print(f"Store ID: {store.id}, Name: {store.store_name}, Address: {store.store_address}")
-    
-    return render_template('view_users.html', users=users, stores=stores)
+        store_info = {
+            "id": store.id,
+            "name": store.store_name,
+            "address": store.store_address,
+            "owner": None,
+            "employees": []
+        }
 
+        for user in store.users:
+            # Fetch the role of the user for this store
+            association = db.session.query(user_store).filter_by(user_id=user.id, store_id=store.id).first()
+            role = association.role if association else None
+
+            if role == "Owner":
+                store_info["owner"] = f"{user.first_name} {user.last_name}"
+            elif role == "Employee":
+                store_info["employees"].append(f"{user.first_name} {user.last_name}")
+
+        store_details.append(store_info)
+
+    # Debugging
+    print("Store Details:", store_details)
+
+    return render_template('view_users.html', users=users, store_details=store_details)
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
@@ -299,30 +396,36 @@ def delete_user(user_id):
         return redirect(url_for('view_users'))
 
     try:
-        # Step 1: Remove the user-store association
+        # Step 1: Check the role of the user in each store before deleting
         for store in user.stores:
-            store.users.remove(user)
+            # Query the user-store association to check the role of the user for this store
+            association = db.session.query(user_store).filter_by(user_id=user.id, store_id=store.id).first()
+            
+            if association and association.role == 'Owner':
+                # Remove the user from the store's user list
+                store.users.remove(user)
 
-            # Step 2: Delete related categories and products
-            for category in store.categories:
-                # Delete related products
-                for product in category.products:
-                    db.session.delete(product)
-                # Then delete the category itself
-                db.session.delete(category)
+                # Step 2: Delete related categories and products for stores owned by the user
+                for category in store.categories:
+                    # Delete related products
+                    for product in category.products:
+                        db.session.delete(product)
+                    # Then delete the category itself
+                    db.session.delete(category)
 
-            # Optionally delete the store
-            db.session.delete(store)
-        
+                # Delete the store only if the user is the owner
+                db.session.delete(store)
+
         # Step 3: Finally, delete the user
         db.session.delete(user)
         db.session.commit()
-        flash("User, associated stores, categories, and products deleted successfully.")
+        flash("User and associated data deleted successfully.")
     except Exception as e:
         db.session.rollback()
         flash(f"An error occurred while deleting the user: {e}")
 
     return redirect(url_for('view_users'))
+
 
 
 @app.route('/delete_store/<int:store_id>', methods=['POST'])

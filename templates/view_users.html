@@ -110,21 +110,35 @@
 
     <!-- Store List -->
     <h3>Store List</h3>
-    {% if stores %}
+    {% if store_details %}
         <div style="overflow-x: auto;">
             <table>
                 <thead>
                     <tr>
                         <th>Store Name</th>
                         <th>Store Location</th>
+                        <th>Owner</th>
+                        <th>Employees</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for store in stores %}
+                    {% for store in store_details %}
                         <tr>
-                            <td>{{ store.store_name }}</td>
-                            <td>{{ store.store_address }}</td>
+                            <td>{{ store.name }}</td>
+                            <td>{{ store.address }}</td>
+                            <td>{{ store.owner if store.owner else "No Owner Assigned" }}</td>
+                            <td>
+                                {% if store.employees %}
+                                    <ul>
+                                        {% for employee in store.employees %}
+                                            <li>{{ employee }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    No Employees
+                                {% endif %}
+                            </td>
                             <td>
                                 <form action="{{ url_for('delete_store', store_id=store.id) }}" method="POST" style="display:inline;">
                                     <button type="submit" class="delete-btn">Delete Store</button>
