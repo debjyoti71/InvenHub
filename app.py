@@ -268,15 +268,12 @@ def add_store():
         flash("All fields are required for adding a new store!", "error")
         return redirect(url_for('add_store_form'))
 
-
 @app.route('/join_store', methods=['GET', 'POST'])
 def join_store():
     if request.method == 'GET':
-        # Render the join store form
         return render_template('join_store.html')
 
     elif request.method == 'POST':
-        # Handle form submission for joining a store
         store_code = request.form.get('store_code')
         current_user = User.query.filter_by(email=session.get('email')).first()
 
@@ -289,13 +286,12 @@ def join_store():
             return redirect(url_for('join_store'))
 
         try:
-            # Find the store by unique code
             store_to_join = Store.query.filter_by(unique_code=store_code).first()
+            print(f"Business Email: {store_to_join.business_email}")
+
 
             if store_to_join:
-                # Check if the user is already associated with this store
                 if store_to_join not in current_user.stores:
-                    # Associate the store with the current user as "Employee"
                     current_user.stores.append(store_to_join)
                     association = db.session.query(user_store).filter_by(
                         user_id=current_user.id, store_id=store_to_join.id
@@ -303,13 +299,32 @@ def join_store():
                     if association:
                         db.session.execute(
                             user_store.update().where(
-                                (user_store.c.user_id == current_user.id) &
+                                (user_store.c.user_id == current_user.id) & 
                                 (user_store.c.store_id == store_to_join.id)
                             ).values(role="Employee")
                         )
                     db.session.commit()
 
                     flash(f"You have successfully joined the store '{store_to_join.store_name}' as an Employee!", "success")
+                    
+                    # Send email to business email about the new employee
+                    business_email = store_to_join.business_email # Replace with your business email address
+                    subject = f"New Employee: {current_user.first_name}"
+                    body = f"A new employee has joined the store '{store_to_join.store_name}'.\n\n" \
+                           f"Name: {current_user.first_name}\n" \
+                           f"Email: {current_user.email}"
+
+                    msg = Message(subject, recipients=[business_email],sender=app.config['MAIL_USERNAME'])
+                    msg.body = body
+
+                    try:
+                        mail.send(msg)
+                        print(f"Email sent successfully! to {business_email} message: {msg}")
+                    except Exception as e:
+                        print(f"Failed to send email: {e}")
+                        flash(f"Failed to send email: {e}", "error")
+
+
                     return redirect(url_for('dashboard'))
                 else:
                     flash("You are already associated with this store!", "warning")
@@ -321,6 +336,7 @@ def join_store():
             flash(f"An error occurred: {e}", "error")
 
         return redirect(url_for('join_store'))
+
 
 
 @app.route('/account')
