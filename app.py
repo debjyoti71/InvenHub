@@ -115,13 +115,10 @@ def send_otp():
     sender=app.config['MAIL_USERNAME'], 
     recipients=[email]
     )
-    msg.body = (
-        f"Dear User,\n\n"
-        f"Your one-time password (OTP) for verification is: {otp}\n\n"
-        f"This code is valid for the next 1 minutes. Please use it to complete your verification process.\n\n"
-        f"If you did not request this code, please ignore this message.\n\n"
-        f"Thank you,\n"
-        f"The InvenHub Team"
+    # Render HTML Template
+    msg.html = render_template(
+        'otpMail_template.html',
+        otp=otp  # Pass the dynamic OTP value to the template
     )
 
     mail.send(msg)
@@ -270,18 +267,15 @@ def add_store():
                         sender=app.config['MAIL_USERNAME'],
                         recipients=[current_user.email]
                     )
-                    user_email_msg.body = (
-                        f"Dear {current_user.first_name},\n\n"
-                        f"Your store '{store_name}' has been successfully added to our platform.\n\n"
-                        f"Store Details:\n"
-                        f"Name: {store_name}\n"
-                        f"Address: {store_address}\n"
-                        f"Owner: {owner_name}\n"
-                        f"GST Number: {gstNumber}\n"
-                        f"Business Email: {business_email}\n\n"
-                        f"Thank you for using our platform.\n\n"
-                        f"Best regards,\n"
-                        f"The InvenHub Team"
+                    user_email_msg.html = render_template(
+                        'email_template.html',
+                        recipient_name=current_user.first_name,
+                        message_body=f"Your store '{store_name}' has been successfully added to our platform.",
+                        store_name=store_name,
+                        store_address=store_address,
+                        owner_name=owner_name,
+                        gstNumber=gstNumber,
+                        business_email=business_email
                     )
                     mail.send(user_email_msg)
                     print("Email sent to user.")
@@ -292,17 +286,15 @@ def add_store():
                         sender=app.config['MAIL_USERNAME'],
                         recipients=[business_email]
                     )
-                    business_email_msg.body = (
-                        f"Dear {store_name} Team,\n\n"
-                        f"A new store has been successfully registered on our platform with the following details:\n\n"
-                        f"Store Name: {store_name}\n"
-                        f"Address: {store_address}\n"
-                        f"Owner: {owner_name}\n"
-                        f"GST Number: {gstNumber}\n"
-                        f"Registered Email: {business_email}\n\n"
-                        f"If you have any questions or need further assistance, please contact us.\n\n"
-                        f"Best regards,\n"
-                        f"The InvenHub Team"
+                    business_email_msg.html = render_template(
+                        'email_template.html',
+                        recipient_name=f"{store_name} Team",
+                        message_body="A new store has been successfully registered on our platform with the following details:",
+                        store_name=store_name,
+                        store_address=store_address,
+                        owner_name=owner_name,
+                        gstNumber=gstNumber,
+                        business_email=business_email
                     )
                     mail.send(business_email_msg)
                     print("Email sent to business email.")
