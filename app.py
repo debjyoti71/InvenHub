@@ -110,8 +110,20 @@ def send_otp():
     session['otp'] = otp  # Store OTP in session
 
     # Send OTP to user’s email
-    msg = Message('Your OTP Code', sender=app.config['MAIL_USERNAME'], recipients=[email])
-    msg.body = f'Your OTP code is: {otp}'
+    msg = Message(
+    'Your One-Time Password (OTP)', 
+    sender=app.config['MAIL_USERNAME'], 
+    recipients=[email]
+    )
+    msg.body = (
+        f"Dear User,\n\n"
+        f"Your one-time password (OTP) for verification is: {otp}\n\n"
+        f"This code is valid for the next 1 minutes. Please use it to complete your verification process.\n\n"
+        f"If you did not request this code, please ignore this message.\n\n"
+        f"Thank you,\n"
+        f"The InvenHub Team"
+    )
+
     mail.send(msg)
     
     return redirect(url_for('verify_otp'))
@@ -251,8 +263,53 @@ def add_store():
                     db.session.commit()
 
                     print("User associated with store as Owner")
+                try:
+                    # Email to the logged-in user
+                    user_email_msg = Message(
+                        'Store Successfully Added',
+                        sender=app.config['MAIL_USERNAME'],
+                        recipients=[current_user.email]
+                    )
+                    user_email_msg.body = (
+                        f"Dear {current_user.first_name},\n\n"
+                        f"Your store '{store_name}' has been successfully added to our platform.\n\n"
+                        f"Store Details:\n"
+                        f"Name: {store_name}\n"
+                        f"Address: {store_address}\n"
+                        f"Owner: {owner_name}\n"
+                        f"GST Number: {gstNumber}\n"
+                        f"Business Email: {business_email}\n\n"
+                        f"Thank you for using our platform.\n\n"
+                        f"Best regards,\n"
+                        f"The InvenHub Team"
+                    )
+                    mail.send(user_email_msg)
+                    print("Email sent to user.")
 
-                flash("Store added and associated with you as the Owner successfully!", "success")
+                    # Email to the business email
+                    business_email_msg = Message(
+                        'New Store Added',
+                        sender=app.config['MAIL_USERNAME'],
+                        recipients=[business_email]
+                    )
+                    business_email_msg.body = (
+                        f"Dear {store_name} Team,\n\n"
+                        f"A new store has been successfully registered on our platform with the following details:\n\n"
+                        f"Store Name: {store_name}\n"
+                        f"Address: {store_address}\n"
+                        f"Owner: {owner_name}\n"
+                        f"GST Number: {gstNumber}\n"
+                        f"Registered Email: {business_email}\n\n"
+                        f"If you have any questions or need further assistance, please contact us.\n\n"
+                        f"Best regards,\n"
+                        f"The InvenHub Team"
+                    )
+                    mail.send(business_email_msg)
+                    print("Email sent to business email.")
+                except Exception as email_error:
+                    print("Error occurred while sending email:", email_error)
+                    flash("Store added successfully, but failed to send notification emails.", "warning")
+
                 return redirect(url_for('dashboard'))
             else:
                 flash("No user found or not logged in", "error")
@@ -308,11 +365,21 @@ def join_store():
                     flash(f"You have successfully joined the store '{store_to_join.store_name}' as an Employee!", "success")
                     
                     # Send email to business email about the new employee
-                    business_email = store_to_join.business_email # Replace with your business email address
-                    subject = f"New Employee: {current_user.first_name}"
-                    body = f"A new employee has joined the store '{store_to_join.store_name}'.\n\n" \
-                           f"Name: {current_user.first_name}\n" \
-                           f"Email: {current_user.email}"
+                    business_email = store_to_join.business_email  # Replace with the store's business email address
+                    subject = f"New Employee Notification: {current_user.first_name} has joined {store_to_join.store_name}"
+                    body = (
+                        f"Dear {store_to_join.store_name} Team,\n\n"
+                        f"We are delighted to inform you that a new employee has successfully joined your store through our platform. Below are the details of the new team member:\n\n"
+                        f"**Name**: {current_user.first_name} {current_user.last_name}\n"
+                        f"**Email**: {current_user.email}\n\n"
+                        f"If you require further assistance or have any questions, please do not hesitate to contact our support team.\n\n"
+                        f"Thank you for using our platform to manage your team!\n\n"
+                        f"Best regards,\n"
+                        f"The InvenHub Team\n"
+                        f"Website: [Your Website URL]\n"
+                        f"Support: sparksofficial.bd@gmail.com\n"
+)
+
 
                     msg = Message(subject, recipients=[business_email],sender=app.config['MAIL_USERNAME'])
                     msg.body = body
