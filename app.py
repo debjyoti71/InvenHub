@@ -268,7 +268,7 @@ def add_store():
                         recipients=[current_user.email]
                     )
                     user_email_msg.html = render_template(
-                        'email_template.html',
+                        'storeAddMail_template.html',
                         recipient_name=current_user.first_name,
                         message_body=f"Your store '{store_name}' has been successfully added to our platform.",
                         store_name=store_name,
@@ -287,7 +287,7 @@ def add_store():
                         recipients=[business_email]
                     )
                     business_email_msg.html = render_template(
-                        'email_template.html',
+                        'storeAddMail_template.html',
                         recipient_name=f"{store_name} Team",
                         message_body="A new store has been successfully registered on our platform with the following details:",
                         store_name=store_name,
