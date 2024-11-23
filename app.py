@@ -9,7 +9,7 @@ import os
 from config import Config  # Import your Config class
 from models import db, User, Store, Product , user_store
 import csv 
-from datetime import datetime
+from datetime import datetime ,timedelta
 
 # Load environment variables from .env file
 load_dotenv()
@@ -111,9 +111,9 @@ def send_otp():
 
     # Send OTP to user’s email
     msg = Message(
-    'Your One-Time Password (OTP)', 
-    sender=app.config['MAIL_USERNAME'], 
-    recipients=[email]
+        'Your One-Time Password (OTP)', 
+        sender=app.config['MAIL_USERNAME'], 
+        recipients=[email]
     )
     # Render HTML Template
     msg.html = render_template(
@@ -122,7 +122,7 @@ def send_otp():
     )
 
     mail.send(msg)
-    
+
     return redirect(url_for('verify_otp'))
 
 @app.route('/verify_otp', methods=['GET', 'POST'])
@@ -134,7 +134,7 @@ def verify_otp():
         if 'otp' in session and otp == str(session['otp']):
             session.pop('otp', None)  # Clear OTP after successful verification
 
-            # Now save the user's data to the database after OTP verification
+            # Save user's data to the database after OTP verification
             user_data = session.pop('temp_user', None)
             if user_data:
                 hashed_password = generate_password_hash(user_data['password'])
