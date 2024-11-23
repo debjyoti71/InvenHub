@@ -391,27 +391,20 @@ def join_store():
                     
                     # Send email to business email about the new employee
                     business_email = store_to_join.business_email  # Replace with the store's business email address
-                    subject = f"New Employee Notification: {current_user.first_name} has joined {store_to_join.store_name}"
-                    body = (
-                        f"Dear {store_to_join.store_name} Team,\n\n"
-                        f"We are delighted to inform you that a new employee has successfully joined your store through our platform. Below are the details of the new team member:\n\n"
-                        f"**Name**: {current_user.first_name} {current_user.last_name}\n"
-                        f"**Email**: {current_user.email}\n\n"
-                        f"If you require further assistance or have any questions, please do not hesitate to contact our support team.\n\n"
-                        f"Thank you for using our platform to manage your team!\n\n"
-                        f"Best regards,\n"
-                        f"The InvenHub Team\n"
-                        f"Website: [Your Website URL]\n"
-                        f"Support: sparksofficial.bd@gmail.com\n"
-)
-
-
-                    msg = Message(subject, recipients=[business_email],sender=app.config['MAIL_USERNAME'])
-                    msg.body = body
-
+                    join_store_email_msg = Message(
+                        'New Employee Joined Your Business using InvenHub',
+                        sender=app.config['MAIL_USERNAME'],
+                        recipients=[business_email]
+                    )
+                    join_store_email_msg.html = render_template(
+                        'joinstoreMail.html',
+                        owner_name=f"{store_to_join.owner_name}",
+                        employee_name=f"{current_user.first_name} {current_user.last_name}",
+                        employee_email= current_user.email
+                    )
                     try:
-                        mail.send(msg)
-                        print(f"Email sent successfully! to {business_email} message: {msg}")
+                        mail.send(join_store_email_msg)
+                        print(f"Email sent successfully! to {business_email} message: {join_store_email_msg}")
                     except Exception as e:
                         print(f"Failed to send email: {e}")
                         flash(f"Failed to send email: {e}", "error")

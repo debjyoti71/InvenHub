@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        h2 {
+            color: #4CAF50;
+            font-size: 24px;
+        }
+        .details {
+            margin: 20px 0;
+        }
+        .details ul {
+            padding: 0;
+            list-style: none;
+        }
+        .details li {
+            margin: 5px 0;
+        }
+        .footer {
+            font-size: 0.9em;
+            color: #555;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .logo {
+            display: block;
+            margin: 0 auto;
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://invenhub.onrender.com/static/images/GblEnT_SS3uxBY5Y9aGmqA-removebg-preview.png" alt="InvenHub Logo" class="logo">
+        <h2>Dear {{ owner_name }},</h2>
+        <p>
+            We are excited to inform you that a new employee has joined your business. Below are the details of the new team member:
+        </p>
+        <div class="details">
+            <h3>New Employee Details:</h3>
+            <ul>
+                <li><strong>Name:</strong> {{ employee_name }}</li>
+                <li><strong>Email:</strong> {{ employee_email }}</li>
+            </ul>
+        </div>
+        <p>If you have any questions or need assistance, please feel free to reach out to us.</p>
+        <div class="footer">
+            <p>Best regards,</p>
+            <p><strong>The InvenHub Team</strong></p>
+            <p><a href="https://invenhub.onrender.com/">Visit our website</a></p>
+        </div>
+    </div>
+</body>
+</html>

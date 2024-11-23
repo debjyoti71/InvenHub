@@ -57,7 +57,7 @@ class Product(db.Model):
     sale_date = db.Column(db.Date, nullable=True, default=datetime.utcnow)  # Optional Sale Date
     month_year = db.Column(db.String(10), nullable=True)  # Optional Month and Year
     monthly_sale = db.Column(db.Integer, nullable=True)  # Optional Monthly Sale
-    profit = db.Column(db.Float, nullable=True)  # Optional Profit
+    product_profit = db.Column(db.Float, nullable=True)  # Optional Profit
 
     def calculate_profit(self):
         # Method to calculate profit based on cost and selling prices
