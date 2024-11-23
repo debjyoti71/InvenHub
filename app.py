@@ -454,6 +454,7 @@ def view_users():
     # Fetch all users and stores from the database
     users = User.query.all()
     stores = Store.query.all()
+    db_size = calculate_database_size()
 
     # Prepare store details with owners and employees
     store_details = []
@@ -481,8 +482,15 @@ def view_users():
 
     # Debugging
     print("Store Details:", store_details)
+    db_size_value = float(db_size.split()[0])   
+    db_size_mb = db_size_value / 1024 
+    db_size_mb_str = f"{db_size_mb:.2f} MB"
 
-    return render_template('view_users.html', users=users, store_details=store_details)
+    # Debugging
+    print("Store Details:", store_details)
+    print("db size Details:", db_size_mb_str)
+
+    return render_template('view_users.html', users=users, store_details=store_details , db_size=db_size_mb_str)
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
