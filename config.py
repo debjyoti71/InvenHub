@@ -11,5 +11,5 @@ class Config:
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', 'your-email-password')
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    ALLOWED_USER = os.getenv('ALLOWED_USER')
+    ALLOWED_USERS = os.getenv('ALLOWED_USERS', '').split(',')
     PREDEFINED_PASSWORD = os.getenv('PREDEFINED_PASSWORD')

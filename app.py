@@ -64,7 +64,7 @@ def config():
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    if session['email'] != app.config['ALLOWED_USER']:
+    if session['email'] not in app.config['ALLOWED_USERS']:
         return "You are not authorized to view this page.", 403
     
     secret_key = os.getenv('SECRET_KEY')
@@ -200,9 +200,9 @@ def login():
         password = request.form['password']
 
         # Check for the predefined admin credentials
-        if email == app.config['ALLOWED_USER'] and password == app.config['PREDEFINED_PASSWORD']:
+        if email in app.config['ALLOWED_USERS'] and password == app.config['PREDEFINED_PASSWORD']:
             session['user'] = 'Admin'  # Store 'Admin' as the display name for admin
-            session['email'] = app.config['ALLOWED_USER']  # Store admin email in session
+            session['email'] = email  # Store admin email in session
             return redirect(url_for('dashboard'))
 
         # Check if the user exists in the database
@@ -448,7 +448,7 @@ def view_users():
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    if session['email'] != app.config['ALLOWED_USER']:
+    if session['email'] not in app.config['ALLOWED_USERS']:
         return "You are not authorized to view this page.", 403
 
     # Fetch all users and stores from the database
@@ -494,7 +494,7 @@ def delete_user(user_id):
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    if session['email'] != app.config['ALLOWED_USER']:
+    if session['email'] not in app.config['ALLOWED_USERS']:
         return "You are not authorized to delete users.", 403
 
     user = User.query.get(user_id)
@@ -540,7 +540,7 @@ def delete_store(store_id):
     if 'user' not in session:
         return redirect(url_for('login'))
     
-    if session['email'] != app.config['ALLOWED_USER']:
+    if session['email'] not in app.config['ALLOWED_USERS']:
         return "You are not authorized to perform this action.", 403
     
     store = Store.query.get(store_id)
