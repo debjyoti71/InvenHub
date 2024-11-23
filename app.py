@@ -10,6 +10,7 @@ from config import Config  # Import your Config class
 from models import db, User, Store, Product , user_store
 import csv 
 from datetime import datetime ,timedelta
+from flask_migrate import Migrate
 
 # Load environment variables from .env file
 load_dotenv()
@@ -24,6 +25,7 @@ mail = Mail(app)
 
 with app.app_context():
     db.create_all()
+migrate = Migrate(app, db)    
 
 import psycopg2
 
