@@ -10,7 +10,6 @@ from config import Config  # Import your Config class
 from models import db, User, Store, Product , user_store
 import csv 
 from datetime import datetime ,timedelta
-from flask_migrate import Migrate
 
 # Load environment variables from .env file
 load_dotenv()
@@ -25,7 +24,6 @@ mail = Mail(app)
 
 with app.app_context():
     db.create_all()
-migrate = Migrate(app, db)    
 
 import psycopg2
 
@@ -53,8 +51,7 @@ def calculate_database_size():
         return db_size
     except Exception as e:
         print(f"Error while calculating database size: {e}")
-        return None
-
+        return None    
 
 # Route for home page
 @app.route('/')
@@ -66,7 +63,7 @@ def config():
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    if session['email'] not in app.config['ALLOWED_USERS']:
+    if session['email'] != app.config['ALLOWED_USER']:
         return "You are not authorized to view this page.", 403
     
     secret_key = os.getenv('SECRET_KEY')
@@ -194,6 +191,7 @@ def verify_otp():
 
     return render_template('otp_verification.html')
 
+# Handle login form submission
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -201,9 +199,9 @@ def login():
         password = request.form['password']
 
         # Check for the predefined admin credentials
-        if email in app.config['ALLOWED_USERS'] and password == app.config['PREDEFINED_PASSWORD']:
+        if email == app.config['ALLOWED_USER'] and password == app.config['PREDEFINED_PASSWORD']:
             session['user'] = 'Admin'  # Store 'Admin' as the display name for admin
-            session['email'] = email  # Store admin email in session
+            session['email'] = app.config['ALLOWED_USER']  # Store admin email in session
             return redirect(url_for('dashboard'))
 
         # Check if the user exists in the database
@@ -225,6 +223,8 @@ def login():
 
     return render_template('login.html')
 
+# Dashboard (only accessible to logged-in users)
+@app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
         return redirect(url_for('login'))
@@ -448,13 +448,12 @@ def view_users():
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    if session['email'] not in app.config['ALLOWED_USERS']:
+    if session['email'] != app.config['ALLOWED_USER']:
         return "You are not authorized to view this page.", 403
 
     # Fetch all users and stores from the database
     users = User.query.all()
     stores = Store.query.all()
-    db_size = calculate_database_size()
 
     # Prepare store details with owners and employees
     store_details = []
@@ -478,23 +477,19 @@ def view_users():
             elif role == "Employee":
                 store_info["employees"].append(f"{user.first_name} {user.last_name}")
 
-        store_details.append(store_info) 
-    db_size_value = float(db_size.split()[0])   
-    db_size_mb = db_size_value / 1024 
-    db_size_mb_str = f"{db_size_mb:.2f} MB"
+        store_details.append(store_info)
 
     # Debugging
     print("Store Details:", store_details)
-    print("db size Details:", db_size_mb_str)
 
-    return render_template('view_users.html', users=users, store_details=store_details , db_size=db_size_mb_str)
+    return render_template('view_users.html', users=users, store_details=store_details)
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    if session['email'] not in app.config['ALLOWED_USERS']:
+    if session['email'] != app.config['ALLOWED_USER']:
         return "You are not authorized to delete users.", 403
 
     user = User.query.get(user_id)
@@ -540,7 +535,7 @@ def delete_store(store_id):
     if 'user' not in session:
         return redirect(url_for('login'))
     
-    if session['email'] not in app.config['ALLOWED_USERS']:
+    if session['email'] != app.config['ALLOWED_USER']:
         return "You are not authorized to perform this action.", 403
     
     store = Store.query.get(store_id)
