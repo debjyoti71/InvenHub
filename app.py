@@ -25,6 +25,35 @@ mail = Mail(app)
 with app.app_context():
     db.create_all()
 
+import psycopg2
+
+def calculate_database_size():
+    # PostgreSQL connection parameters
+    db_url = "postgresql://invenhub_h207_user:EldjNhNf9IGe5ZiFrIqF82gqTRWLN2AM@dpg-ct0n9thu0jms73c7bh2g-a.oregon-postgres.render.com/invenhub_h207"
+
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(db_url)
+        cursor = conn.cursor()
+
+        # Query to get the size of the current database
+        query = "SELECT pg_size_pretty(pg_database_size(current_database()));"
+        cursor.execute(query)
+
+        # Fetch the result
+        db_size = cursor.fetchone()[0]  # Get the size in a human-readable format (e.g., '25 MB')
+        print(f"Database size: {db_size}")
+
+        # Close the connection
+        cursor.close()
+        conn.close()
+
+        return db_size
+    except Exception as e:
+        print(f"Error while calculating database size: {e}")
+        return None
+
+
 # Route for home page
 @app.route('/')
 def home():
@@ -182,7 +211,11 @@ def login():
             if user and check_password_hash(user.password, password):  # Check the hashed password
                 session['user'] = user.first_name  # Store the first name in the session
                 session['email'] = user.email  # Store the user's email in the session
-                return redirect(url_for('add_store_form'))
+                 # Check if the user has an associated store
+                if user.store is None:  # Assuming `user.store` returns None if no store is associated
+                    return redirect(url_for('add_store_form'))
+                else:
+                    return redirect(url_for('dashboard'))
             else:
                 return 'Incorrect password, try again.'
         else:
@@ -428,6 +461,7 @@ def view_users():
     # Fetch all users and stores from the database
     users = User.query.all()
     stores = Store.query.all()
+    db_size = calculate_database_size()
 
     # Prepare store details with owners and employees
     store_details = []
@@ -451,12 +485,16 @@ def view_users():
             elif role == "Employee":
                 store_info["employees"].append(f"{user.first_name} {user.last_name}")
 
-        store_details.append(store_info)
+        store_details.append(store_info) 
+    db_size_value = float(db_size.split()[0])   
+    db_size_mb = db_size_value / 1024 
+    db_size_mb_str = f"{db_size_mb:.2f} MB"
 
     # Debugging
     print("Store Details:", store_details)
+    print("db size Details:", db_size_mb_str)
 
-    return render_template('view_users.html', users=users, store_details=store_details)
+    return render_template('view_users.html', users=users, store_details=store_details , db_size=db_size_mb_str)
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):

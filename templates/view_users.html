@@ -49,7 +49,7 @@
 <body>
     <h2>User and Store List</h2>
 
-    <h3>Total Database Size: {{ db_size or "N/A" }} MB</h3>
+    <h3>Total Database Size: {{ db_size or "N/A" }}</h3>
 
     {% with messages = get_flashed_messages() %}
         {% if messages %}
