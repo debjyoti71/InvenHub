@@ -194,7 +194,6 @@ def verify_otp():
 
     return render_template('otp_verification.html')
 
-# Handle login form submission
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -210,14 +209,15 @@ def login():
         # Check if the user exists in the database
         user = User.query.filter_by(email=email).first()
         if user:
-            if user and check_password_hash(user.password, password):  # Check the hashed password
+            if check_password_hash(user.password, password):  # Check the hashed password
                 session['user'] = user.first_name  # Store the first name in the session
                 session['email'] = user.email  # Store the user's email in the session
-                 # Check if the user has an associated store
-                if user.store is None:  # Assuming `user.store` returns None if no store is associated
-                    return redirect(url_for('add_store_form'))
+
+                # Check if the user has an associated store
+                if not user.stores:  # Check if the user has no stores associated
+                    return redirect(url_for('add_store_form'))  # Redirect to store addition form
                 else:
-                    return redirect(url_for('dashboard'))
+                    return redirect(url_for('dashboard'))  # Redirect to dashboard if store exists
             else:
                 return 'Incorrect password, try again.'
         else:
@@ -225,8 +225,6 @@ def login():
 
     return render_template('login.html')
 
-# Dashboard (only accessible to logged-in users)
-@app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
         return redirect(url_for('login'))
