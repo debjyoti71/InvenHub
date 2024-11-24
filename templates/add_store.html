@@ -61,22 +61,32 @@ button {
 }
 .spinner:before,
 .spinner:after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50% 50% 0 50%;
-    background: #2a85cd;
-    -webkit-mask: radial-gradient(circle 10px at 50% 50%, #0000 94%, #000);
-    mask: radial-gradient(circle 10px at 50% 50%, #0000 94%, #000); /* Add this for compatibility */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50% 50% 0 50%;
+  background: #2a85cd;
+  -webkit-mask: radial-gradient(circle 10px at 50% 50%, #0000 94%, #000); /* For WebKit-based browsers */
+  mask: radial-gradient(circle 10px at 50% 50%, #0000 94%, #000); /* Standard property */
 }
-pinner:after {
+.spinner:after {
   animation: l6 1s infinite;
-  transform: perspective(300px) translateZ(0px)
+  transform: perspective(300px) translateZ(0px);
 }
 @keyframes l6 {
-  to {transform: perspective(300px) translateZ(150px);opacity:0}
+  to {
+    transform: perspective(300px) translateZ(150px);
+    opacity: 0;
+  }
 }
-@keyframes l1 {to{transform: rotate(.5turn)}}
+
+#loc{
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
     </style>
     <div class="wrapper">
         <aside id="sidebar">
@@ -201,28 +211,31 @@ pinner:after {
                                     <input type="text" class="form-control" id="gstNumber" name="gstNumber" placeholder="Enter GST Number">
                                     <div id="phoneError" class="invalid-feedback">Please provide a valid GST number.</div>
                                 </div>
-                            
                                 <div class="mb-4">
-                                    <label for="store_address" class="form-label">Business Address</label>
-                                    <textarea class="form-control" id="store_address" name="store_address" rows="3" placeholder="Enter Business Address" required></textarea>
-                                    <div id="addressError" class="invalid-feedback">Address is required.</div>
+                                <div class="row">
+                                    <div class="col-11">
+                                        <label for="store_address" class="form-label">Address</label>
+                                        <input type="text" class="form-control" id="store_address" name="store_address" placeholder="Enter Your Address">
+
+                                    </div>
+                                    <div class="col" id="loc">
+                                        <button type="button" id="getLocation" style="background-color: transparent;border: 0px solid transparent;"><img src="/static/images/icons8-location-48 (1).png" alt=""></button>
+                                    </div>
                                 </div>
-                                <div class="btn-gps mb-4">
-                                    <button type="button" class="btn" id="getLocation" style="background-color: #102741; color: white;">Get Current Location</button>
-                                    <div class="spinner" role="status"></div>
-                                </div>
-                                <div class="mb-3" hidden>
-                                    <label for="latitude" class="form-label">Latitude</label>
-                                    <input type="text" class="form-control" id="latitude" readonly>
-                                </div>
-                                <div class="mb-4" hidden>
-                                    <label for="longitude" class="form-label">Longitude</label>
-                                    <input type="text" class="form-control" id="longitude" readonly>
-                                </div>
-                            
-                                <button type="submit" class="btn w-100" id="btn">Submit</button>
-                            </form>
-                            
+                            </div>
+                            <div class="btn-gps mb-4">
+                                <div class="spinner" role="status"></div>
+                            </div>
+                            <div class="mb-3" hidden>
+                                <label for="latitude" class="form-label">Latitude</label>
+                                <input type="text" class="form-control" id="latitude" readonly>
+                            </div>
+                            <div class="mb-4" hidden>
+                                <label for="longitude" class="form-label">Longitude</label>
+                                <input type="text" class="form-control" id="longitude" readonly>
+                            </div>
+                            <button type="submit" class="btn w-100" id="btn">Submit</button>
+                        </form>
                         </div>
                     </div>
                 </div>
@@ -258,50 +271,49 @@ pinner:after {
         const spinner = document.querySelector('.spinner');
         const latitudeField = document.getElementById('latitude');
         const longitudeField = document.getElementById('longitude');
-        const addressField = document.getElementById('address');
+        const addressField = document.getElementById('store_address');
 
         getLocationBtn.addEventListener('click', () => {
-        spinner.style.display = 'inline-block'; // Show spinner
+            spinner.style.display = 'inline-block'; // Show spinner
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
 
-                    // Fill latitude and longitude fields
-                    latitudeField.value = latitude;
-                    longitudeField.value = longitude;
+                        // Fill latitude and longitude fields
+                        latitudeField.value = latitude;
+                        longitudeField.value = longitude;
 
-                    // Fetch address using a geocoding API
-                    try {
-                        const response = await fetch(
-                            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-                        );
-                        const data = await response.json();
-                        if (data && data.address) {
-                            document.getElementById('store_address').value = data.display_name;
-                        } else {
-                            addressField.value = 'Unable to fetch address.';
+                        // Fetch address using a geocoding API
+                        try {
+                            const response = await fetch(
+                                `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=3ea71d75861545f8898330047f645b1d`
+                            );
+                            const data = await response.json();
+                            if (data && data.results.length > 0) {
+                                addressField.value = data.results[0].formatted;
+                            } else {
+                                addressField.value = 'Unable to fetch address.';
+                            }
+                        } catch (error) {
+                            addressField.value = 'Error fetching address.';
+                            console.error(error);
+                        } finally {
+                            spinner.style.display = 'none'; // Hide spinner
                         }
-                    } catch (error) {
-                        addressField.value = 'Error fetching address.';
-                        console.error(error);
-                    } finally {
+                    },
+                    (error) => {
+                        alert('Unable to retrieve location. Please allow location access in your browser settings.');
                         spinner.style.display = 'none'; // Hide spinner
                     }
-                },
-                (error) => {
-                    alert('Unable to retrieve location. Please allow location access in your browser settings.');
-                    spinner.style.display = 'none'; // Hide spinner
-                }
-            );
-        } else {
-            alert('Geolocation is not supported by your browser.');
-            spinner.style.display = 'none'; // Hide spinner
-        }
-    });
-
+                );
+            } else {
+                alert('Geolocation is not supported by your browser.');
+                spinner.style.display = 'none'; // Hide spinner
+            }
+        });
 
         const form = document.getElementById('locationForm');
         form.addEventListener('submit', (e) => {
