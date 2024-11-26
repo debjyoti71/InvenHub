@@ -1,0 +1,54 @@
+.profileCard{
+  height: auto;
+  width: 50vw;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+  border-radius: 15px;
+  background-color: #f2f8fd;
+  margin-bottom: 70px;
+  margin-top: 10px;
+}
+::-webkit-scrollbar {
+  width: 15px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--800);
+  border-radius: 50px;
+  border: 2px solid #c2ddf5;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #c2ddf5;
+}
+.text{
+  color: var(--800);
+  padding-left: 50px;
+  padding-top: 10px;
+}
+#profileHeading{
+  margin-top: 20px;
+}
+#profileHeading h2{
+  font-weight:500;
+  color: var(--950);
+}
+#data-field{
+  box-shadow: rgba(0, 0, 0, 0.17) 0px -23px 25px 0px inset, rgba(0, 0, 0, 0.15) 0px -36px 30px 0px inset, rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px, rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px, rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+  margin: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  border-radius: 10px;
+  background-color: var(--300);
+  color: white;
+}
+#copy-btn{
+  border-radius: 15px;
+  width: auto;
+  margin-left: 20px;
+  border-color: black;
+}
+
+#bg{
+  background-color:#c2ddf5 ;
+}

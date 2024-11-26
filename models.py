@@ -27,8 +27,8 @@ class UserStore(db.Model):
     role_name = db.Column(db.String(50), nullable=False)  # Store-specific role (e.g., Store Manager, Employee) # pore role name ta change kore debo
     
     # Relationships
-    user = db.relationship('User', backref='user_store_relation', lazy=True)  # Change 'user' to 'user_store_back'
-    store = db.relationship('Store', backref='user_store', lazy=True)
+    user = db.relationship('User', backref='user_store_relation', overlaps='stores,users',lazy=True)  # Change 'user' to 'user_store_back'
+    store = db.relationship('Store', backref='user_store', overlaps='stores,users',lazy=True)
 
 
 class Store(db.Model):

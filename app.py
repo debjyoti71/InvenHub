@@ -376,28 +376,32 @@ def join_store():
 
         try:
             store_to_join = Store.query.filter_by(unique_code=store_code).first()
-            print(f"Business Email: {store_to_join.business_email}")
-
 
             if store_to_join:
+                print(f"Store found: {store_to_join.store_name}, Business Email: {store_to_join.business_email}")
+
                 if store_to_join not in current_user.stores:
                     current_user.stores.append(store_to_join)
+
+                    # Check if association exists, and update role if necessary
                     association = db.session.query(UserStore).filter_by(
                         user_id=current_user.id, store_id=store_to_join.id
                     ).first()
+
                     if association:
                         db.session.execute(
                             UserStore.update().where(
                                 (UserStore.c.user_id == current_user.id) & 
                                 (UserStore.c.store_id == store_to_join.id)
-                            ).values(role="Employee")
+                            ).values(role_name="Employee")
                         )
+
                     db.session.commit()
 
                     flash(f"You have successfully joined the store '{store_to_join.store_name}' as an Employee!", "success")
-                    
-                    # Send email to business email about the new employee
-                    business_email = store_to_join.business_email  # Replace with the store's business email address
+
+                    # Send email to business about the new employee
+                    business_email = store_to_join.business_email
                     join_store_email_msg = Message(
                         'New Employee Joined Your Business using InvenHub',
                         sender=app.config['MAIL_USERNAME'],
@@ -405,19 +409,20 @@ def join_store():
                     )
                     join_store_email_msg.html = render_template(
                         'joinstoreMail.html',
-                        owner_name=f"{store_to_join.owner_name}",
+                        owner_name=store_to_join.owner_name,
                         employee_name=f"{current_user.first_name} {current_user.last_name}",
-                        employee_email= current_user.email
+                        employee_email=current_user.email
                     )
+
                     try:
                         mail.send(join_store_email_msg)
-                        print(f"Email sent successfully! to {business_email} message: {join_store_email_msg}")
+                        print(f"Email sent successfully to {business_email}")
                     except Exception as e:
                         print(f"Failed to send email: {e}")
                         flash(f"Failed to send email: {e}", "error")
 
-
                     return redirect(url_for('dashboard'))
+
                 else:
                     flash("You are already associated with this store!", "warning")
             else:
