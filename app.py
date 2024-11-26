@@ -503,8 +503,41 @@ def view_users():
         # Debugging
         print("Store Details:", store_details)
         print("db size Details:", db_size_mb_str)
+        users = User.query.all()
 
         return render_template('view_users.html', users=users, store_details=store_details , db_size=db_size_mb_str)
+    else:
+        return "You are not authorized to perform this action.", 403
+
+@app.route('/make_user_role/<int:user_id>', methods=['POST'])
+def make_user_role(user_id):
+    if 'email' not in session:
+        flash("Please log in to continue.", "error")
+        return redirect(url_for('login'))
+    
+    current_user = User.query.filter_by(email=session.get('email')).first()
+
+    if current_user.role_name != 'user':
+        user_to_update = User.query.get(user_id)
+        if not user_to_update:
+            flash("User not found.", "error")
+            return redirect(url_for('view_users'))
+
+        try:
+            # Toggle role
+            if user_to_update.role_name.lower() == "user":
+                user_to_update.role_name = "Admin"
+                flash(f"{user_to_update.first_name} {user_to_update.last_name} has been made an Admin.", "success")
+            else:
+                user_to_update.role_name = "User"
+                flash(f"{user_to_update.first_name} {user_to_update.last_name} has been made a User.", "success")
+            
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occurred while updating the user's role: {e}", "error")
+
+        return redirect(url_for('view_users'))
     else:
         return "You are not authorized to perform this action.", 403
 
