@@ -32,7 +32,7 @@ import psycopg2
 
 def calculate_database_size():
     # PostgreSQL connection parameters
-    db_url = "postgresql://invenhub:WNSqDVS6rNrzeAoiNVRXvi28z8vz9iIP@dpg-ct2n3c3tq21c73b4ovu0-a.oregon-postgres.render.com/invenhub_azboZ"
+    db_url = "postgresql://invenhub:n92xcbKhBMZVwL9x5Gc5XYJxVcwmH05w@dpg-ct2tie3qf0us73a243jg-a.oregon-postgres.render.com/invenhub_c410"
 
     try:
         # Connect to the PostgreSQL database
@@ -380,27 +380,24 @@ def join_store():
             if store_to_join:
                 print(f"Store found: {store_to_join.store_name}, Business Email: {store_to_join.business_email}")
 
-                if store_to_join not in current_user.stores:
-                    current_user.stores.append(store_to_join)
+                # Check if the user is already associated with the store
+                existing_association = UserStore.query.filter_by(
+                    user_id=current_user.id, store_id=store_to_join.id
+                ).first()
 
-                    # Check if association exists, and update role if necessary
-                    association = db.session.query(UserStore).filter_by(
-                        user_id=current_user.id, store_id=store_to_join.id
-                    ).first()
-
-                    if association:
-                        db.session.execute(
-                            UserStore.update().where(
-                                (UserStore.c.user_id == current_user.id) & 
-                                (UserStore.c.store_id == store_to_join.id)
-                            ).values(role_name="Employee")
-                        )
-
+                if not existing_association:
+                    # Create a new association for the user with the store
+                    new_association = UserStore(
+                        user_id=current_user.id,
+                        store_id=store_to_join.id,
+                        role_name="Employee"  # Default role
+                    )
+                    db.session.add(new_association)
                     db.session.commit()
 
                     flash(f"You have successfully joined the store '{store_to_join.store_name}' as an Employee!", "success")
 
-                    # Send email to business about the new employee
+                    # Send email to the business owner about the new employee
                     business_email = store_to_join.business_email
                     join_store_email_msg = Message(
                         'New Employee Joined Your Business using InvenHub',
@@ -433,7 +430,6 @@ def join_store():
             flash(f"An error occurred: {e}", "error")
 
         return redirect(url_for('join_store'))
-
 
 
 @app.route('/account')
