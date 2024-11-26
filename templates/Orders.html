@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container { margin-top: 20px; }
+        .btn-group-toggle .btn { border-radius: 0; }
+        .table { background-color: #fff; }
+        .btn.active { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Orders</h3>
+    <div class="d-flex justify-content-between">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-outline-primary active" id="buyBtn">
+                <input type="radio" name="options" autocomplete="off" checked> Buy
+            </label>
+            <label class="btn btn-outline-primary" id="sellBtn">
+                <input type="radio" name="options" autocomplete="off"> Sell
+            </label>
+        </div>
+        <button class="btn btn-secondary" onclick="exportToExcel()">Import to Excel</button>
+    </div>
+
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Product</th>
+                <th>Items</th>
+                <th>Price</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody id="ordersTable">
+            <!-- Data will be injected here -->
+        </tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const apiUrls = {
+        buy: '/api/buyOrders',
+        sell: '/api/sellOrders'
+    };
+
+    function fetchOrders(type) {
+        fetch(apiUrls[type])
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('ordersTable');
+                tbody.innerHTML = '';
+                data.forEach(order => {
+                    const row = `<tr>
+                        <td>${order.id}</td>
+                        <td>${order.date}</td>
+                        <td>${order.product}</td>
+                        <td>${order.items}</td>
+                        <td>₹${order.price.toFixed(2)}</td>
+                        <td>${type.charAt(0).toUpperCase() + type.slice(1)}</td>
+                    </tr>`;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    }
+
+    function exportToExcel() {
+        // Placeholder function for exporting to Excel
+        alert('Export to Excel feature not implemented.');
+    }
+
+    document.getElementById('buyBtn').addEventListener('click', () => {
+        fetchOrders('buy');
+        document.getElementById('buyBtn').classList.add('active');
+        document.getElementById('sellBtn').classList.remove('active');
+    });
+
+    document.getElementById('sellBtn').addEventListener('click', () => {
+        fetchOrders('sell');
+        document.getElementById('sellBtn').classList.add('active');
+        document.getElementById('buyBtn').classList.remove('active');
+    });
+
+    // Initial load with buy orders
+    fetchOrders('buy');
+</script>
+
+</body>
+</html>

@@ -7,9 +7,10 @@ import random
 from dotenv import load_dotenv
 import os
 from config import Config  # Import your Config class
-from models import db, User, Store, Product , user_store
+from models import db, User, Store, Product, UserStore, Category, Sale
 import csv 
 from datetime import datetime ,timedelta
+from flask_migrate import Migrate
 
 # Load environment variables from .env file
 load_dotenv()
@@ -25,11 +26,13 @@ mail = Mail(app)
 with app.app_context():
     db.create_all()
 
+migrate = Migrate(app, db)    
+
 import psycopg2
 
 def calculate_database_size():
     # PostgreSQL connection parameters
-    db_url = "postgresql://invenhub_h207_user:EldjNhNf9IGe5ZiFrIqF82gqTRWLN2AM@dpg-ct0n9thu0jms73c7bh2g-a.oregon-postgres.render.com/invenhub_h207"
+    db_url = "postgresql://invenhub:WNSqDVS6rNrzeAoiNVRXvi28z8vz9iIP@dpg-ct2n3c3tq21c73b4ovu0-a.oregon-postgres.render.com/invenhub_azboZ"
 
     try:
         # Connect to the PostgreSQL database
@@ -62,28 +65,31 @@ def home():
 def config():
     if 'user' not in session:
         return redirect(url_for('login'))
+    
+    email = session['email']
+    user = User.query.filter_by(email=email).first()
 
-    if session['email'] != app.config['ALLOWED_USER']:
+    if user.role_name != 'user':
+        secret_key = os.getenv('SECRET_KEY')
+        database_url = os.getenv('DATABASE_URL')
+        mail_username = os.getenv('MAIL_USERNAME')
+        mail_password = os.getenv('MAIL_PASSWORD')
+        allowed_user = os.getenv('ALLOWED_USER')
+        predefined_password = os.getenv('PREDEFINED_PASSWORD')
+        
+        return f"""
+            <h1>Environment Variables</h1>
+            <ul>
+                <li><strong>SECRET_KEY:</strong> {secret_key}</li>
+                <li><strong>DATABASE_URL:</strong> {database_url}</li>
+                <li><strong>MAIL_USERNAME:</strong> {mail_username}</li>
+                <li><strong>MAIL_PASSWORD:</strong> {mail_password}</li>
+                <li><strong>ALLOWED_USER:</strong> {allowed_user}</li>
+                <li><strong>PREDEFINED_PASSWORD:</strong> {predefined_password}</li>
+            </ul>
+        """
+    else:
         return "You are not authorized to view this page.", 403
-    
-    secret_key = os.getenv('SECRET_KEY')
-    database_url = os.getenv('DATABASE_URL')
-    mail_username = os.getenv('MAIL_USERNAME')
-    mail_password = os.getenv('MAIL_PASSWORD')
-    allowed_user = os.getenv('ALLOWED_USER')
-    predefined_password = os.getenv('PREDEFINED_PASSWORD')
-    
-    return f"""
-        <h1>Environment Variables</h1>
-        <ul>
-            <li><strong>SECRET_KEY:</strong> {secret_key}</li>
-            <li><strong>DATABASE_URL:</strong> {database_url}</li>
-            <li><strong>MAIL_USERNAME:</strong> {mail_username}</li>
-            <li><strong>MAIL_PASSWORD:</strong> {mail_password}</li>
-            <li><strong>ALLOWED_USER:</strong> {allowed_user}</li>
-            <li><strong>PREDEFINED_PASSWORD:</strong> {predefined_password}</li>
-        </ul>
-    """
 
 # Helper functions for authentication
 def check_admin(email, password):
@@ -286,11 +292,12 @@ def add_store():
                 print("Current User Found:", current_user)
 
                 # Check if there is already an association between user and store
-                association = db.session.query(user_store).filter_by(user_id=current_user.id, store_id=new_store.id).first()
+                association = db.session.query(UserStore).filter_by(user_id=current_user.id, store_id=new_store.id).first()
                 if not association:  # Only create the association if it does not exist
                     # Create association between the user and the store
-                    db.session.execute(user_store.insert().values(user_id=current_user.id, store_id=new_store.id, role="Owner"))
-                    db.session.commit()
+                    new_association = UserStore(user_id=current_user.id, store_id=new_store.id, role_name="Owner")
+                    db.session.add(new_association)  # Add the new association to the session
+                    db.session.commit()  # Commit the changes to the database
 
                     print("User associated with store as Owner")
                 try:
@@ -375,14 +382,14 @@ def join_store():
             if store_to_join:
                 if store_to_join not in current_user.stores:
                     current_user.stores.append(store_to_join)
-                    association = db.session.query(user_store).filter_by(
+                    association = db.session.query(UserStore).filter_by(
                         user_id=current_user.id, store_id=store_to_join.id
                     ).first()
                     if association:
                         db.session.execute(
-                            user_store.update().where(
-                                (user_store.c.user_id == current_user.id) & 
-                                (user_store.c.store_id == store_to_join.id)
+                            UserStore.update().where(
+                                (UserStore.c.user_id == current_user.id) & 
+                                (UserStore.c.store_id == store_to_join.id)
                             ).values(role="Employee")
                         )
                     db.session.commit()
@@ -448,93 +455,104 @@ def view_users():
     if 'user' not in session:
         return redirect(url_for('login'))
 
-    if session['email'] != app.config['ALLOWED_USER']:
-        return "You are not authorized to view this page.", 403
+    email = session['email']
+    user = User.query.filter_by(email=email).first()
 
-    # Fetch all users and stores from the database
-    users = User.query.all()
-    stores = Store.query.all()
-    db_size = calculate_database_size()
+    if user.role_name != 'user':
 
-    # Prepare store details with owners and employees
-    store_details = []
-    for store in stores:
-        store_info = {
-            "id": store.id,
-            "name": store.store_name,
-            "address": store.store_address,
-            "owner": None,
-            "employees": [],
-            "store_code" : store.unique_code
-        }
+        # Fetch all users and stores from the database
+        users = User.query.all()
+        stores = Store.query.all()
+        db_size = calculate_database_size()
 
-        for user in store.users:
-            # Fetch the role of the user for this store
-            association = db.session.query(user_store).filter_by(user_id=user.id, store_id=store.id).first()
-            role = association.role if association else None
+        # Prepare store details with owners and employees
+        store_details = []
+        for store in stores:
+            store_info = {
+                "id": store.id,
+                "name": store.store_name,
+                "address": store.store_address,
+                "owner": None,
+                "employees": [],
+                "store_code" : store.unique_code
+            }
 
-            if role == "Owner":
-                store_info["owner"] = f"{user.first_name} {user.last_name}"
-            elif role == "Employee":
-                store_info["employees"].append(f"{user.first_name} {user.last_name}")
+            for user in store.users:
+                # Fetch the role of the user for this store
+                association = db.session.query(UserStore).filter_by(user_id=user.id, store_id=store.id).first()
+                role = association.role_name if association else None
 
-        store_details.append(store_info)
+                if role == "Owner":
+                    store_info["owner"] = f"{user.first_name} {user.last_name}"
+                elif role == "Employee":
+                    store_info["employees"].append(f"{user.first_name} {user.last_name}")
 
-    # Debugging
-    print("Store Details:", store_details)
-    db_size_value = float(db_size.split()[0])   
-    db_size_mb = db_size_value / 1024 
-    db_size_mb_str = f"{db_size_mb:.2f} MB"
+            store_details.append(store_info)
 
-    # Debugging
-    print("Store Details:", store_details)
-    print("db size Details:", db_size_mb_str)
+        # Debugging
+        print("Store Details:", store_details)
+        if db_size is not None:
+            db_size_value = float(db_size.split()[0])
+        else:
+            db_size_value = 0.0  # Or some default value depending on your logic
+    
+        db_size_mb = db_size_value / 1024 
+        db_size_mb_str = f"{db_size_mb:.2f} MB"
 
-    return render_template('view_users.html', users=users, store_details=store_details , db_size=db_size_mb_str)
+        # Debugging
+        print("Store Details:", store_details)
+        print("db size Details:", db_size_mb_str)
+
+        return render_template('view_users.html', users=users, store_details=store_details , db_size=db_size_mb_str)
+    else:
+        return "You are not authorized to perform this action.", 403
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
     if 'user' not in session:
         return redirect(url_for('login'))
+    
+    email = session['email']
+    user = User.query.filter_by(email=email).first()
 
-    if session['email'] != app.config['ALLOWED_USER']:
-        return "You are not authorized to delete users.", 403
+    if user.role_name != 'user':
+        user = User.query.get(user_id)
+        if not user:
+            flash("User not found.")
+            return redirect(url_for('view_users'))
 
-    user = User.query.get(user_id)
-    if not user:
-        flash("User not found.")
+        try:
+            # Step 1: Check the role of the user in each store before deleting
+            for store in user.stores:
+                # Query the user-store association to check the role of the user for this store
+                association = db.session.query(UserStore).filter_by(user_id=user.id, store_id=store.id).first()
+                
+                if association and association.role == 'Owner':
+                    # Remove the user from the store's user list
+                    store.users.remove(user)
+
+                    # Step 2: Delete related categories and products for stores owned by the user
+                    for category in store.categories:
+                        # Delete related products
+                        for product in category.products:
+                            db.session.delete(product)
+                        # Then delete the category itself
+                        db.session.delete(category)
+
+                    # Delete the store only if the user is the owner
+                    db.session.delete(store)
+
+            # Step 3: Finally, delete the user
+            db.session.delete(user)
+            db.session.commit()
+            flash("User and associated data deleted successfully.")
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occurred while deleting the user: {e}")
+
         return redirect(url_for('view_users'))
-
-    try:
-        # Step 1: Check the role of the user in each store before deleting
-        for store in user.stores:
-            # Query the user-store association to check the role of the user for this store
-            association = db.session.query(user_store).filter_by(user_id=user.id, store_id=store.id).first()
-            
-            if association and association.role == 'Owner':
-                # Remove the user from the store's user list
-                store.users.remove(user)
-
-                # Step 2: Delete related categories and products for stores owned by the user
-                for category in store.categories:
-                    # Delete related products
-                    for product in category.products:
-                        db.session.delete(product)
-                    # Then delete the category itself
-                    db.session.delete(category)
-
-                # Delete the store only if the user is the owner
-                db.session.delete(store)
-
-        # Step 3: Finally, delete the user
-        db.session.delete(user)
-        db.session.commit()
-        flash("User and associated data deleted successfully.")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"An error occurred while deleting the user: {e}")
-
-    return redirect(url_for('view_users'))
+    else:
+        return "You are not authorized to perform this action.", 403
 
 
 
@@ -543,30 +561,34 @@ def delete_store(store_id):
     if 'user' not in session:
         return redirect(url_for('login'))
     
-    if session['email'] != app.config['ALLOWED_USER']:
-        return "You are not authorized to perform this action.", 403
+    email = session['email']
+    user = User.query.filter_by(email=email).first()
+
+    if user.role_name != 'user':
     
-    store = Store.query.get(store_id)
-    if store:
-        try:
-            # Step 1: Delete related products
-            for category in store.categories:
-                for product in category.products:
-                    db.session.delete(product)
-                # Step 2: Delete categories
-                db.session.delete(category)
-            
-            # Step 3: Finally, delete the store
-            db.session.delete(store)
-            db.session.commit()
-            flash('Store and related products and categories deleted successfully', 'success')
-        except Exception as e:
-            db.session.rollback()
-            flash(f"An error occurred while deleting the store: {e}", 'error')
+        store = Store.query.get(store_id)
+        if store:
+            try:
+                # Step 1: Delete related products
+                for category in store.categories:
+                    for product in category.products:
+                        db.session.delete(product)
+                    # Step 2: Delete categories
+                    db.session.delete(category)
+                
+                # Step 3: Finally, delete the store
+                db.session.delete(store)
+                db.session.commit()
+                flash('Store and related products and categories deleted successfully', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f"An error occurred while deleting the store: {e}", 'error')
+        else:
+            flash('Store not found', 'error')
+        
+        return redirect(url_for('view_users'))
     else:
-        flash('Store not found', 'error')
-    
-    return redirect(url_for('view_users'))
+        return "You are not authorized to perform this action.", 403
 
 
 @app.route('/logout')
