@@ -155,6 +155,7 @@
                                             </form>
                                         </td>
                                         <td>
+                                            <span class="badge bg-info ms-2">{{ user.role_name }}</span>
                                             <form action="{{ url_for('make_user_role', user_id=user.id) }}" method="POST" class="d-inline">
                                                 {% if user.role_name.lower() == 'admin' %}
                                                     <button type="submit" class="btn btn-sm btn-outline-primary" 
@@ -163,8 +164,7 @@
                                                     <button type="submit" class="btn btn-sm btn-outline-success" 
                                                             onclick="return confirm('Are you sure you want to promote this User to Admin?')">Make Admin</button>
                                                 {% endif %}
-                                            </form>
-                                            <span class="badge bg-info ms-2">{{ user.role_name }}</span>
+                                            </form>                                           
                                         </td>
                                     </tr>
                                 {% endfor %}
