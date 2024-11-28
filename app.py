@@ -451,6 +451,117 @@ def account():
     return render_template('account_details.html', username=session['user'], email=session['email'], user=user, stores=stores)
 
 
+@app.route('/inventory', methods=['GET', 'POST'])
+def inventory():
+    if request.method == 'GET':
+        # Fetch the current user based on session
+        current_user = User.query.filter_by(email=session.get('email')).first()
+        if not current_user:
+            flash("User not logged in. Please log in first.", "danger")
+            return redirect(url_for('login'))
+
+        # Fetch the user's associated store
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        if not user_store:
+            flash("No store associated with this user. Please join or create a store first.", "danger")
+            return redirect(url_for('add_store_form'))
+
+        # Fetch the products for the user's store
+        store = Store.query.filter_by(id=user_store.store_id).first()
+        if not store:
+            flash("Store not found.", "danger")
+            return redirect(url_for('dashboard'))
+
+        # Fetch all categories and their products for this store
+        categories = Category.query.filter_by(store_id=store.id).all()
+        products = Product.query.join(Category).filter(Category.store_id == store.id).all()
+        # Calculate dashboard metrics
+        total_products = len(products)
+        top_selling = 5  # Placeholder, replace with actual logic
+        low_stock = sum(1 for product in products if product.stock < 10)  
+
+        return render_template(
+            'inventory.html',
+            products=products,
+            categories=categories,  # Pass categories to template
+            total_products=total_products,
+            top_selling=top_selling,
+            low_stock=low_stock,
+        )
+
+    elif request.method == 'POST':
+        # You can handle POST requests for adding or updating products here
+        pass
+
+        
+
+
+@app.route('/new_product', methods=['GET', 'POST'])
+def new_product():
+    if request.method == 'GET':
+        return render_template('new_product.html')
+
+    elif request.method == 'POST':
+        # Fetch the current user based on session
+        current_user = User.query.filter_by(email=session.get('email')).first()
+        if not current_user:
+            flash("User not logged in. Please log in first.", "danger")
+            return redirect(url_for('login'))
+
+        # Fetch the user's associated store(s)
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+
+        if not user_store:
+            flash("No store associated with this user. Please join or create a store first.", "danger")
+            return redirect(url_for('add_store_form'))
+
+        # Ensure the user has permission to add products (e.g., Store Manager role)
+        # if user_store.role_name not in ['Store Manager']:
+        #     flash("You do not have permission to add products to this store.", "danger")
+        #     return redirect(url_for('dashboard'))
+
+        # Fetch form data
+        productCategory = request.form.get('productCategory')
+        product_name = request.form.get('productName')
+        productPrice = request.form.get('productPrice')
+        productQuantity = request.form.get('productQuantity')
+        productSellingPrice = request.form.get('productSellingPrice')
+
+        if productCategory and product_name and productPrice and productQuantity and productSellingPrice:
+            # Check if the category exists
+            category = Category.query.filter_by(category_name=productCategory, store_id=user_store.store_id).first()
+            if not category:
+                # Create the category if it doesn't exist
+                category = Category(category_name=productCategory, store_id=user_store.store_id)
+                db.session.add(category)
+                db.session.commit()
+
+            # Check if the product exists
+            existing_product = Product.query.filter_by(name=product_name, category_id=category.id).first()
+
+            if existing_product:
+                # Update existing product
+                existing_product.cost_price = float(productPrice)  # Update cost price
+                existing_product.selling_price = float(productSellingPrice)  # Update selling price
+                existing_product.stock += int(productQuantity)  # Add to stock
+                db.session.commit()
+                flash("Product updated successfully!", "success")
+            else:
+                # Add new product
+                new_product = Product(
+                    name=product_name,
+                    cost_price=float(productPrice),
+                    stock=int(productQuantity),
+                    selling_price=float(productSellingPrice),
+                    category_id=category.id,
+                )
+                db.session.add(new_product)
+                db.session.commit()
+                flash("Product added successfully!", "success")
+
+            return redirect(url_for('inventory'))
+
+
 @app.route('/6007')
 def view_users():
     if 'user' not in session:

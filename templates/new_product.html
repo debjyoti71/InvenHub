@@ -48,45 +48,45 @@
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="dashboard.html" class="sidebar-link">
-                        <i><img height="25px" width="25px" src="images/icons8-home (2).svg" alt=""></i>
+                    <a href="/dashboard" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-home (2).svg" alt=""></i>
                         <span style="margin-left: 20px;">Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="inventory.html" class="sidebar-link">
-                        <i><img height="25px" width="25px" src="images/icons8-inventory-50.png" alt="warehouse-1"/></i>
+                    <a href="/inventory" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-inventory-50.png" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">Inventory</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link">
-                        <i><img height="25px" width="25px" src="images/icons8-graph-48.png" alt="warehouse-1"/></i>
+                        <i><img height="25px" width="25px" src="/static/images/icons8-graph-48.png" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">Reports</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link">
-                        <i><img height="25px" width="25px" src="images/icons8-order-50.png" alt="warehouse-1"/></i>
+                        <i><img height="25px" width="25px" src="/static/images/icons8-order-50.png" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">Orders</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link">
-                        <i><img height="25px" width="25px" src="images/icons8-plus.svg" alt="warehouse-1"/></i>
+                        <i><img height="25px" width="25px" src="/static/images/icons8-plus.svg" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">New Sale</span>
                     </a>
                 </li>
             </ul>
             <div class="sidebar-footer">
                 <a href="#" class="sidebar-link">
-                    <i><img height="25px" width="25px" src="images/icons8-settings.svg" alt="warehouse-1"/></i>
+                    <i><img height="25px" width="25px" src="/static/images/icons8-settings.svg" alt="warehouse-1"/></i>
                     <span style="margin-left: 20px;">Settings</span>
                 </a>
             </div>
             <div class="sidebar-footer">
-                <a href="" class="sidebar-link">
-                    <i><img height="25px" width="25px" src="images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
+                <a href="/logout" class="sidebar-link">
+                    <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
                     <span style="margin-left: 20px;">Logout</span>
                 </a>
             </div>
@@ -109,7 +109,7 @@
                 <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
                     <div class="dropdown dropleft">
                         <a class="notification-icon position-relative" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i><img height="30px" width="30px" src="images/icons8-notification (3).svg" alt=""></i>
+                            <i><img height="30px" width="30px" src="/static/images/icons8-notification (3).svg" alt=""></i>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="notificationDropdown">
                             <li class="dropdown-header">Notifications</li>
@@ -121,7 +121,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col"><a href="account_details.html"><i><img height="30px" width="30px" src="images/icons8-account-50.png" alt=""></i></a></div>
+                <div class="col"><a href="/account"><i><img height="30px" width="30px" src="/static/images/icons8-account-50.png" alt=""></i></a></div>
                 <div class="col"></div>
             </div>
             <div class="row" style="height: 100%;background-color: #c2ddf5;">
@@ -129,71 +129,43 @@
                     <div class="main-content" style="height: 100%;">
                         <div class="main-content">
                             <h3>Add New Product</h3>
-                            <form id="addProductForm">
-                              <div class="mb-3">
-                                <label for="productName" class="form-label">Product Name</label>
-                                <input type="text" class="form-control" id="productName" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="productCategory" class="form-label">Category</label>
-                                <input type="text" class="form-control" id="productCategory" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="productPrice" class="form-label">Buying Price</label>
-                                <input type="number" class="form-control" id="productPrice" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="productQuantity" class="form-label">Quantity</label>
-                                <input type="number" class="form-control" id="productQuantity" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="productSellingPrice" class="form-label">Selling Price</label>
-                                <input type="text" class="form-control" id="productUnit" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="thresholdValue" class="form-label">Threshold Value</label>
-                                <input type="number" class="form-control" id="thresholdValue" required>
-                              </div>
-                              <button type="submit" class="btn btn-primary">Add Product</button>
-                              <button type="button" class="btn btn-secondary" onclick="goBack()">Cancel</button>
+                            <form id="addProductForm" action="/new_product" method="POST">
+                                <div class="mb-3">
+                                    <label for="productCategory" class="form-label">Category</label>
+                                    <input type="text" class="form-control" name="productCategory" id="productCategory" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productName" class="form-label">Product Name</label>
+                                    <input type="text" class="form-control" name="productName" id="productName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productPrice" class="form-label">Cost Price</label>
+                                    <input type="number" class="form-control" name="productPrice" id="productPrice" step="0.01" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productQuantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" name="productQuantity" id="productQuantity" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productSellingPrice" class="form-label">Selling Price</label>
+                                    <input type="number" class="form-control" name="productSellingPrice" id="productSellingPrice" step="0.01" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Product</button>
+                                <button type="button" class="btn btn-secondary" onclick="goBack()">Cancel</button>
                             </form>
-                          </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col" style="height: 100%;">
-                    <img src="images/undraw_add_tasks_re_s5yj.svg" alt="" style="height: 60%; width: 90%; margin-top: 10%;">
+                    <img src="/static/images/undraw_add_tasks_re_s5yj.svg" alt="" style="height: 60%; width: 90%; margin-top: 10%;">
                 </div>
             </div>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-        crossorigin="anonymous"></script>
-    <script src="/static/js/dashboard.js"></script>
-    <script>
-        function goBack() {
-      window.location.href = 'inventory.html';
-    }
-    document.getElementById('addProductForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const product = {
-        name: document.getElementById('productName').value,
-        category: document.getElementById('productCategory').value,
-        price: document.getElementById('productPrice').value,
-        quantity: document.getElementById('productQuantity').value,
-        SellingPrice: document.getElementById('productSellingPrice').value,
-        threshold: document.getElementById('thresholdValue').value,
-      };
-
-      // Save to localStorage
-      const products = JSON.parse(localStorage.getItem('products')) || [];
-      products.push(product);
-      localStorage.setItem('products', JSON.stringify(products));
-
-      // Redirect back to the inventory page
-      window.location.href = 'inventory.html';
-    });
-      </script>
-</body>
-</html>
+            
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+                crossorigin="anonymous"></script>
+            <script>
+                function goBack() {
+                    window.location.href = '/inventory';
+                }
+            </script>
