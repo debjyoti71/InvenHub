@@ -3,172 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User and Store List</title>
+    <title>Admin Panel - User and Store List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Bungi_spice';
+            src: url(/static/fonts/BungeeSpice-Regular.ttf);
+        }
         body {
-            background-color: #e3f2fd;
-            color: #333;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
+            background-color: white;
+            transition: background-color 0.3s, color 0.3s;
         }
-        table {
-            margin: 20px auto;
-            border-collapse: collapse;
-            width: 80%;
+        body.dark-mode {
+            background-color: #222;
+            color: #f8f9fa;
         }
-        table, th, td {
-            border: 1px solid #2196f3;
-        }
-        th, td {
-            padding: 15px;
-            text-align: left;
-        }
-        th {
-            background-color: #bbdefb;
-        }
-        a {
-            color: #1976d2;
+        .navbar-brand {
             font-weight: bold;
         }
-        a:hover {
-            text-decoration: underline;
-        }
-        .delete-btn {
-            color: red;
-            cursor: pointer;
+        .card {
             border: none;
-            background: none;
-            font-weight: bold;
+            box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+            margin: 5rem;
+            transition: background-color 0.3s;
         }
-        .delete-btn:hover {
-            text-decoration: underline;
+        .dark-mode .card {
+            background-color: #333;
+        }
+        .card-header {
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+            font-family: 'Bungi_spice';
+        }
+        .dark-mode .card-header {
+            background-color: #444;
+            color: #f8f9fa;
+        }
+        .table {
+            margin-bottom: 0;
+            transition: color 0.3s;
+        }
+        .dark-mode .table {
+            color: #f8f9fa;
+        }
+        .table th {
+            transition: background-color 0.3s;
+        }
+        .dark-mode .table th {
+            background-color: #444;
+        }
+        .btn-delete {
+            color: #dc3545;
+        }
+        .btn-delete:hover {
+            color: #bd2130;
+        }
+        .badge {
+            font-size: 0.8rem;
+        }
+        .dark-mode .alert-info {
+            background-color: #1a3a4a;
+            color: #9fcdff;
+            border-color: #0f2a3d;
+        }
+        .dark-mode .text-muted {
+            color: #adb5bd !important;
         }
     </style>
 </head>
 <body>
-    <h2>User and Store List</h2>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">Admin Panel</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href='/dashboard'>Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <button id="darkModeToggle" class="btn btn-outline-secondary">
+                            <i class="fas fa-moon"></i> Dark Mode
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <h3>Total Database Size: {{ db_size or "N/A" }}</h3>
+    <div class="container">
+        <h1 class="text-center mb-4" style="font-family: 'Bungi_spice';">User and Store List</h1>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul style="color: red; font-weight: bold; list-style: none;">
+        <div class="alert alert-info">
+            <i class="fas fa-database me-2"></i>Total Database Size: {{ db_size or "N/A" }}
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
                 {% for message in messages %}
-                    <li>{{ message }}</li>
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
                 {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+            {% endif %}
+        {% endwith %}
 
-    <!-- User List -->
-    <h3>User List</h3>
-    {% if users %}
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>                   
-                        <th>Stores</th>
-                        <th>Actions</th>
-                        <th>Make Admin</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                        <tr>
-                            <td>{{ user.first_name }}</td>
-                            <td>{{ user.last_name }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>{{ user.phone }}</td>
-                            <td>
-                                {% if user.stores %}
-                                    <ul>
-                                        {% for store in user.stores %}
-                                            <li>{{ store.store_name }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    No stores
-                                {% endif %}
-                            </td>
-                            <td>
-                                <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
-                                    <button type="submit" class="delete-btn">Delete</button>
-                                </form>
-                            </td>
-                            <td>
-                                <form action="{{ url_for('make_user_role', user_id=user.id) }}" method="POST" style="display:inline;">
-                                    {% if user.role_name.lower() == 'admin' %}
-                                        <button type="submit" class="btn btn-primary" 
-                                                onclick="return confirm('Are you sure you want to change this Admin to a User?')">Make User</button>
-                                    {% else %}
-                                        <button type="submit" class="btn btn-primary" 
-                                                onclick="return confirm('Are you sure you want to promote this User to Admin?')">Make Admin</button>
-                                    {% endif %}
-                                </form>
-                                <p>Current Role: <strong>{{ user.role_name }}</strong></p>
-                            </td>                                                      
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- User List -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-users me-2"></i>User List
+            </div>
+            <div class="card-body">
+                {% if users %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Stores</th>
+                                    <th>Actions</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                    <tr>
+                                        <td>{{ user.first_name }}</td>
+                                        <td>{{ user.last_name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.phone }}</td>
+                                        <td>
+                                            {% if user.stores %}
+                                                {% for store in user.stores %}
+                                                    <span class="badge bg-primary">{{ store.store_name }}</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="badge bg-secondary">No stores</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-link btn-delete p-0" onclick="return confirm('Are you sure you want to delete this user?')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                        <td>
+                                            <form action="{{ url_for('make_user_role', user_id=user.id) }}" method="POST" class="d-inline">
+                                                {% if user.role_name.lower() == 'admin' %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary" 
+                                                            onclick="return confirm('Are you sure you want to change this Admin to a User?')">Make User</button>
+                                                {% else %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" 
+                                                            onclick="return confirm('Are you sure you want to promote this User to Admin?')">Make Admin</button>
+                                                {% endif %}
+                                            </form>
+                                            <span class="badge bg-info ms-2">{{ user.role_name }}</span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No users found.</p>
+                {% endif %}
+            </div>
         </div>
-    {% else %}
-        <p style="color: #666;">No users found.</p>
-    {% endif %}
 
-    <!-- Store List -->
-    <h3>Store List</h3>
-    {% if store_details %}
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Store Name</th>
-                        <th>Store Location</th>
-                        <th>Owner</th>
-                        <th>Employees</th>
-                        <th>Store Code</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for store in store_details %}
-                        <tr>
-                            <td>{{ store.name }}</td>
-                            <td>{{ store.address }}</td>
-                            <td>{{ store.owner | default("No Owner Assigned") }}</td>
-                            <td>
-                                {% if store.employees %}
-                                    <ul>
-                                        {% for employee in store.employees %}
-                                            <li>{{ employee }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    No Employees
-                                {% endif %}
-                            </td>
-                            <td>{{ store.store_code }}</td>
-                            <td>
-                                <form action="{{ url_for('delete_store', store_id=store.id) }}" method="POST" style="display:inline;">
-                                    <button type="submit" class="delete-btn">Delete Store</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>    
-            </table>
+        <!-- Store List -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-store me-2"></i>Store List
+            </div>
+            <div class="card-body">
+                {% if store_details %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Store Name</th>
+                                    <th>Store Location</th>
+                                    <th>Owner</th>
+                                    <th>Employees</th>
+                                    <th>Store Code</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for store in store_details %}
+                                    <tr>
+                                        <td>{{ store.name }}</td>
+                                        <td>{{ store.address }}</td>
+                                        <td>{{ store.owner | default("No Owner Assigned", true) }}</td>
+                                        <td>
+                                            {% if store.employees %}
+                                                {% for employee in store.employees %}
+                                                    <span class="badge bg-success">{{ employee }}</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="badge bg-secondary">No Employees</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><code>{{ store.store_code }}</code></td>
+                                        <td>
+                                            <form action="{{ url_for('delete_store', store_id=store.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-link btn-delete p-0" onclick="return confirm('Are you sure you want to delete this store?')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No stores found.</p>
+                {% endif %}
+            </div>
         </div>
-    {% else %}
-        <p style="color: #666;">No stores found.</p>
-    {% endif %}
+    </div>
 
-    <br>
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <footer class="bg-light text-center text-muted py-3 mt-4">
+        <div class="container">
+            &copy; 2023 InvenHub. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const body = document.body;
+            const navbar = document.querySelector('.navbar');
+            const footer = document.querySelector('footer');
+
+            function toggleDarkMode() {
+                body.classList.toggle('dark-mode');
+                navbar.classList.toggle('navbar-dark');
+                navbar.classList.toggle('bg-dark');
+                footer.classList.toggle('bg-dark');
+                footer.classList.toggle('text-light');
+
+                const isDarkMode = body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDarkMode);
+
+                darkModeToggle.innerHTML = isDarkMode 
+                    ? '<i class="fas fa-sun"></i> Light Mode'
+                    : '<i class="fas fa-moon"></i> Dark Mode';
+            }
+
+            darkModeToggle.addEventListener('click', toggleDarkMode);
+
+            // Check for saved dark mode preference
+            const savedDarkMode = localStorage.getItem('darkMode');
+            if (savedDarkMode === 'true') {
+                toggleDarkMode();
+            }
+        });
+    </script>
 </body>
 </html>

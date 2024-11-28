@@ -560,6 +560,11 @@ def new_product():
                 flash("Product added successfully!", "success")
 
             return redirect(url_for('inventory'))
+        
+@app.route('/new_sale', methods=['GET', 'POST'])
+def new_sale():
+    if request.method == 'GET':
+        return render_template('new_sale.html')
 
 
 @app.route('/6007')
