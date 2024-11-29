@@ -7,3 +7,5 @@ tempCodeRunnerFile
 
 # Ignore compiled Python files
 *.pyc
+migration
+instance

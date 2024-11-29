@@ -262,13 +262,13 @@ var(--950);
                                     
                                     <div class="product-fields">
                                         <div class="mb-3">
-                                            <input type="text" class="form-control" placeholder="Product Name">
+                                            <input type="text" class="form-control" name=productName placeholder="Product Name">
                                         </div>
                                         <div class="mb-3">
-                                            <input type="number" class="form-control" placeholder="Price">
+                                            <input type="number" class="form-control" name=Price placeholder="Price">
                                         </div>
                                         <div class="mb-3">
-                                            <input type="number" class="form-control" placeholder="No. of Items">
+                                            <input type="number" class="form-control" name=quantity placeholder="No. of Items">
                                         </div>
                                     </div>
                 
@@ -320,84 +320,10 @@ var(--950);
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('sellItemsForm');
-            const addProductBtn = document.querySelector('.add-product-btn');
-            const productFields = document.querySelector('.product-fields');
-            const scanBarcodeBtn = document.querySelector('.scan-barcode-btn');
-            const productTable = document.getElementById('productTable').getElementsByTagName('tbody')[0];
-
-            // Function to add a product to the table
-            function addProductToTable(name, price, quantity) {
-                const newRow = productTable.insertRow();
-                newRow.innerHTML = `
-                    <td>${name}</td>
-                    <td>${price}</td>
-                    <td>${quantity}</td>
-                `;
-            }
-
-            // Add new product fields
-            addProductBtn.addEventListener('click', function() {
-                const newProductFields = `
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="productName" placeholder="Product Name" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="number" class="form-control" name="price" placeholder="Price" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="number" class="form-control" name="quantity" placeholder="No. of Items" required>
-                    </div>
-                `;
-                productFields.insertAdjacentHTML('beforeend', newProductFields);
-            });
-
-            // Handle form submission
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Get all product inputs
-                const productNames = form.querySelectorAll('input[name="productName"]');
-                const prices = form.querySelectorAll('input[name="price"]');
-                const quantities = form.querySelectorAll('input[name="quantity"]');
-
-                // Add each product to the table
-                for (let i = 0; i < productNames.length; i++) {
-                    const name = productNames[i].value;
-                    const price = prices[i].value;
-                    const quantity = quantities[i].value;
-
-                    if (name && price && quantity) {
-                        addProductToTable(name, price, quantity);
-                    }
-                }
-
-                // Clear product fields after adding
-                productFields.innerHTML = '';
-                
-                // Add initial product fields
-                const initialFields = `
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="productName" placeholder="Product Name" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="number" class="form-control" name="price" placeholder="Price" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="number" class="form-control" name="quantity" placeholder="No. of Items" required>
-                    </div>
-                `;
-                productFields.insertAdjacentHTML('beforeend', initialFields);
-
-                console.log('Products added to the table');
-            });
-
             // Simulate barcode scanning
             scanBarcodeBtn.addEventListener('click', function() {
                 alert('Scanning barcode... (This is a placeholder for actual barcode scanning functionality)');
             });
-        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"

@@ -33,7 +33,7 @@ import psycopg2
 def calculate_database_size():
     # PostgreSQL connection parameters
     database_url = os.getenv('DATABASE_URL')
-    db_url =     database_url = os.getenv('DATABASE_URL')
+    db_url = database_url = os.getenv('DATABASE_URL')
 
     try:
         # Connect to the PostgreSQL database
@@ -70,7 +70,7 @@ def config():
     email = session['email']
     user = User.query.filter_by(email=email).first()
 
-    if user.role_name != 'user':
+    if user.role_name.lower() != 'user':
         secret_key = os.getenv('SECRET_KEY')
         database_url = os.getenv('DATABASE_URL')
         mail_username = os.getenv('MAIL_USERNAME')
@@ -567,6 +567,17 @@ def new_sale():
     if request.method == 'GET':
         return render_template('new_sale.html')
 
+    elif request.method == 'POST':
+        product_name = request.json.get('product_name')
+        # Fetch the product details
+        product = Product.query.filter(Product.name.ilike(f"%{product_name}%")).all()
+        if product:
+            return jsonify([{"id": p.id, "name": p.name, "price": p.price} for p in product])
+        else:
+            return jsonify({"error": "Product not found"}), 404
+
+
+
 
 @app.route('/6007')
 def view_users():
@@ -576,7 +587,7 @@ def view_users():
     email = session['email']
     user = User.query.filter_by(email=email).first()
 
-    if user.role_name != 'user':
+    if user.role_name.lower() != 'user':
 
         # Fetch all users and stores from the database
         users = User.query.all()
@@ -634,7 +645,7 @@ def make_user_role(user_id):
     
     current_user = User.query.filter_by(email=session.get('email')).first()
 
-    if current_user.role_name != 'user':
+    if current_user.role_name.lower() != 'user':
         user_to_update = User.query.get(user_id)
         if not user_to_update:
             flash("User not found.", "error")
@@ -666,7 +677,7 @@ def delete_user(user_id):
     email = session['email']
     user = User.query.filter_by(email=email).first()
 
-    if user.role_name != 'user':
+    if user.role_name.lower() != 'user':
         user = User.query.get(user_id)
         if not user:
             flash("User not found.")
@@ -715,7 +726,7 @@ def delete_store(store_id):
     email = session['email']
     user = User.query.filter_by(email=email).first()
 
-    if user.role_name != 'user':
+    if user.role_name.lower() != 'user':
     
         store = Store.query.get(store_id)
         if store:
