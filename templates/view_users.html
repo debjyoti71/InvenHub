@@ -9,7 +9,7 @@
     <style>
         @font-face {
             font-family: 'Bungi_spice';
-            src: url(/static/fonts/BungeeSpice-Regular.ttf);
+            src: url(fonts/BungeeSpice-Regular.ttf);
         }
         body {
             background-color: white;
@@ -82,7 +82,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href='/dashboard'>Dashboard</a>
+                        <a class="nav-link" href='dashboard.html'>Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <button id="darkModeToggle" class="btn btn-outline-secondary">
@@ -119,7 +119,7 @@
             <div class="card-body">
                 {% if users %}
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th>First Name</th>
@@ -155,7 +155,6 @@
                                             </form>
                                         </td>
                                         <td>
-                                            <span class="badge bg-info ms-2">{{ user.role_name }}</span>
                                             <form action="{{ url_for('make_user_role', user_id=user.id) }}" method="POST" class="d-inline">
                                                 {% if user.role_name.lower() == 'admin' %}
                                                     <button type="submit" class="btn btn-sm btn-outline-primary" 
@@ -164,7 +163,8 @@
                                                     <button type="submit" class="btn btn-sm btn-outline-success" 
                                                             onclick="return confirm('Are you sure you want to promote this User to Admin?')">Make Admin</button>
                                                 {% endif %}
-                                            </form>                                           
+                                            </form>
+                                            <span class="badge bg-info ms-2">{{ user.role_name }}</span>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -185,7 +185,7 @@
             <div class="card-body">
                 {% if store_details %}
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th>Store Name</th>
