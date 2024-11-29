@@ -3,225 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Management System</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        /* Custom CSS */
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .hero {
-            background: #007bff;
-            color: #fff;
-            padding: 100px 0;
-            text-align: center;
-        }
-        .features, .cta, .pricing, .steps, .testimonials, .contact, footer {
-            padding: 50px 0;
-        }
-        #btn {
-            border: 2px solid white;
-            border-radius: 5px;
-        }
-        #btn:hover {
-            background-color: white;
-            color: black;
-            border-radius: 5px;
-        }
-        h5 {
-            font-weight: bold;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+    <title>Document</title>
 </head>
 <body>
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">InvenHub</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-                <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
-                <li class="nav-item"><a class="nav-link" href="#testimonials">Testimonials</a></li>
-                <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-                <li class="nav-item"><a class="nav-link ml-2 mr-2" id="btn" href="{{ url_for('signup') }}">Sign Up</a></li>
-                <li class="nav-item"><a class="nav-link" id="btn" href="{{ url_for('login') }}">Login</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <header class="hero">
-        <div class="container">
-            <h1>Comprehensive Inventory Management System</h1>
-            <p>Streamline inventory tracking, barcode generation, sales management, and predictive analysis.</p>
-            <a href="#features" class="btn btn-light mt-4">Learn More</a>
+    <style>
+        body{
+            background-image: url(/static/images/4002676.jpg);
+            background-size: cover;
+            overflow: hidden;
+        }
+        *{
+            margin: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+        }
+        #text{
+            height: 91vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        svg path{
+            fill: transparent;
+            stroke: white;
+            stroke-width: 2;
+            stroke-dasharray:600 ;
+            stroke-dashoffset: 600;
+            animation: textAnimation 4s ease-in-out 1 forwards;
+        }
+        @keyframes textAnimation{
+            0%{
+                stroke-dashoffset: 600;
+                transform: scale(0.8);
+                transform-origin: center;
+            }
+            80%{
+                fill: transparent;
+            }
+            100%{
+                fill: white;
+                stroke-dashoffset: 0;
+                transform: scale(1);
+            }
+        }
+        #navbar-container{
+            height: 7vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top:2vh;
+        }
+        #navbar{
+            border-radius: 10px;
+            background: linear-gradient(135deg,rgba(225,225,225,0.1),rgba(225,225,225,0));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid white;
+        }
+        .navbar-nav{
+            margin-left: auto;
+            gap: 5px;
+            color: black;
+        }
+        .container{
+            background-color: transparent;
+            height: auto;
+            margin-top: 2vh;
+        }
+        .nav-item:hover{
+            text-shadow: rgba(255,255,255) 0px 0px 30px;
+        }
+    </style>
+    <header>
+        <div class="row" id="navbar-container">
+            <div class="col-11" id="navbar">
+                <nav class="navbar navbar-expand-lg navbar-dark">
+                    <a class="navbar-brand" href="/dashboard">InvenHub</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#testimonials">Testimonials</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                            <li class="nav-item"><a class="nav-link" id="btn" href="/signup">Sign Up</a></li>
+                            <li class="nav-item"><a class="nav-link" id="btn" href="/login">Login</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
         </div>
     </header>
-
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="container">
-            <h2 class="text-center">Key Features</h2>
-            <div class="row text-center mt-4">
-                <div class="col-md-4">
-                    <h5>Product Addition & Barcode Generation</h5>
-                    <p>Add products with details and generate unique barcodes instantly for easy tracking and labeling.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Real-time Inventory Tracking</h5>
-                    <p>Scan barcodes to update stock in real-time and receive low-stock alerts for timely restocking.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Sales & Transaction Management</h5>
-                    <p>Automate sales recording, bill generation, and calculate profits to track business success.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Comprehensive Reporting</h5>
-                    <p>Generate weekly or monthly reports on sales, stock levels, and profitability for business insights.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Predictive Sales Analysis (ML-Powered)</h5>
-                    <p>Use historical data to forecast future demand, optimize stock, and gain personalized insights.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Cloud-Based Backend System</h5>
-                    <p>Securely store data with real-time synchronization between the mobile app and backend.</p>
+    <div class="container">
+        <div class="row">
+            <div class="col" id="text">
+                <div class="title">
+                    <svg width="480" height="97" viewBox="0 0 475 97" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30.592 9.088C24.8747 11.392 20.4373 14.9333 17.28 19.712C14.208 24.4053 12.672 30.1653 12.672 36.992C12.672 40.1493 12.9707 42.368 13.568 43.648C14.1653 44.8427 14.464 45.5253 14.464 45.696C9.856 45.696 6.4 44.7573 4.096 42.88C1.87733 40.9173 0.768 37.7173 0.768 33.28C0.768 27.8187 2.98667 22.528 7.424 17.408C11.9467 12.2027 17.7067 8.02133 24.704 4.864C31.7013 1.62133 38.6987 -7.62939e-06 45.696 -7.62939e-06C46.8907 -7.62939e-06 48.5973 0.0853271 50.816 0.255997L30.464 96H12.032L30.592 9.088ZM94.208 96.768C89.0027 96.768 85.1627 95.4027 82.688 92.672C80.2987 89.856 79.104 86.4 79.104 82.304C79.104 80.512 79.3173 78.5067 79.744 76.288C80.1707 73.984 80.5973 71.7653 81.024 69.632C81.536 67.4987 81.8773 66.1333 82.048 65.536C82.7307 62.5493 83.3707 59.6053 83.968 56.704C84.5653 53.8027 84.864 51.456 84.864 49.664C84.864 45.312 83.328 43.136 80.256 43.136C78.0373 43.136 76.0747 44.2453 74.368 46.464C72.6613 48.5973 71.296 51.4133 70.272 54.912L61.568 96H43.136L56.704 32H75.136L73.728 38.656C77.9947 33.8773 82.9867 31.488 88.704 31.488C93.056 31.488 96.512 32.6827 99.072 35.072C101.632 37.4613 102.912 41.088 102.912 45.952C102.912 48.4267 102.613 51.2 102.016 54.272C101.419 57.2587 100.565 60.928 99.456 65.28C98.7733 67.9253 98.1333 70.528 97.536 73.088C97.024 75.5627 96.768 77.5253 96.768 78.976C96.768 80.6827 97.152 82.0053 97.92 82.944C98.688 83.8827 100.011 84.352 101.888 84.352C104.448 84.352 106.496 83.456 108.032 81.664C109.568 79.7867 111.104 76.928 112.64 73.088H118.016C114.859 82.4747 111.189 88.7893 107.008 92.032C102.912 95.1893 98.6453 96.768 94.208 96.768ZM127.217 96.768C122.268 96.768 118.385 95.5307 115.569 93.056C112.838 90.496 111.473 86.6987 111.473 81.664C111.473 79.616 111.686 77.568 112.113 75.52L121.329 32H139.761L130.545 75.52C130.118 77.6533 129.905 79.1893 129.905 80.128C129.905 82.944 131.356 84.352 134.257 84.352C138.182 84.352 141.809 81.8773 145.137 76.928C148.55 71.9787 151.281 66.0907 153.329 59.264C155.377 52.4373 156.401 46.5493 156.401 41.6C156.23 42.0267 155.676 42.368 154.737 42.624C153.798 42.7947 152.988 42.88 152.305 42.88C150.854 42.88 149.702 42.1973 148.849 40.832C148.081 39.4667 147.697 37.9733 147.697 36.352C147.697 34.304 148.337 32.64 149.617 31.36C150.982 30.08 152.988 29.44 155.633 29.44C158.449 29.44 160.497 30.5067 161.777 32.64C163.057 34.688 163.697 37.3333 163.697 40.576C163.697 48.256 162.374 56.4907 159.729 65.28C157.084 73.984 153.03 81.408 147.569 87.552C142.108 93.696 135.324 96.768 127.217 96.768ZM183.929 96.768C177.614 96.768 172.708 95.1467 169.209 91.904C165.71 88.576 163.961 83.4133 163.961 76.416C163.961 70.528 165.113 64.0427 167.417 56.96C169.721 49.8773 173.476 43.776 178.681 38.656C183.886 33.4507 190.5 30.848 198.521 30.848C207.908 30.848 212.601 34.944 212.601 43.136C212.601 47.9147 211.236 52.3093 208.505 56.32C205.774 60.3307 202.148 63.5733 197.625 66.048C193.102 68.4373 188.281 69.8027 183.161 70.144C182.99 72.704 182.905 74.4107 182.905 75.264C182.905 79.4453 183.63 82.304 185.081 83.84C186.532 85.2907 188.878 86.016 192.121 86.016C196.729 86.016 200.654 84.9493 203.897 82.816C207.225 80.6827 210.852 77.44 214.777 73.088H219.129C209.657 88.8747 197.924 96.768 183.929 96.768ZM184.185 64C187.342 63.8293 190.329 62.72 193.145 60.672C196.046 58.624 198.35 56.0213 200.057 52.864C201.849 49.7067 202.745 46.3787 202.745 42.88C202.745 39.3813 201.678 37.632 199.545 37.632C196.473 37.632 193.444 40.32 190.457 45.696C187.556 51.072 185.465 57.1733 184.185 64ZM258.782 96.768C254.259 96.768 250.974 95.4027 248.926 92.672C246.878 89.9413 245.854 86.4853 245.854 82.304C245.854 80.512 246.067 78.5067 246.494 76.288C246.921 73.984 247.347 71.7653 247.774 69.632C248.286 67.4987 248.627 66.1333 248.798 65.536C249.481 62.5493 250.121 59.6053 250.718 56.704C251.315 53.8027 251.614 51.456 251.614 49.664C251.614 45.312 250.078 43.136 247.006 43.136C244.787 43.136 242.825 44.2453 241.118 46.464C239.411 48.5973 238.046 51.4133 237.022 54.912L228.318 96H209.886L223.454 32H241.886L240.478 38.656C244.745 33.8773 249.737 31.488 255.454 31.488C259.806 31.488 263.262 32.6827 265.822 35.072C268.382 37.4613 269.662 41.088 269.662 45.952C269.662 48.4267 269.363 51.2 268.766 54.272C268.169 57.2587 267.315 60.928 266.206 65.28C265.523 67.9253 264.883 70.528 264.286 73.088C263.774 75.5627 263.518 77.5253 263.518 78.976C263.518 80.6827 263.902 82.0053 264.67 82.944C265.438 83.8827 266.761 84.352 268.638 84.352C270.686 84.352 272.094 84.096 272.862 83.584C272.35 87.936 270.771 91.2213 268.126 93.44C265.566 95.6587 262.451 96.768 258.782 96.768ZM304.235 8.96C298.518 11.3493 294.08 14.9333 290.923 19.712C287.851 24.4907 286.315 30.2507 286.315 36.992C286.315 40.1493 286.614 42.368 287.211 43.648C287.808 44.8427 288.107 45.5253 288.107 45.696C283.499 45.696 280.043 44.7573 277.739 42.88C275.52 40.9173 274.411 37.7173 274.411 33.28C274.411 27.8187 276.63 22.528 281.067 17.408C285.59 12.2027 291.35 8.02133 298.347 4.864C305.344 1.62133 312.342 -7.62939e-06 319.339 -7.62939e-06C320.534 -7.62939e-06 322.24 0.0853271 324.459 0.255997L316.267 38.4H335.083L343.275 0.255997H361.707L341.355 96H322.923L333.163 47.872H314.347L304.107 96H285.675L304.235 8.96ZM370.672 96.768C366.576 96.768 363.248 95.488 360.688 92.928C358.213 90.368 356.976 86.528 356.976 81.408C356.976 79.2747 357.317 76.5013 358 73.088L366.704 32H385.136L375.92 75.52C375.664 76.8 375.536 77.9947 375.536 79.104C375.536 82.6027 376.816 84.352 379.376 84.352C381.765 84.352 383.813 83.3707 385.52 81.408C387.227 79.36 388.592 76.5867 389.616 73.088L398.32 32H416.752L407.536 75.52C407.195 76.8 407.024 78.1653 407.024 79.616C407.024 81.3227 407.408 82.56 408.176 83.328C409.029 84.0107 410.395 84.352 412.272 84.352C414.661 84.352 416.709 83.328 418.416 81.28C420.208 79.232 421.616 76.5013 422.64 73.088H428.016C424.859 82.304 420.933 88.576 416.24 91.904C411.632 95.1467 406.981 96.768 402.288 96.768C398.619 96.768 395.675 95.744 393.456 93.696C391.323 91.648 390.043 88.6187 389.616 84.608C386.715 89.3013 383.643 92.5013 380.4 94.208C377.243 95.9147 374 96.768 370.672 96.768ZM439.649 96.768C433.846 96.768 429.409 95.36 426.337 92.544C423.265 89.6427 421.729 85.5893 421.729 80.384C421.729 77.824 422.028 75.392 422.625 73.088L436.321 8.96L455.265 6.39999L449.121 35.2C451.51 33.7493 453.473 32.8107 455.009 32.384C456.545 31.872 458.081 31.616 459.617 31.616C469.686 31.616 474.721 38.912 474.721 53.504C474.721 59.392 473.569 65.7067 471.265 72.448C469.046 79.104 465.292 84.8213 460.001 89.6C454.796 94.3787 448.012 96.768 439.649 96.768ZM446.817 84.352C449.462 84.352 451.937 82.7307 454.241 79.488C456.545 76.16 458.38 72.064 459.745 67.2C461.11 62.2507 461.793 57.5147 461.793 52.992C461.793 49.5787 461.196 46.6773 460.001 44.288C458.806 41.8987 457.142 40.704 455.009 40.704C453.729 40.704 452.278 40.9173 450.657 41.344C449.121 41.6853 448.054 42.24 447.457 43.008L440.417 75.52C440.161 76.544 440.033 77.5253 440.033 78.464C440.033 82.3893 442.294 84.352 446.817 84.352Z" fill="white"/>
+                        </svg>                
                 </div>
             </div>
         </div>
-    </section>
+        <div class="row" style="height: auto;">
 
-    <!-- Call to Action (CTA) Section -->
-    <section class="cta text-center bg-primary text-white">
-        <div class="container">
-            <h2>Ready to Simplify Your Inventory?</h2>
-            <p>Sign up now to manage your inventory effectively and boost profitability!</p>
-            <a href="{{ url_for('signup') }}" class="btn btn-light">Get Started</a>
         </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="pricing">
-        <div class="container">
-            <h2 class="text-center">Pricing Plans</h2>
-            <div class="row text-center mt-4">
-                <div class="col-md-4">
-                    <h4>Basic</h4>
-                    <p>$10/month</p>
-                    <ul class="list-unstyled">
-                        <li>Basic Features</li>
-                        <li>Email Support</li>
-                    </ul>
-                    <a href="#" class="btn btn-primary">Select Plan</a>
-                </div>
-                <div class="col-md-4">
-                    <h4>Pro</h4>
-                    <p>$25/month</p>
-                    <ul class="list-unstyled">
-                        <li>All Features</li>
-                        <li>Priority Support</li>
-                    </ul>
-                    <a href="#" class="btn btn-primary">Select Plan</a>
-                </div>
-                <div class="col-md-4">
-                    <h4>Enterprise</h4>
-                    <p>Contact Us</p>
-                    <ul class="list-unstyled">
-                        <li>Custom Features</li>
-                        <li>Dedicated Support</li>
-                    </ul>
-                    <a href="#" class="btn btn-primary">Contact Us</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Steps Section -->
-    <section id="steps" class="steps">
-        <div class="container">
-            <h2 class="text-center">How It Works</h2>
-            <div class="row text-center mt-4">
-                <div class="col-md-4">
-                    <h5>Step 1</h5>
-                    <p>Sign up and set up your inventory details.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Step 2</h5>
-                    <p>Track items in real-time with automated alerts.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Step 3</h5>
-                    <p>Analyze inventory data and make informed decisions.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials bg-light">
-        <div class="container text-center">
-            <h2>What Our Clients Say</h2>
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <blockquote class="blockquote">
-                        <p>"This system saved us countless hours each week!"</p>
-                        <footer class="blockquote-footer">Alex Johnson, Store Manager</footer>
-                    </blockquote>
-                </div>
-                <div class="col-md-4">
-                    <blockquote class="blockquote">
-                        <p>"Efficient and easy to use - our inventory has never been so organized."</p>
-                        <footer class="blockquote-footer">Megan Smith, Warehouse Director</footer>
-                    </blockquote>
-                </div>
-                <div class="col-md-4">
-                    <blockquote class="blockquote">
-                        <p>"Highly recommend for businesses of any size!"</p>
-                        <footer class="blockquote-footer">John Doe, Retailer</footer>
-                    </blockquote>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <h2 class="text-center">Contact Us</h2>
-            <div class="row justify-content-center mt-4">
-                <div class="col-md-8">
-                    <form>
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" id="name" placeholder="Enter your name">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" placeholder="Enter your email">
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea class="form-control" id="message" rows="4" placeholder="Enter your message"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3">
-        <p>&copy; 2024 InvenHub. All Rights Reserved.</p>
-    </footer>
-
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </div>
 </body>
 </html>

@@ -29,8 +29,7 @@
         }
 
         .section-title {
-            color: #4a5568;
-            font-size: 1.25rem;
+            margin-top: 2rem;
             margin-bottom: 1.5rem;
         }
 
@@ -62,6 +61,91 @@
             border-radius: 0.25rem;
             font-size: 0.875rem;
         }
+        .checkOutButton{
+            height: 40px;
+            width: auto;
+            margin-top: 20px;
+            background-color: #3182ce;
+        }
+        .btn-44,
+.btn-44 *,
+.btn-44 :after,
+.btn-44 :before,
+.btn-44:after,
+.btn-44:before {
+  border: 0 solid;
+  box-sizing: border-box;
+}
+.btn-44 {
+  -webkit-tap-highlight-color: 
+transparent;
+  -webkit-appearance: button;
+  background-color: 
+var(--950);
+  background-image: none;
+  color: 
+#fff;
+  cursor: pointer;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-size: 100%;
+  font-weight: 900;
+  line-height: 1.5;
+  margin: 0;
+  -webkit-mask-image: -webkit-radial-gradient(var(--950), #fff);
+  padding: 0;
+}
+.btn-44:disabled {
+  cursor: default;
+}
+.btn-44:-moz-focusring {
+  outline: auto;
+}
+.btn-44 svg {
+  display: block;
+  vertical-align: middle;
+}
+.btn-44 [hidden] {
+  display: none;
+}
+.btn-44 {
+  border: 1px solid;
+  border-radius: 999px;
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  padding: 1.2rem 3rem;
+  position: relative;
+  text-transform: uppercase;
+}
+.btn-44 span {
+  font-weight: 900;
+  mix-blend-mode: difference;
+}
+.btn-44:after,
+.btn-44:before {
+  background: 
+#fff;
+  content: "";
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: -100%;
+  transition: transform 0.2s cubic-bezier(0.76, 0, 0.24, 1);
+  width: 100%;
+  will-change: transform;
+}
+.btn-44:after {
+  background: 
+#dedede;
+  transition-delay: 0.13s;
+  z-index: -1;
+}
+.btn-44:hover:after,
+.btn-44:hover:before {
+  transform: translateY(100%);
+}
     </style>
     <div class="wrapper">
         <aside id="sidebar">
@@ -75,13 +159,13 @@
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="/static/dashboard.html" class="sidebar-link">
+                    <a href="dashboard.html" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-home (2).svg" alt=""></i>
                         <span style="margin-left: 20px;">Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="/inventory" class="sidebar-link">
+                    <a href="inventory.html" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-inventory-50.png" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">Inventory</span>
                     </a>
@@ -99,7 +183,7 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="/new_sale/" class="sidebar-link">
+                    <a href="new_sale.html" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-plus.svg" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">New Sale</span>
                     </a>
@@ -112,7 +196,7 @@
                 </a>
             </div>
             <div class="sidebar-footer">
-                <a href="/logout" class="sidebar-link">
+                <a href="" class="sidebar-link">
                     <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
                     <span style="margin-left: 20px;">Logout</span>
                 </a>
@@ -147,7 +231,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="col"><a href="/account"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt=""></a></div>
+                        <div class="col"><a href="account_details.html"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt=""></a></div>
                     </div>
                 </div>
             </div>
@@ -163,7 +247,7 @@
                                 <div class="mb-4">
                                     <h3 class="section-title">Customer Details</h3>
                                     <div class="mb-3">
-                                        <input type="tel" class="form-control" placeholder="Phone Number" required>
+                                        <input type="tel" class="form-control" placeholder="Phone Number">
                                     </div>
                                 </div>
                 
@@ -178,33 +262,59 @@
                                     
                                     <div class="product-fields">
                                         <div class="mb-3">
-                                            <input type="text" class="form-control" placeholder="Product Name" required>
+                                            <input type="text" class="form-control" placeholder="Product Name">
                                         </div>
                                         <div class="mb-3">
-                                            <input type="number" class="form-control" placeholder="Price" required>
+                                            <input type="number" class="form-control" placeholder="Price">
                                         </div>
                                         <div class="mb-3">
-                                            <input type="number" class="form-control" placeholder="No. of Items" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <input type="date" class="form-control" placeholder="Expiry Date" required>
+                                            <input type="number" class="form-control" placeholder="No. of Items">
                                         </div>
                                     </div>
                 
-                                    <button type="button" class="add-product-btn">
+                                    <button type="button" class="add-product-btn" hidden>
                                         <i class="bi bi-plus"></i> Add Product
                                     </button>
                                 </div>
                 
+                                <div class="text-center d-flex justify-content-center align-items-center">
+                                    <a href="checkout.html">
+                                        <button type="button" class="btn-44"><span>Proceed to Checkout</span></button>
+                                    </a>
+                                </div>
                                 <div class="text-center">
-                                    <button type="submit" class="proceed-btn">Proceed</button>
+                                    <button type="submit" class="proceed-btn" hidden></button>
                                 </div>
                             </form>
                         </div>
                     </main>
                 </div>
-                <div class="col d-flex justify-content-center align-items-center">
-                    <img src="/static/images/undraw_empty_cart_co35.svg" alt="" style="height: 50vh;">
+                <div class="col">
+                    <div class="row" style="height: auto;">
+                        <div class="col-11">
+                            <h1 class="section-title">Added Products</h1>
+                <table class="table table-striped" id="productTable">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <table class="table table-striped" id="checkoutTable">
+                    <thead>
+                        <tr>
+                            <th>Total price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -215,21 +325,29 @@
             const addProductBtn = document.querySelector('.add-product-btn');
             const productFields = document.querySelector('.product-fields');
             const scanBarcodeBtn = document.querySelector('.scan-barcode-btn');
+            const productTable = document.getElementById('productTable').getElementsByTagName('tbody')[0];
+
+            // Function to add a product to the table
+            function addProductToTable(name, price, quantity) {
+                const newRow = productTable.insertRow();
+                newRow.innerHTML = `
+                    <td>${name}</td>
+                    <td>${price}</td>
+                    <td>${quantity}</td>
+                `;
+            }
 
             // Add new product fields
             addProductBtn.addEventListener('click', function() {
                 const newProductFields = `
                     <div class="mb-3">
-                        <input type="text" class="form-control" placeholder="Product Name" required>
+                        <input type="text" class="form-control" name="productName" placeholder="Product Name" required>
                     </div>
                     <div class="mb-3">
-                        <input type="number" class="form-control" placeholder="Price" required>
+                        <input type="number" class="form-control" name="price" placeholder="Price" required>
                     </div>
                     <div class="mb-3">
-                        <input type="number" class="form-control" placeholder="No. of Items" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="date" class="form-control" placeholder="Expiry Date" required>
+                        <input type="number" class="form-control" name="quantity" placeholder="No. of Items" required>
                     </div>
                 `;
                 productFields.insertAdjacentHTML('beforeend', newProductFields);
@@ -238,23 +356,52 @@
             // Handle form submission
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                // Collect form data
-                const formData = new FormData(form);
-                // Here you would typically send the data to your backend
-                console.log('Form submitted:', Object.fromEntries(formData));
-                alert('Order processed successfully!');
+                
+                // Get all product inputs
+                const productNames = form.querySelectorAll('input[name="productName"]');
+                const prices = form.querySelectorAll('input[name="price"]');
+                const quantities = form.querySelectorAll('input[name="quantity"]');
+
+                // Add each product to the table
+                for (let i = 0; i < productNames.length; i++) {
+                    const name = productNames[i].value;
+                    const price = prices[i].value;
+                    const quantity = quantities[i].value;
+
+                    if (name && price && quantity) {
+                        addProductToTable(name, price, quantity);
+                    }
+                }
+
+                // Clear product fields after adding
+                productFields.innerHTML = '';
+                
+                // Add initial product fields
+                const initialFields = `
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="productName" placeholder="Product Name" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" class="form-control" name="price" placeholder="Price" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" class="form-control" name="quantity" placeholder="No. of Items" required>
+                    </div>
+                `;
+                productFields.insertAdjacentHTML('beforeend', initialFields);
+
+                console.log('Products added to the table');
             });
 
             // Simulate barcode scanning
             scanBarcodeBtn.addEventListener('click', function() {
                 alert('Scanning barcode... (This is a placeholder for actual barcode scanning functionality)');
-                // Here you would typically integrate with a barcode scanning library
             });
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    <script src="/static/js/dasboard.js"></script>
+    <script src="/static/js/dashboard.js"></script>
 </body>
 </html>

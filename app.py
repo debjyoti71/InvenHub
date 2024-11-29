@@ -32,7 +32,8 @@ import psycopg2
 
 def calculate_database_size():
     # PostgreSQL connection parameters
-    db_url = "postgresql://invenhub:n92xcbKhBMZVwL9x5Gc5XYJxVcwmH05w@dpg-ct2tie3qf0us73a243jg-a.oregon-postgres.render.com/invenhub_c410"
+    database_url = os.getenv('DATABASE_URL')
+    db_url =     database_url = os.getenv('DATABASE_URL')
 
     try:
         # Connect to the PostgreSQL database
