@@ -562,21 +562,79 @@ def new_product():
 
             return redirect(url_for('inventory'))
         
+@app.route('/product-suggestions', methods=['GET'])
+def product_suggestions():
+    """
+    Render the product suggestion page with the user's associated store data and related product suggestions.
+    """
+    # Ensure the user is logged in
+    if 'email' not in session:
+        return "Please log in to access this page.", 401
+
+    # Fetch the current logged-in user
+    current_user = User.query.filter_by(email=session.get('email')).first()
+    if not current_user:
+        return "User not found.", 404
+
+    # Fetch the store associated with the user
+    user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+    if not user_store:
+        return "No store associated with this user.", 404
+
+    # Fetch the store details
+    store = Store.query.filter_by(id=user_store.store_id).first()
+    if not store:
+        return "Store not found.", 404
+
+    # Render the template and pass store_id and related products
+    return render_template('test.html', store_id=store.id)
+
+
+@app.route('/suggest-products', methods=['GET'])
+def suggest_products():
+    query = request.args.get('query', '').strip()
+    store_id = request.args.get('store_id', type=int)
+
+    if not query or not store_id:
+        return jsonify({"suggestions": []})
+
+    # Fetch matching products for the store
+    products = Product.query.join(Category).filter(
+        Category.store_id == store_id,
+        Product.name.ilike(f"%{query}%")
+    ).limit(5).all()
+
+    # Return product name, selling price, and stock
+    suggestions = [
+        {"name": product.name, "selling_price": product.selling_price, "stock": product.stock}
+        for product in products
+    ]
+
+    return jsonify({"suggestions": suggestions})
+
+    
 @app.route('/new_sale', methods=['GET', 'POST'])
 def new_sale():
     if request.method == 'GET':
-        return render_template('new_sale.html')
+        if 'email' not in session:
+            return "Please log in to access this page.", 401
 
-    elif request.method == 'POST':
-        product_name = request.json.get('product_name')
-        # Fetch the product details
-        product = Product.query.filter(Product.name.ilike(f"%{product_name}%")).all()
-        if product:
-            return jsonify([{"id": p.id, "name": p.name, "price": p.price} for p in product])
-        else:
-            return jsonify({"error": "Product not found"}), 404
+        # Fetch the current logged-in user
+        current_user = User.query.filter_by(email=session.get('email')).first()
+        if not current_user:
+            return "User not found.", 404
 
+        # Fetch the store associated with the user
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        if not user_store:
+            return "No store associated with this user.", 404
 
+        # Fetch the store details
+        store = Store.query.filter_by(id=user_store.store_id).first()
+        if not store:
+            return "Store not found.", 404
+
+        return render_template('new_sale.html', store_id=store.id)
 
 
 @app.route('/6007')

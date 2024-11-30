@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Suggestions</title>
+    <script>
+        function fetchSuggestions(query) {
+            const storeId = {{ store_id }}; // Store ID passed from Flask
+            if (query.length < 1) {
+                document.getElementById('suggestions').innerHTML = '';
+                return;
+            }
+            fetch(`/suggest-products?query=${query}&store_id=${storeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const suggestions = data.suggestions;
+                    const suggestionsList = document.getElementById('suggestions');
+                    suggestionsList.innerHTML = ''; // Clear previous suggestions
+
+                    suggestions.forEach(product => {
+                        const item = document.createElement('div');
+                        item.className = 'suggestion-item';
+                        item.textContent = product.name; // Product name
+                        item.onclick = () => {
+                            document.getElementById('product-search').value = product.name; 
+                            suggestionsList.innerHTML = ''; 
+                        };
+                        suggestionsList.appendChild(item);
+                    });
+                })
+                .catch(error => console.error('Error fetching suggestions:', error));
+        }
+    </script>
+</head>
+<body>
+    <h1>Search Products</h1>
+    <input
+        type="text"
+        id="product-search"
+        oninput="fetchSuggestions(this.value)"
+        placeholder="Type product name..."
+    />
+    <div id="suggestions"></div>
+
+</body>
+</html>

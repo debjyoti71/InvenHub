@@ -159,13 +159,13 @@ var(--950);
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="dashboard.html" class="sidebar-link">
+                    <a href="/dashboard" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-home (2).svg" alt=""></i>
                         <span style="margin-left: 20px;">Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="inventory.html" class="sidebar-link">
+                    <a href="/inventory" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-inventory-50.png" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">Inventory</span>
                     </a>
@@ -183,7 +183,7 @@ var(--950);
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="new_sale.html" class="sidebar-link">
+                    <a href="/new_sale" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-plus.svg" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">New Sale</span>
                     </a>
@@ -196,7 +196,7 @@ var(--950);
                 </a>
             </div>
             <div class="sidebar-footer">
-                <a href="" class="sidebar-link">
+                <a href="/logout" class="sidebar-link">
                     <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
                     <span style="margin-left: 20px;">Logout</span>
                 </a>
@@ -231,7 +231,7 @@ var(--950);
                                 </ul>
                             </div>
                         </div>
-                        <div class="col"><a href="account_details.html"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt=""></a></div>
+                        <div class="col"><a href="/account"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt=""></a></div>
                     </div>
                 </div>
             </div>
@@ -259,66 +259,193 @@ var(--950);
                                             <i class="bi bi-upc-scan"></i>Scan Barcode to Autofill
                                         </button>
                                     </div>
-                                    
                                     <div class="product-fields">
                                         <div class="mb-3">
-                                            <input type="text" class="form-control" name=productName placeholder="Product Name">
+                                            <input 
+                                            type="text" 
+                                            id="productName" 
+                                            class="form-control" 
+                                            name="productName" 
+                                            placeholder="Product Name" 
+                                            autocomplete="off" 
+                                            oninput="fetchSuggestions(this.value)" >
+                                            <ul id="suggestions" class="list-group" style="display: none;"></ul>
                                         </div>
                                         <div class="mb-3">
-                                            <input type="number" class="form-control" name=Price placeholder="Price">
+                                            <input 
+                                                type="number" 
+                                                id="productPrice" 
+                                                class="form-control" 
+                                                name="Price" 
+                                                placeholder="Price" 
+                                                readonly>
                                         </div>
                                         <div class="mb-3">
-                                            <input type="number" class="form-control" name=quantity placeholder="No. of Items">
+                                            <input 
+                                                type="number" 
+                                                id="productQuantity" 
+                                                class="form-control" 
+                                                name="quantity" 
+                                                placeholder="No. of Items" 
+                                                value="1" 
+                                                oninput="validateQuantity()">
                                         </div>
                                     </div>
-                
-                                    <button type="button" class="add-product-btn" hidden>
-                                        <i class="bi bi-plus"></i> Add Product
-                                    </button>
-                                </div>
-                
-                                <div class="text-center d-flex justify-content-center align-items-center">
-                                    <a href="checkout.html">
-                                        <button type="button" class="btn-44"><span>Proceed to Checkout</span></button>
-                                    </a>
-                                </div>
-                                <div class="text-center">
-                                    <button type="submit" class="proceed-btn" hidden></button>
-                                </div>
-                            </form>
-                        </div>
-                    </main>
-                </div>
-                <div class="col">
-                    <div class="row" style="height: auto;">
-                        <div class="col-11">
-                            <h1 class="section-title">Added Products</h1>
-                <table class="table table-striped" id="productTable">
-                    <thead>
-                        <tr>
-                            <th>Product Name</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-                <table class="table table-striped" id="checkoutTable">
-                    <thead>
-                        <tr>
-                            <th>Total price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+                                    <div class="text-center d-flex justify-content-center align-items-center">
+                                        <a href="/checkout">
+                                            <button type="button" class="btn-44"><span>Proceed to Checkout</span></button>
+                                        </a>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="proceed-btn" hidden></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </main>
+                    </div>
+                    <div class="col">
+                        <div class="row" style="height: auto;">
+                            <div class="col-11">
+                                <h1 class="section-title">Added Products</h1>
+                    <table class="table table-striped" id="productTable">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <table class="table table-striped" id="checkoutTable">
+                        <thead>
+                            <tr>
+                                <th>Total Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="totalPrice">0</td> <!-- Add this -->
+                            </tr>
+                        </tbody>
+                    </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        <script>
+            // Fetch product suggestions
+            function fetchSuggestions(query) {
+                const storeId = {{ store_id }}; // Store ID passed from Flask
+        
+                if (query.length < 2) {
+                    document.getElementById('suggestions').style.display = 'none';
+                    return;
+                }
+        
+                fetch(`/suggest-products?query=${query}&store_id=${storeId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const suggestions = data.suggestions;
+                        const suggestionsList = document.getElementById('suggestions');
+                        suggestionsList.innerHTML = ''; // Clear previous suggestions
+                        suggestionsList.style.display = 'block'; // Show suggestions
+        
+                        suggestions.forEach(product => {
+                            const item = document.createElement('li');
+                            item.className = 'list-group-item suggestion-item';
+                            item.textContent = product.name; // Product name
+                            item.onclick = () => {
+                                // Set product name, price, and quantity
+                                document.getElementById('productName').value = product.name;
+                                document.getElementById('productPrice').value = product.selling_price;
+                                document.getElementById('productQuantity').value = 1; // Default quantity
+                                suggestionsList.style.display = 'none'; // Hide suggestions
+                                // Store product stock in a custom data attribute
+                                document.getElementById('productName').setAttribute('data-stock', product.stock);
+                            };
+                            suggestionsList.appendChild(item);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching suggestions:', error));
+            }
+        
+            // Validate quantity to ensure it doesn't exceed available stock
+            function validateQuantity() {
+                const productQuantity = parseInt(document.getElementById('productQuantity').value);
+                const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'));
+        
+                // Check if the quantity exceeds available stock
+                if (productQuantity > productStock) {
+                    alert('Quantity exceeds available stock!');
+                    document.getElementById('productQuantity').value = productStock; // Set to max available stock
+                }
+            }
+        
+            // Handle Enter key to update the table
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent default form submission behavior
+        
+                    const productName = document.getElementById('productName').value.trim();
+                    const productPrice = parseFloat(document.getElementById('productPrice').value);
+                    const productQuantity = parseInt(document.getElementById('productQuantity').value);
+        
+                    // Validate inputs
+                    if (!productName || isNaN(productPrice) || isNaN(productQuantity)) {
+                        alert('Please fill in valid product details.');
+                        return;
+                    }
+        
+                    // Check if quantity exceeds stock
+                    const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'));
+                    if (productQuantity > productStock) {
+                        alert('Quantity exceeds available stock!');
+                        return; // Prevent adding product if quantity is too high
+                    }
+        
+                    const tableBody = document.getElementById('productTable').getElementsByTagName('tbody')[0];
+                    let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === productName);
+        
+                    if (existingRow) {
+                        // Update quantity and recalculate the total price for this product
+                        const existingQuantity = parseInt(existingRow.cells[2].textContent);
+                        const updatedQuantity = existingQuantity + productQuantity;
+                        if (updatedQuantity > productStock) {
+                            alert('Quantity exceeds available stock!');
+                            return; // Prevent adding product if quantity is too high
+                        }
+                        existingRow.cells[2].textContent = updatedQuantity;
+        
+                        // Update total price
+                        const totalPriceElement = document.getElementById('totalPrice');
+                        const currentTotal = parseFloat(totalPriceElement.textContent);
+                        const updatedTotal = currentTotal + productPrice * productQuantity;
+                        totalPriceElement.textContent = updatedTotal.toFixed(2);
+                    } else {
+                        // Add a new row for the product
+                        const row = tableBody.insertRow();
+                        row.insertCell(0).textContent = productName;
+                        row.insertCell(1).textContent = productPrice.toFixed(2);
+                        row.insertCell(2).textContent = productQuantity;
+        
+                        // Update total price
+                        const totalPriceElement = document.getElementById('totalPrice');
+                        const currentTotal = parseFloat(totalPriceElement.textContent);
+                        const updatedTotal = currentTotal + productPrice * productQuantity;
+                        totalPriceElement.textContent = updatedTotal.toFixed(2);
+                    }
+        
+                    // Clear input fields
+                    document.getElementById('productName').value = '';
+                    document.getElementById('productPrice').value = '';
+                    document.getElementById('productQuantity').value = 1;
+                }
+            });
+        </script>               
     <script>
             // Simulate barcode scanning
             scanBarcodeBtn.addEventListener('click', function() {
