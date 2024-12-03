@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+</head>
+<body>
+    <h1>Checkout Overview</h1>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.price * item.quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <h3>Total Amount: 
+        {% set total = 0 %}
+        {% for item in cart %}
+            {% set total = total + (item.price * item.quantity) %}
+        {% endfor %}
+        ${{ total }}
+    </h3>
+
+    <form action="{{ url_for('checkout') }}" method="POST">
+        <button type="submit">Proceed to Checkout</button>
+    </form>
+    <form action="/clear-cart" method="POST" style="text-align: center; margin-top: 20px;">
+        <button type="submit" class="btn btn-danger">Clear Cart</button>
+    </form>
+    
+</body>
+<script>
+function clearCart() {
+    fetch('/clear-cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            document.getElementById('productTable').getElementsByTagName('tbody')[0].innerHTML = ''; // Clear the cart table
+            document.getElementById('totalPrice').textContent = '0.00'; // Reset total price
+        } else {
+            alert('Failed to clear cart: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+
+</html>

@@ -250,25 +250,24 @@ var(--950);
                                         <input type="tel" class="form-control" placeholder="Phone Number">
                                     </div>
                                 </div>
-                
                                 <!-- Product Section -->
                                 <div class="mb-4">
                                     <h3 class="section-title">Product details</h3>
                                     <div class="text-end mb-3">
                                         <button type="button" class="scan-barcode-btn">
-                                            <i class="bi bi-upc-scan"></i>Scan Barcode to Autofill
+                                            <i class="bi bi-upc-scan"></i> Scan Barcode to Autofill
                                         </button>
                                     </div>
                                     <div class="product-fields">
                                         <div class="mb-3">
                                             <input 
-                                            type="text" 
-                                            id="productName" 
-                                            class="form-control" 
-                                            name="productName" 
-                                            placeholder="Product Name" 
-                                            autocomplete="off" 
-                                            oninput="fetchSuggestions(this.value)" >
+                                                type="text" 
+                                                id="productName" 
+                                                class="form-control" 
+                                                name="productName" 
+                                                placeholder="Product Name" 
+                                                autocomplete="off" 
+                                                oninput="fetchSuggestions(this.value)">
                                             <ul id="suggestions" class="list-group" style="display: none;"></ul>
                                         </div>
                                         <div class="mb-3">
@@ -279,6 +278,9 @@ var(--950);
                                                 name="Price" 
                                                 placeholder="Price" 
                                                 readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="hidden" id="category_id" name="category_id">
                                         </div>
                                         <div class="mb-3">
                                             <input 
@@ -299,153 +301,195 @@ var(--950);
                                     <div class="text-center">
                                         <button type="submit" class="proceed-btn" hidden></button>
                                     </div>
-                                </form>
-                            </div>
-                        </main>
-                    </div>
-                    <div class="col">
-                        <div class="row" style="height: auto;">
-                            <div class="col-11">
-                                <h1 class="section-title">Added Products</h1>
-                    <table class="table table-striped" id="productTable">
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                    <table class="table table-striped" id="checkoutTable">
-                        <thead>
-                            <tr>
-                                <th>Total Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td id="totalPrice">0</td> <!-- Add this -->
-                            </tr>
-                        </tbody>
-                    </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script>
-            // Fetch product suggestions
-            function fetchSuggestions(query) {
-                const storeId = {{ store_id }}; // Store ID passed from Flask
-        
-                if (query.length < 2) {
-                    document.getElementById('suggestions').style.display = 'none';
-                    return;
-                }
-        
-                fetch(`/suggest-products?query=${query}&store_id=${storeId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const suggestions = data.suggestions;
-                        const suggestionsList = document.getElementById('suggestions');
-                        suggestionsList.innerHTML = ''; // Clear previous suggestions
-                        suggestionsList.style.display = 'block'; // Show suggestions
-        
-                        suggestions.forEach(product => {
-                            const item = document.createElement('li');
-                            item.className = 'list-group-item suggestion-item';
-                            item.textContent = product.name; // Product name
-                            item.onclick = () => {
-                                // Set product name, price, and quantity
-                                document.getElementById('productName').value = product.name;
-                                document.getElementById('productPrice').value = product.selling_price;
-                                document.getElementById('productQuantity').value = 1; // Default quantity
-                                suggestionsList.style.display = 'none'; // Hide suggestions
-                                // Store product stock in a custom data attribute
-                                document.getElementById('productName').setAttribute('data-stock', product.stock);
-                            };
-                            suggestionsList.appendChild(item);
-                        });
-                    })
-                    .catch(error => console.error('Error fetching suggestions:', error));
-            }
-        
-            // Validate quantity to ensure it doesn't exceed available stock
-            function validateQuantity() {
-                const productQuantity = parseInt(document.getElementById('productQuantity').value);
-                const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'));
-        
-                // Check if the quantity exceeds available stock
-                if (productQuantity > productStock) {
-                    alert('Quantity exceeds available stock!');
-                    document.getElementById('productQuantity').value = productStock; // Set to max available stock
-                }
-            }
-        
-            // Handle Enter key to update the table
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Prevent default form submission behavior
-        
-                    const productName = document.getElementById('productName').value.trim();
-                    const productPrice = parseFloat(document.getElementById('productPrice').value);
-                    const productQuantity = parseInt(document.getElementById('productQuantity').value);
-        
-                    // Validate inputs
-                    if (!productName || isNaN(productPrice) || isNaN(productQuantity)) {
-                        alert('Please fill in valid product details.');
-                        return;
-                    }
-        
-                    // Check if quantity exceeds stock
-                    const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'));
-                    if (productQuantity > productStock) {
-                        alert('Quantity exceeds available stock!');
-                        return; // Prevent adding product if quantity is too high
-                    }
-        
-                    const tableBody = document.getElementById('productTable').getElementsByTagName('tbody')[0];
-                    let existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === productName);
-        
-                    if (existingRow) {
-                        // Update quantity and recalculate the total price for this product
-                        const existingQuantity = parseInt(existingRow.cells[2].textContent);
-                        const updatedQuantity = existingQuantity + productQuantity;
-                        if (updatedQuantity > productStock) {
-                            alert('Quantity exceeds available stock!');
-                            return; // Prevent adding product if quantity is too high
-                        }
-                        existingRow.cells[2].textContent = updatedQuantity;
-        
-                        // Update total price
-                        const totalPriceElement = document.getElementById('totalPrice');
-                        const currentTotal = parseFloat(totalPriceElement.textContent);
-                        const updatedTotal = currentTotal + productPrice * productQuantity;
-                        totalPriceElement.textContent = updatedTotal.toFixed(2);
-                    } else {
-                        // Add a new row for the product
-                        const row = tableBody.insertRow();
-                        row.insertCell(0).textContent = productName;
-                        row.insertCell(1).textContent = productPrice.toFixed(2);
-                        row.insertCell(2).textContent = productQuantity;
-        
-                        // Update total price
-                        const totalPriceElement = document.getElementById('totalPrice');
-                        const currentTotal = parseFloat(totalPriceElement.textContent);
-                        const updatedTotal = currentTotal + productPrice * productQuantity;
-                        totalPriceElement.textContent = updatedTotal.toFixed(2);
-                    }
-        
-                    // Clear input fields
-                    document.getElementById('productName').value = '';
-                    document.getElementById('productPrice').value = '';
-                    document.getElementById('productQuantity').value = 1;
-                }
-            });
-        </script>               
+                                </div>
+
+                                <!-- Added Products Section -->
+                                <div class="col">
+                                    <div class="row" style="height: auto;">
+                                        <div class="col-11">
+                                            <h1 class="section-title">Added Products</h1>
+                                            <table class="table table-striped" id="productTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Product Name</th>
+                                                        <th>Price</th>
+                                                        <th>Quantity</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                            <table class="table table-striped" id="checkoutTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Total Price</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td id="totalPrice">0</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <script>
+                                    // Fetch product suggestions based on user input
+                                    function fetchSuggestions(query) {
+                                        const storeId = {{ store_id }}; // Store ID passed from Flask
+
+                                        if (query.length < 2) {
+                                            hideSuggestions();
+                                            return;
+                                        }
+
+                                        fetch(`/suggest-products?query=${query}&store_id=${storeId}`)
+                                            .then(response => response.json())
+                                            .then(data => displaySuggestions(data.suggestions))
+                                            .catch(error => console.error('Error fetching suggestions:', error));
+                                    }
+
+                                    // Display product suggestions in the suggestion list
+                                    function displaySuggestions(suggestions) {
+                                        const suggestionsList = document.getElementById('suggestions');
+                                        suggestionsList.innerHTML = ''; // Clear previous suggestions
+                                        suggestionsList.style.display = 'block'; // Show suggestions list
+
+                                        suggestions.forEach(product => {
+                                            const item = document.createElement('li');
+                                            item.className = 'list-group-item suggestion-item';
+                                            item.textContent = product.name; // Display product name
+                                            item.onclick = () => selectProduct(product);
+                                            suggestionsList.appendChild(item);
+                                        });
+                                    }
+
+                                    // Hide the suggestions list
+                                    function hideSuggestions() {
+                                        const suggestionsList = document.getElementById('suggestions');
+                                        suggestionsList.style.display = 'none';
+                                    }
+
+                                    // Handle product selection from the suggestion list
+                                    function selectProduct(product) {
+                                        document.getElementById('productName').value = product.name;
+                                        document.getElementById('productPrice').value = product.selling_price;
+                                        document.getElementById('productQuantity').value = 1; // Default quantity
+                                        document.getElementById('category_id').value = product.category_id;
+
+                                        // Store the product stock in a custom data attribute
+                                        document.getElementById('productName').setAttribute('data-stock', product.stock);
+
+                                        hideSuggestions(); // Hide suggestions after selection
+                                    }
+
+                                    // Validate product quantity to ensure it doesn't exceed available stock
+                                    function validateQuantity() {
+                                        const productQuantity = parseInt(document.getElementById('productQuantity').value, 10);
+                                        const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'), 10);
+
+                                        if (productQuantity > productStock) {
+                                            alert('Quantity exceeds available stock!');
+                                            document.getElementById('productQuantity').value = productStock; // Set to max available stock
+                                        }
+                                    }
+
+                                    // Handle Enter key press to update the product table
+                                    document.addEventListener('keydown', function (event) {
+                                        if (event.key === 'Enter') {
+                                            event.preventDefault(); // Prevent default form submission
+
+                                            const productName = document.getElementById('productName').value.trim();
+                                            const productPrice = parseFloat(document.getElementById('productPrice').value);
+                                            const productQuantity = parseInt(document.getElementById('productQuantity').value, 10);
+                                            const categoryId = document.getElementById('category_id').value;
+
+                                            if (!validateInputs(productName, productPrice, productQuantity)) {
+                                                return;
+                                            }
+
+                                            updateProductTable(productName, productPrice, productQuantity, categoryId);
+                                            clearInputFields();
+                                        }
+                                    });
+
+                                    // Validate product input details
+                                    function validateInputs(name, price, quantity) {
+                                        if (!name || isNaN(price) || isNaN(quantity)) {
+                                            alert('Please fill in valid product details.');
+                                            return false;
+                                        }
+
+                                        const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'), 10);
+                                        if (quantity > productStock) {
+                                            alert('Quantity exceeds available stock!');
+                                            return false;
+                                        }
+
+                                        return true;
+                                    }
+
+                                    // Update the product table with the selected product details
+                                    function updateProductTable(name, price, quantity, categoryId) {
+                                        const tableBody = document.getElementById('productTable').getElementsByTagName('tbody')[0];
+                                        const existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === name);
+
+                                        if (existingRow) {
+                                            const existingQuantity = parseInt(existingRow.cells[2].textContent, 10);
+                                            const updatedQuantity = existingQuantity + quantity;
+                                            const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'), 10);
+
+                                            if (updatedQuantity > productStock) {
+                                                alert('Quantity exceeds available stock!');
+                                                return;
+                                            }
+
+                                            existingRow.cells[2].textContent = updatedQuantity;
+                                        } else {
+                                            const row = tableBody.insertRow();
+                                            row.insertCell(0).textContent = name;
+                                            row.insertCell(1).textContent = price.toFixed(2);
+                                            row.insertCell(2).textContent = quantity;
+                                        }
+
+                                        updateTotalPrice(price * quantity);
+                                        saveCart(name, price, quantity, categoryId);
+                                    }
+
+                                    // Update the total price
+                                    function updateTotalPrice(amount) {
+                                        const totalPriceElement = document.getElementById('totalPrice');
+                                        const currentTotal = parseFloat(totalPriceElement.textContent);
+                                        totalPriceElement.textContent = (currentTotal + amount).toFixed(2);
+                                    }
+
+                                    // Save cart details via POST request
+                                    function saveCart(name, price, quantity, categoryId) {
+                                        const formData = new FormData();
+                                        formData.append('productName', name);
+                                        formData.append('productPrice', price);
+                                        formData.append('productQuantity', quantity);
+                                        formData.append('category_id', categoryId);
+
+                                        fetch('/add-to-cart', {
+                                            method: 'POST',
+                                            body: formData
+                                        })
+                                            .then(response => response.json())
+                                            .then(data => console.log('Cart updated:', data))
+                                            .catch(error => console.error('Error updating cart:', error));
+                                    }
+
+                                    // Clear input fields after adding product
+                                    function clearInputFields() {
+                                        document.getElementById('productName').value = '';
+                                        document.getElementById('productPrice').value = '';
+                                        document.getElementById('productQuantity').value = 1;
+                                        document.getElementById('category_id').value = '';
+                                    }
+                                </script>
+
     <script>
             // Simulate barcode scanning
             scanBarcodeBtn.addEventListener('click', function() {

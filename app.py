@@ -494,9 +494,6 @@ def inventory():
         # You can handle POST requests for adding or updating products here
         pass
 
-        
-
-
 @app.route('/new_product', methods=['GET', 'POST'])
 def new_product():
     if request.method == 'GET':
@@ -515,11 +512,6 @@ def new_product():
         if not user_store:
             flash("No store associated with this user. Please join or create a store first.", "danger")
             return redirect(url_for('add_store_form'))
-
-        # Ensure the user has permission to add products (e.g., Store Manager role)
-        # if user_store.role_name not in ['Store Manager']:
-        #     flash("You do not have permission to add products to this store.", "danger")
-        #     return redirect(url_for('dashboard'))
 
         # Fetch form data
         productCategory = request.form.get('productCategory')
@@ -604,37 +596,124 @@ def suggest_products():
         Product.name.ilike(f"%{query}%")
     ).limit(5).all()
 
-    # Return product name, selling price, and stock
-    suggestions = [
-        {"name": product.name, "selling_price": product.selling_price, "stock": product.stock}
-        for product in products
-    ]
-
+# Prepare the suggestions list to include product details
+    suggestions = []
+    for product in products:
+        suggestions.append({
+            "name": product.name,  # Product name
+            "selling_price": product.selling_price,  # Selling price of the product
+            "stock": product.stock,  # Available stock
+            "category_id": product.category_id  # Associated category ID
+        })
     return jsonify({"suggestions": suggestions})
 
     
-@app.route('/new_sale', methods=['GET', 'POST'])
-def new_sale():
-    if request.method == 'GET':
-        if 'email' not in session:
-            return "Please log in to access this page.", 401
+# @app.route('/new_sale', methods=['GET', 'POST'])
+# def new_sale():
+#     if request.method == 'GET':
+#         if 'email' not in session:
+#             return "Please log in to access this page.", 401
 
-        # Fetch the current logged-in user
-        current_user = User.query.filter_by(email=session.get('email')).first()
-        if not current_user:
-            return "User not found.", 404
+#         # Fetch the current logged-in user
+#         current_user = User.query.filter_by(email=session.get('email')).first()
+#         if not current_user:
+#             return "User not found.", 404
 
-        # Fetch the store associated with the user
-        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-        if not user_store:
-            return "No store associated with this user.", 404
+#         # Fetch the store associated with the user
+#         user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+#         if not user_store:
+#             return "No store associated with this user.", 404
 
-        # Fetch the store details
-        store = Store.query.filter_by(id=user_store.store_id).first()
-        if not store:
-            return "Store not found.", 404
+#         # Fetch the store details
+#         store = Store.query.filter_by(id=user_store.store_id).first()
+#         if not store:
+#             return "Store not found.", 404
 
-        return render_template('new_sale.html', store_id=store.id)
+#         return render_template('new_sale.html', store_id=store.id)
+    
+# @app.route('/add-to-cart', methods=['POST'])
+# def add_to_cart():
+#     # Retrieve the cart from session
+#     cart = session.get('cart', [])
+
+#     try:
+#         product_name = request.form['productName']
+#         product_price = float(request.form['productPrice'])
+#         product_quantity = int(request.form['productQuantity'])
+#         category_id = int(request.form['category_id'])  # Ensure frontend matches this ke
+
+#         # Check if the product is already in the cart
+#         for item in cart:
+#             if item['name'] == product_name:
+#                 # If the product is already in the cart, update the quantity
+#                 item['quantity'] += product_quantity
+#                 break
+#         else:
+#             # If the product is not in the cart, add it
+#             cart.append({
+#                 'name': product_name,
+#                 'price': product_price,
+#                 'quantity': product_quantity,
+#                 'catagory_id': category_id
+#             })
+
+#         # Save the updated cart back to the session
+#         session['cart'] = cart
+
+#         return redirect(url_for('inventory'))
+    
+#     except KeyError as e:
+#         return jsonify({'success': False, 'message': f'Missing key: {str(e)}'}), 400
+#     except ValueError as e:
+#         return jsonify({'success': False, 'message': f'Invalid data: {str(e)}'}), 400# Get the product data from the form
+    
+# @app.route('/clear-cart', methods=['POST'])
+# def clear_cart():
+#     try:
+#         # Assuming you store the cart in a session
+#         session['cart'] = []  # Reset the cart to an empty list
+#         return jsonify({'success': True, 'message': 'Cart has been cleared!'}), 200
+#     except Exception as e:
+#         return jsonify({'success': False, 'message': f'Error clearing cart: {str(e)}'}), 500
+
+
+
+# @app.route('/checkout', methods=['GET', 'POST'])
+# def checkout():
+#     # Retrieve the cart from the session
+#     cart = session.get('cart', [])
+
+#     if request.method == 'POST':
+#         store_id = request.args.get('store_id', type=int)
+        
+#         if not store_id:
+#             flash("Store ID missing!", "danger")
+#             return redirect(url_for('new_sale'))
+
+#         # Process the checkout (Update stock)
+#         for item in cart:
+#             product_name = item['name']
+#             catagory_id = item['catagory_id']
+#             quantity = item['quantity']
+            
+#             # Fetch the product from the database and update stock
+#             sell_product =  Product.query.filter_by(name=product_name, category_id=catagory_id).first()
+
+#             if sell_product:
+#                 # Update stock
+#                 sell_product.stock -= int(quantity)
+#                 db.session.commit()  # Commit to reflect the changes in the database
+#                 flash(f"Stock updated for {product_name}!", "success")
+#             else:
+#                 flash(f"Product {product_name} not found.", "danger")
+
+#         # Clear the cart after checkout
+#         session['cart'] = []
+
+#         return redirect(url_for('inventory'))  # Redirect to a thank you page or order confirmation page
+
+#     return render_template('checkout.html', cart=cart)
+
 
 
 @app.route('/6007')
@@ -731,38 +810,22 @@ def make_user_role(user_id):
 def delete_user(user_id):
     if 'user' not in session:
         return redirect(url_for('login'))
-    
-    email = session['email']
-    user = User.query.filter_by(email=email).first()
 
-    if user.role_name.lower() != 'user':
+    current_user = User.query.filter_by(email=session['email']).first()
+
+    if current_user.role_name.lower() != 'user':  # Only admins can delete users
         user = User.query.get(user_id)
         if not user:
             flash("User not found.")
             return redirect(url_for('view_users'))
 
         try:
-            # Step 1: Check the role of the user in each store before deleting
-            for store in user.stores:
-                # Query the user-store association to check the role of the user for this store
-                association = db.session.query(UserStore).filter_by(user_id=user.id, store_id=store.id).first()
-                
-                if association and association.role == 'Owner':
-                    # Remove the user from the store's user list
-                    store.users.remove(user)
+            # Delete UserStore associations explicitly
+            associations = UserStore.query.filter_by(user_id=user.id).all()
+            for association in associations:
+                db.session.delete(association)
 
-                    # Step 2: Delete related categories and products for stores owned by the user
-                    for category in store.categories:
-                        # Delete related products
-                        for product in category.products:
-                            db.session.delete(product)
-                        # Then delete the category itself
-                        db.session.delete(category)
-
-                    # Delete the store only if the user is the owner
-                    db.session.delete(store)
-
-            # Step 3: Finally, delete the user
+            # Delete the user
             db.session.delete(user)
             db.session.commit()
             flash("User and associated data deleted successfully.")
@@ -784,29 +847,34 @@ def delete_store(store_id):
     email = session['email']
     user = User.query.filter_by(email=email).first()
 
+    # Ensure the user is authorized
     if user.role_name.lower() != 'user':
-    
         store = Store.query.get(store_id)
         if store:
             try:
-                # Step 1: Delete related products
+                # Step 1: Delete associated UserStore entries
+                user_store_associations = UserStore.query.filter_by(store_id=store.id).all()
+                for association in user_store_associations:
+                    db.session.delete(association)
+
+                # Step 2: Delete related categories and products
                 for category in store.categories:
                     for product in category.products:
                         db.session.delete(product)
-                    # Step 2: Delete categories
                     db.session.delete(category)
                 
-                # Step 3: Finally, delete the store
+                # Step 3: Delete the store
                 db.session.delete(store)
                 db.session.commit()
-                flash('Store and related products and categories deleted successfully', 'success')
+
+                flash('Store and its related data deleted successfully', 'success')
             except Exception as e:
                 db.session.rollback()
                 flash(f"An error occurred while deleting the store: {e}", 'error')
         else:
             flash('Store not found', 'error')
         
-        return redirect(url_for('view_users'))
+        return redirect(url_for('view_users'))  # Adjust redirect as necessary
     else:
         return "You are not authorized to perform this action.", 403
 
