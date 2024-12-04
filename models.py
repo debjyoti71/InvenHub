@@ -46,15 +46,17 @@ class Store(db.Model):
     unique_code = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
     categories = db.relationship('Category', backref='store', lazy=True, cascade='all, delete-orphan')
 
-# Category model
 class Category(db.Model):
+    __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True)
     category_name = db.Column(db.String(50), nullable=False)
     store_id = db.Column(db.Integer, db.ForeignKey('store.id'), nullable=False)
+    C_unique_id = db.Column(db.String(20), unique=True, nullable=False)
     products = db.relationship('Product', backref='category', lazy=True, cascade='all, delete-orphan')
 
-# Product model
+
 class Product(db.Model):
+    __tablename__ = 'product'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     manufacture_date = db.Column(db.Date, nullable=True)
@@ -62,8 +64,10 @@ class Product(db.Model):
     cost_price = db.Column(db.Float, nullable=False)
     selling_price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)  # ForeignKey referencing category.id
+    P_unique_id = db.Column(db.String(20), unique=True, nullable=False)
     sales = db.relationship('Sale', backref='product', lazy=True, cascade='all, delete-orphan')
+
 
 # Sales model
 class Sale(db.Model):

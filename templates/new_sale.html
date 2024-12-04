@@ -260,236 +260,227 @@ var(--950);
                                     </div>
                                     <div class="product-fields">
                                         <div class="mb-3">
-                                            <input 
-                                                type="text" 
-                                                id="productName" 
-                                                class="form-control" 
-                                                name="productName" 
-                                                placeholder="Product Name" 
-                                                autocomplete="off" 
-                                                oninput="fetchSuggestions(this.value)">
-                                            <ul id="suggestions" class="list-group" style="display: none;"></ul>
+                                            <label for="productName" class="form-label">Product Name</label>
+                                            <input type="text" class="form-control" name="productName" id="productName" required autocomplete="off">
+                                            <ul id="productSuggestions" class="list-group mt-2" style="display: none;"></ul>
                                         </div>
                                         <div class="mb-3">
-                                            <input 
-                                                type="number" 
-                                                id="productPrice" 
-                                                class="form-control" 
-                                                name="Price" 
-                                                placeholder="Price" 
-                                                readonly>
+                                            <label for="productSellingPrice" class="form-label">Price</label>
+                                            <input type="number" class="form-control" name="productSellingPrice" id="productSellingPrice" step="0.01" required>
                                         </div>
                                         <div class="mb-3">
-                                            <input type="hidden" id="category_id" name="category_id">
+                                            <input type="hidden" id="productId">
                                         </div>
                                         <div class="mb-3">
-                                            <input 
-                                                type="number" 
-                                                id="productQuantity" 
-                                                class="form-control" 
-                                                name="quantity" 
-                                                placeholder="No. of Items" 
-                                                value="1" 
-                                                oninput="validateQuantity()">
+                                            <label for="productQuantity" class="form-label">Quantity</label>
+                                            <input type="number" class="form-control" name="quantity" placeholder="No. of Items" id="productQuantity" oninput="validateQuantity()">
                                         </div>
+                                        <input type="hidden" id="productManufactureDate">
+                                        <input type="hidden" id="productExpiryDate">
+                                    </div>
+                                    <!-- Save Product and Reset Button -->
+                                    <div class="text-center">
+                                        <button type="button" class="btn btn-success" id="saveProductButton">Save Product</button>
                                     </div>
                                     <div class="text-center d-flex justify-content-center align-items-center">
                                         <a href="/checkout">
                                             <button type="button" class="btn-44"><span>Proceed to Checkout</span></button>
                                         </a>
                                     </div>
+                                    
                                     <div class="text-center">
                                         <button type="submit" class="proceed-btn" hidden></button>
                                     </div>
-                                </div>
-
-                                <!-- Added Products Section -->
-                                <div class="col">
-                                    <div class="row" style="height: auto;">
-                                        <div class="col-11">
-                                            <h1 class="section-title">Added Products</h1>
-                                            <table class="table table-striped" id="productTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Product Name</th>
-                                                        <th>Price</th>
-                                                        <th>Quantity</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
-                                            <table class="table table-striped" id="checkoutTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Total Price</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td id="totalPrice">0</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                    
+                                    <!-- Added Products Section -->
+                                    <div class="col">
+                                        <div class="row" style="height: auto;">
+                                            <div class="col-11">
+                                                <h1 class="section-title">Added Products</h1>
+                                                <table class="table table-striped" id="productTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Product Name</th>
+                                                            <th>Price</th>
+                                                            <th>Quantity</th>
+                                                            <th>Total Price</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                                <table class="table table-striped" id="checkoutTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Total Price</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="totalPrice">0</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <script>
-                                    // Fetch product suggestions based on user input
-                                    function fetchSuggestions(query) {
-                                        const storeId = {{ store_id }}; // Store ID passed from Flask
-
-                                        if (query.length < 2) {
-                                            hideSuggestions();
-                                            return;
+                                    
+                                    <script>
+                                        let productStock = 0; 
+                                        let selectedProduct = {};
+                                    
+                                        // Fetch product suggestions based on user input
+                                        function fetchProductSuggestions(query) {
+                                            const storeId = {{ store_id }}; 
+                                    
+                                            if (query.length < 2) {
+                                                hideSuggestions(); 
+                                                return;
+                                            }
+                                    
+                                            fetch(`/suggest-products?query=${query}&store_id=${storeId}`)
+                                                .then(response => response.json())
+                                                .then(data => displayProductSuggestions(data.suggestions))
+                                                .catch(error => console.error('Error fetching product suggestions:', error));
                                         }
-
-                                        fetch(`/suggest-products?query=${query}&store_id=${storeId}`)
-                                            .then(response => response.json())
-                                            .then(data => displaySuggestions(data.suggestions))
-                                            .catch(error => console.error('Error fetching suggestions:', error));
-                                    }
-
-                                    // Display product suggestions in the suggestion list
-                                    function displaySuggestions(suggestions) {
-                                        const suggestionsList = document.getElementById('suggestions');
-                                        suggestionsList.innerHTML = ''; // Clear previous suggestions
-                                        suggestionsList.style.display = 'block'; // Show suggestions list
-
-                                        suggestions.forEach(product => {
-                                            const item = document.createElement('li');
-                                            item.className = 'list-group-item suggestion-item';
-                                            item.textContent = product.name; // Display product name
-                                            item.onclick = () => selectProduct(product);
-                                            suggestionsList.appendChild(item);
+                                    
+                                        function displayProductSuggestions(suggestions) {
+                                            const suggestionsList = document.getElementById('productSuggestions');
+                                            suggestionsList.innerHTML = ''; 
+                                            suggestionsList.style.display = 'block'; 
+                                    
+                                            if (suggestions.length > 0) {
+                                                suggestions.forEach(product => {
+                                                    const item = document.createElement('li');
+                                                    item.className = 'list-group-item suggestion-item';
+                                                    item.textContent = `${product.name} - ${product.selling_price} (Stock: ${product.stock})`; 
+                                                    item.onclick = () => selectProduct(product); 
+                                                    suggestionsList.appendChild(item);
+                                                });
+                                            } else {
+                                                const noResultsItem = document.createElement('li');
+                                                noResultsItem.className = 'list-group-item';
+                                                noResultsItem.textContent = 'No products found';
+                                                suggestionsList.appendChild(noResultsItem);
+                                            }
+                                        }
+                                    
+                                        function hideSuggestions() {
+                                            const suggestionsList = document.getElementById('productSuggestions');
+                                            suggestionsList.style.display = 'none';
+                                        }
+                                    
+                                        function selectProduct(product) {
+                                            document.getElementById('productName').value = product.name;
+                                            document.getElementById('productSellingPrice').value = product.selling_price; 
+                                            document.getElementById('productQuantity').value = 1; 
+                                            document.getElementById('productId').value = product.product_id; 
+                                            document.getElementById('productManufactureDate').value = product.manufacture_date;
+                                            document.getElementById('productExpiryDate').value = product.expiry_date; 
+                                    
+                                            productStock = product.stock;
+                                            selectedProduct = product; 
+                                    
+                                            hideSuggestions(); 
+                                        }
+                                    
+                                        function validateQuantity() {
+                                            const quantity = document.getElementById('productQuantity').value; 
+                                    
+                                            if (quantity > productStock) {
+                                                alert(`You cannot order more than ${productStock} items. Please adjust the quantity.`);
+                                                document.getElementById('productQuantity').value = productStock; 
+                                            }
+                                        }
+                                    
+                                        function updateTable() {
+                                            const quantity = parseInt(document.getElementById('productQuantity').value); 
+                                            const totalPrice = quantity * selectedProduct.selling_price;
+                                    
+                                            let row = document.querySelector(`#productTable tbody tr[data-product-id='${selectedProduct.product_id}']`);
+                                    
+                                            if (row) {
+                                                row.querySelector('.product-quantity').textContent = quantity;
+                                                row.querySelector('.product-total-price').textContent = totalPrice.toFixed(2);
+                                            } else {
+                                                const newRow = document.createElement('tr');
+                                                newRow.setAttribute('data-product-id', selectedProduct.product_id);
+                                    
+                                                newRow.innerHTML = `
+                                                    <td>${selectedProduct.name}</td>
+                                                    <td>${selectedProduct.selling_price}</td>
+                                                    <td class="product-quantity">${quantity}</td>
+                                                    <td class="product-total-price">${totalPrice.toFixed(2)}</td>
+                                                `;
+                                    
+                                                document.querySelector('#productTable tbody').appendChild(newRow);
+                                            }
+                                    
+                                            updateTotalPrice();
+                                        }
+                                    
+                                        function updateTotalPrice() {
+                                            let total = 0;
+                                    
+                                            const rows = document.querySelectorAll('#productTable tbody tr');
+                                            rows.forEach(row => {
+                                                const totalPrice = parseFloat(row.querySelector('.product-total-price').textContent);
+                                                total += totalPrice;
+                                            });
+                                    
+                                            document.getElementById('totalPrice').textContent = total.toFixed(2);
+                                        }
+                                    
+                                        document.getElementById('productName').addEventListener('input', function() {
+                                            const query = this.value.trim(); 
+                                            fetchProductSuggestions(query); 
                                         });
-                                    }
-
-                                    // Hide the suggestions list
-                                    function hideSuggestions() {
-                                        const suggestionsList = document.getElementById('suggestions');
-                                        suggestionsList.style.display = 'none';
-                                    }
-
-                                    // Handle product selection from the suggestion list
-                                    function selectProduct(product) {
-                                        document.getElementById('productName').value = product.name;
-                                        document.getElementById('productPrice').value = product.selling_price;
-                                        document.getElementById('productQuantity').value = 1; // Default quantity
-                                        document.getElementById('category_id').value = product.category_id;
-
-                                        // Store the product stock in a custom data attribute
-                                        document.getElementById('productName').setAttribute('data-stock', product.stock);
-
-                                        hideSuggestions(); // Hide suggestions after selection
-                                    }
-
-                                    // Validate product quantity to ensure it doesn't exceed available stock
-                                    function validateQuantity() {
-                                        const productQuantity = parseInt(document.getElementById('productQuantity').value, 10);
-                                        const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'), 10);
-
-                                        if (productQuantity > productStock) {
-                                            alert('Quantity exceeds available stock!');
-                                            document.getElementById('productQuantity').value = productStock; // Set to max available stock
-                                        }
-                                    }
-
-                                    // Handle Enter key press to update the product table
-                                    document.addEventListener('keydown', function (event) {
-                                        if (event.key === 'Enter') {
-                                            event.preventDefault(); // Prevent default form submission
-
-                                            const productName = document.getElementById('productName').value.trim();
-                                            const productPrice = parseFloat(document.getElementById('productPrice').value);
-                                            const productQuantity = parseInt(document.getElementById('productQuantity').value, 10);
-                                            const categoryId = document.getElementById('category_id').value;
-
-                                            if (!validateInputs(productName, productPrice, productQuantity)) {
+                                    
+                                        document.getElementById('productQuantity').addEventListener('input', function() {
+                                            validateQuantity(); 
+                                            updateTable(); 
+                                        });
+                                    
+                                        document.getElementById('saveProductButton').addEventListener('click', function() {
+                                            if (!selectedProduct.product_id) {
+                                                alert('Please select a product first.');
                                                 return;
                                             }
-
-                                            updateProductTable(productName, productPrice, productQuantity, categoryId);
-                                            clearInputFields();
-                                        }
-                                    });
-
-                                    // Validate product input details
-                                    function validateInputs(name, price, quantity) {
-                                        if (!name || isNaN(price) || isNaN(quantity)) {
-                                            alert('Please fill in valid product details.');
-                                            return false;
-                                        }
-
-                                        const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'), 10);
-                                        if (quantity > productStock) {
-                                            alert('Quantity exceeds available stock!');
-                                            return false;
-                                        }
-
-                                        return true;
-                                    }
-
-                                    // Update the product table with the selected product details
-                                    function updateProductTable(name, price, quantity, categoryId) {
-                                        const tableBody = document.getElementById('productTable').getElementsByTagName('tbody')[0];
-                                        const existingRow = Array.from(tableBody.rows).find(row => row.cells[0].textContent === name);
-
-                                        if (existingRow) {
-                                            const existingQuantity = parseInt(existingRow.cells[2].textContent, 10);
-                                            const updatedQuantity = existingQuantity + quantity;
-                                            const productStock = parseInt(document.getElementById('productName').getAttribute('data-stock'), 10);
-
-                                            if (updatedQuantity > productStock) {
-                                                alert('Quantity exceeds available stock!');
-                                                return;
-                                            }
-
-                                            existingRow.cells[2].textContent = updatedQuantity;
-                                        } else {
-                                            const row = tableBody.insertRow();
-                                            row.insertCell(0).textContent = name;
-                                            row.insertCell(1).textContent = price.toFixed(2);
-                                            row.insertCell(2).textContent = quantity;
-                                        }
-
-                                        updateTotalPrice(price * quantity);
-                                        saveCart(name, price, quantity, categoryId);
-                                    }
-
-                                    // Update the total price
-                                    function updateTotalPrice(amount) {
-                                        const totalPriceElement = document.getElementById('totalPrice');
-                                        const currentTotal = parseFloat(totalPriceElement.textContent);
-                                        totalPriceElement.textContent = (currentTotal + amount).toFixed(2);
-                                    }
-
-                                    // Save cart details via POST request
-                                    function saveCart(name, price, quantity, categoryId) {
-                                        const formData = new FormData();
-                                        formData.append('productName', name);
-                                        formData.append('productPrice', price);
-                                        formData.append('productQuantity', quantity);
-                                        formData.append('category_id', categoryId);
-
-                                        fetch('/add-to-cart', {
-                                            method: 'POST',
-                                            body: formData
-                                        })
+                                    
+                                            updateTable();
+                                    
+                                            const cartData = {
+                                                productId: selectedProduct.product_id,
+                                                productName: selectedProduct.name,
+                                                productSellingPrice: selectedProduct.selling_price,
+                                                quantity: parseInt(document.getElementById('productQuantity').value),
+                                                totalPrice: parseInt(document.getElementById('productQuantity').value) * selectedProduct.selling_price
+                                            };
+                                    
+                                            fetch('/add-to-cart', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify(cartData)
+                                            })
                                             .then(response => response.json())
-                                            .then(data => console.log('Cart updated:', data))
-                                            .catch(error => console.error('Error updating cart:', error));
-                                    }
-
-                                    // Clear input fields after adding product
-                                    function clearInputFields() {
-                                        document.getElementById('productName').value = '';
-                                        document.getElementById('productPrice').value = '';
-                                        document.getElementById('productQuantity').value = 1;
-                                        document.getElementById('category_id').value = '';
-                                    }
-                                </script>
-
+                                            .then(data => {
+                                                console.log('Cart data saved successfully:', data);
+                                            })
+                                            .catch(error => console.error('Error saving cart data:', error));
+                                    
+                                            document.getElementById('productName').value = '';
+                                            document.getElementById('productSellingPrice').value = '';
+                                            document.getElementById('productQuantity').value = 1;
+                                            document.getElementById('productId').value = '';
+                                            document.getElementById('productManufactureDate').value = '';
+                                            document.getElementById('productExpiryDate').value = '';
+                                    
+                                            selectedProduct = {};
+                                            productStock = 0;
+                                        });
+                                    </script>
+                               
     <script>
             // Simulate barcode scanning
             scanBarcodeBtn.addEventListener('click', function() {

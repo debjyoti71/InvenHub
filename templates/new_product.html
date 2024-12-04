@@ -132,24 +132,35 @@
                             <form id="addProductForm" action="/new_product" method="POST">
                                 <div class="mb-3">
                                     <label for="productCategory" class="form-label">Category</label>
-                                    <input type="text" class="form-control" name="productCategory" id="productCategory" required>
+                                    <input type="text" class="form-control" name="productCategory" id="productCategory" required autocomplete="off">
+                                    <ul id="categorySuggestions" class="list-group mt-2" style="display: none;"></ul>
                                 </div>
                                 <div class="mb-3">
                                     <label for="productName" class="form-label">Product Name</label>
-                                    <input type="text" class="form-control" name="productName" id="productName" required>
+                                    <input type="text" class="form-control" name="productName" id="productName" required autocomplete="off">
+                                    <ul id="productSuggestions" class="list-group mt-2" style="display: none;"></ul>
                                 </div>
+                                
                                 <div class="mb-3">
                                     <label for="productPrice" class="form-label">Cost Price</label>
                                     <input type="number" class="form-control" name="productPrice" id="productPrice" step="0.01" required>
                                 </div>
+                                
                                 <div class="mb-3">
                                     <label for="productQuantity" class="form-label">Quantity</label>
                                     <input type="number" class="form-control" name="productQuantity" id="productQuantity" required>
                                 </div>
+                                
                                 <div class="mb-3">
                                     <label for="productSellingPrice" class="form-label">Selling Price</label>
                                     <input type="number" class="form-control" name="productSellingPrice" id="productSellingPrice" step="0.01" required>
                                 </div>
+                                
+                                <!-- Hidden fields to store additional product details -->
+                                <input type="hidden" id="productId">
+                                <input type="hidden" id="productManufactureDate">
+                                <input type="hidden" id="productExpiryDate">
+                                                                   
                                 <button type="submit" class="btn btn-primary">Add Product</button>
                                 <button type="button" class="btn btn-secondary" onclick="goBack()">Cancel</button>
                             </form>
@@ -160,6 +171,135 @@
                     <img src="/static/images/undraw_add_tasks_re_s5yj.svg" alt="" style="height: 60%; width: 90%; margin-top: 10%;">
                 </div>
             </div>
+            <script>
+                // Function to fetch category suggestions based on user input
+                function fetchCategorySuggestions(query) {
+                    const storeId = {{ store_id }}; // Store ID passed from Flask
+            
+                    if (query.length < 2) {
+                        hideCategorySuggestions(); // Hide suggestions if query length is less than 2
+                        return;
+                    }
+            
+                    // Fetch category suggestions from the server
+                    fetch(`/suggest-categories?query=${query}&store_id=${storeId}`)
+                        .then(response => response.json())
+                        .then(data => displayCategorySuggestions(data.suggestions))
+                        .catch(error => console.error('Error fetching category suggestions:', error));
+                }
+            
+                // Function to display fetched category suggestions
+                function displayCategorySuggestions(suggestions) {
+                    const suggestionsList = document.getElementById('categorySuggestions');
+                    suggestionsList.innerHTML = ''; // Clear previous suggestions
+                    suggestionsList.style.display = 'block'; // Show suggestions list
+            
+                    if (suggestions.length > 0) {
+                        suggestions.forEach(category => {
+                            const item = document.createElement('li');
+                            item.className = 'list-group-item suggestion-item';
+                            item.textContent = category.name; // Display category name
+            
+                            // Optionally, display more info about the category, like product count
+                            // item.textContent = `${category.name} - ${category.product_count} products`; // Example of adding more info
+            
+                            item.onclick = () => selectCategory(category); // Set click handler for selecting a category
+                            suggestionsList.appendChild(item);
+                        });
+                    } else {
+                        const noResultsItem = document.createElement('li');
+                        noResultsItem.className = 'list-group-item';
+                        noResultsItem.textContent = 'No categories found';
+                        suggestionsList.appendChild(noResultsItem);
+                    }
+                }
+            
+                // Function to hide the suggestions list
+                function hideCategorySuggestions() {
+                    const suggestionsList = document.getElementById('categorySuggestions');
+                    suggestionsList.style.display = 'none';
+                }
+            
+                // Handle category selection from the suggestion list
+                function selectCategory(category) {
+                    document.getElementById('productCategory').value = category.name; // Set input field to selected category
+                    hideCategorySuggestions(); // Hide suggestions after selection
+                }
+            
+                // Listen for input events on the category input field
+                document.getElementById('productCategory').addEventListener('input', function() {
+                    const query = this.value.trim(); // Get the query from the input field
+                    fetchCategorySuggestions(query); // Fetch suggestions based on the query
+                });
+            </script>
+            
+            <script>
+                // Function to fetch product suggestions based on user input
+                function fetchProductSuggestions(query) {
+                    const storeId = {{ store_id }}; // Store ID passed from Flask
+            
+                    if (query.length < 2) {
+                        hideSuggestions(); // Hide suggestions if query length is less than 2
+                        return;
+                    }
+            
+                    // Fetch product suggestions from the server
+                    fetch(`/suggest-products?query=${query}&store_id=${storeId}`)
+                        .then(response => response.json())
+                        .then(data => displayProductSuggestions(data.suggestions))
+                        .catch(error => console.error('Error fetching product suggestions:', error));
+                }
+            
+                // Function to display fetched product suggestions
+                function displayProductSuggestions(suggestions) {
+                    const suggestionsList = document.getElementById('productSuggestions');
+                    suggestionsList.innerHTML = ''; // Clear previous suggestions
+                    suggestionsList.style.display = 'block'; // Show suggestions list
+            
+                    if (suggestions.length > 0) {
+                        suggestions.forEach(product => {
+                            const item = document.createElement('li');
+                            item.className = 'list-group-item suggestion-item';
+                            item.textContent = `${product.name} - ${product.selling_price} (Stock: ${product.stock})`; // Display product details
+                            item.onclick = () => selectProduct(product); // Set click handler for selecting a product
+                            suggestionsList.appendChild(item);
+                        });
+                    } else {
+                        const noResultsItem = document.createElement('li');
+                        noResultsItem.className = 'list-group-item';
+                        noResultsItem.textContent = 'No products found';
+                        suggestionsList.appendChild(noResultsItem);
+                    }
+                }
+            
+                // Function to hide the suggestions list
+                function hideSuggestions() {
+                    const suggestionsList = document.getElementById('productSuggestions');
+                    suggestionsList.style.display = 'none';
+                }
+            
+                // Handle product selection from the suggestion list
+                function selectProduct(product) {
+                    // Set input fields to selected product's values
+                    document.getElementById('productName').value = product.name;
+                    document.getElementById('productPrice').value = product.cost_price; // Set cost price
+                    document.getElementById('productQuantity').value = 1; // Default quantity to 1
+                    document.getElementById('productSellingPrice').value = product.selling_price; // Set selling price
+            
+                    // Display product-specific data
+                    document.getElementById('productId').value = product.product_id; // Set product ID
+                    document.getElementById('productManufactureDate').value = product.manufacture_date; // Set manufacture date
+                    document.getElementById('productExpiryDate').value = product.expiry_date; // Set expiry date
+            
+                    hideSuggestions(); // Hide suggestions after selection
+                }
+            
+                // Listen for input events on the product name input field
+                document.getElementById('productName').addEventListener('input', function() {
+                    const query = this.value.trim(); // Get the query from the input field
+                    fetchProductSuggestions(query); // Fetch suggestions based on the query
+                });
+            </script>
             
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
                 integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"

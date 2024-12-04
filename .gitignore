@@ -9,3 +9,4 @@ tempCodeRunnerFile
 *.pyc
 migration
 instance
+db_changes.py

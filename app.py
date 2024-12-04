@@ -497,7 +497,10 @@ def inventory():
 @app.route('/new_product', methods=['GET', 'POST'])
 def new_product():
     if request.method == 'GET':
-        return render_template('new_product.html')
+        current_user = User.query.filter_by(email=session.get('email')).first()
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        store_id = user_store.store_id
+        return render_template('new_product.html',store_id=store_id)
 
     elif request.method == 'POST':
         # Fetch the current user based on session
@@ -529,6 +532,12 @@ def new_product():
                 db.session.add(category)
                 db.session.commit()
 
+                # Automatically set C_unique_id after creating the category
+                categories_in_store = Category.query.filter_by(store_id=user_store.store_id).all()
+                for i, cat in enumerate(categories_in_store, start=1):
+                    cat.C_unique_id = f"{cat.store_id}{i}"
+                db.session.commit()
+
             # Check if the product exists
             existing_product = Product.query.filter_by(name=product_name, category_id=category.id).first()
 
@@ -548,39 +557,17 @@ def new_product():
                     selling_price=float(productSellingPrice),
                     category_id=category.id,
                 )
+                
+                # Set P_unique_id before committing
+                products_in_category = Product.query.filter_by(category_id=category.id).all()
+                new_product.P_unique_id = f"{category.C_unique_id}{len(products_in_category) + 1}"
+
                 db.session.add(new_product)
                 db.session.commit()
+
                 flash("Product added successfully!", "success")
 
             return redirect(url_for('inventory'))
-        
-@app.route('/product-suggestions', methods=['GET'])
-def product_suggestions():
-    """
-    Render the product suggestion page with the user's associated store data and related product suggestions.
-    """
-    # Ensure the user is logged in
-    if 'email' not in session:
-        return "Please log in to access this page.", 401
-
-    # Fetch the current logged-in user
-    current_user = User.query.filter_by(email=session.get('email')).first()
-    if not current_user:
-        return "User not found.", 404
-
-    # Fetch the store associated with the user
-    user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-    if not user_store:
-        return "No store associated with this user.", 404
-
-    # Fetch the store details
-    store = Store.query.filter_by(id=user_store.store_id).first()
-    if not store:
-        return "Store not found.", 404
-
-    # Render the template and pass store_id and related products
-    return render_template('test.html', store_id=store.id)
-
 
 @app.route('/suggest-products', methods=['GET'])
 def suggest_products():
@@ -602,34 +589,47 @@ def suggest_products():
         suggestions.append({
             "name": product.name,  # Product name
             "selling_price": product.selling_price,  # Selling price of the product
+            "cost_price": product.cost_price,
             "stock": product.stock,  # Available stock
-            "category_id": product.category_id  # Associated category ID
+            "product_id": product.P_unique_id,
+            "manufacture_date":product.manufacture_date,
+            "expiry_date": product.expire_date
+
         })
     return jsonify({"suggestions": suggestions})
 
+@app.route('/suggest-categories', methods=['GET'])
+def suggest_categories():
+    query = request.args.get('query', '').strip()
+    store_id = request.args.get('store_id', type=int)
+
+    if not query or not store_id:
+        return jsonify({"suggestions": []})
+
+    # Fetch matching categories for the store
+    categories = Category.query.filter(
+        Category.store_id == store_id,
+        Category.category_name.ilike(f"%{query}%")  # Corrected this line
+    ).limit(5).all()
+
+    # Prepare the suggestions list to include category details
+    suggestions = []
+    for category in categories:
+        suggestions.append({
+            "name": category.category_name,  # Corrected this line
+            "category_id": category.id
+        })
+
+    return jsonify({"suggestions": suggestions})
     
-# @app.route('/new_sale', methods=['GET', 'POST'])
-# def new_sale():
-#     if request.method == 'GET':
-#         if 'email' not in session:
-#             return "Please log in to access this page.", 401
-
-#         # Fetch the current logged-in user
-#         current_user = User.query.filter_by(email=session.get('email')).first()
-#         if not current_user:
-#             return "User not found.", 404
-
-#         # Fetch the store associated with the user
-#         user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-#         if not user_store:
-#             return "No store associated with this user.", 404
-
-#         # Fetch the store details
-#         store = Store.query.filter_by(id=user_store.store_id).first()
-#         if not store:
-#             return "Store not found.", 404
-
-#         return render_template('new_sale.html', store_id=store.id)
+@app.route('/new_sale', methods=['GET', 'POST'])
+def new_sale():
+    if request.method == 'GET':
+        current_user = User.query.filter_by(email=session.get('email')).first()
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        store_id = user_store.store_id
+        return render_template('new_sale.html',store_id=store_id)
+        
     
 # @app.route('/add-to-cart', methods=['POST'])
 # def add_to_cart():
