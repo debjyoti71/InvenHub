@@ -76,7 +76,8 @@ class Transaction(db.Model):
     bill_number = db.Column(db.String(50), unique=True, nullable=False)  # This acts as the order/bill ID
     transaction_type = db.Column(db.String(50), nullable=False)  # Or use Python Enum
     payment_method = db.Column(db.String(50), nullable=True, default="cash")
-    sucess = db.Column(db.String(50), nullable=True, default="yes") #yes or no
+    total_selling_price=db.Column(db.Integer, nullable=True, default= 0)
+    success = db.Column(db.String(50), nullable=True, default="yes") #yes or no
 
     transaction_items = db.relationship('TransactionItem', backref='transaction', lazy=True, cascade='all, delete-orphan')
 

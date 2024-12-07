@@ -272,6 +272,7 @@ var(--950);
                                 <!-- Added Products Section -->
                                 <div class="mt-5">
                                     <h2 class="section-title">Added Products</h2>
+                                    <h2 class="section-title">Bill Number : {{transaction.bill_number}}</h2>
                                     <table class="table table-striped" id="productTable">
                                         <thead>
                                             <tr>
@@ -285,7 +286,12 @@ var(--950);
                                         </tbody>
                                     </table>
                                     <p class="text-end"><strong>Total Price: </strong><span id="totalPrice">0.00</span></p>
-                                    <button type="button" class="btn btn-primary" id="proceedToCheckout"  disabled>Proceed to Checkout</button>
+                                    <!-- <button type="button" class="btn btn-primary" id="proceedToCheckout"  disabled>Proceed to Checkout</button> -->
+                                    <div class="text-center d-flex justify-content-center align-items-center" id="proceedToCheckout" >
+                                        <a href="/checkout">
+                                            <button type="button" class="btn-44"><span>Proceed to Checkout</span></button>
+                                        </a>
+                                    </div>
                                 </div>
                                 
                             </form>

@@ -578,7 +578,7 @@ def new_product():
                 payment_method='cash',  # Assume cash for stock additions
                 total_selling_price=0,  # No selling price for stock additions
                 total_cost_price=float(productPrice) * int(productQuantity),  # Total cost price for the added stock
-                sucess = 'yes'
+                success = 'yes'
             )
 
             db.session.add(transaction)
@@ -674,27 +674,59 @@ def new_sale():
         session_transaction_id = session.get('transaction_id')
         transaction = None
         if session_transaction_id:
-            transaction = Transaction.query.get(session_transaction_id)
-            print(f"Found existing transaction with ID: {transaction.id}")
+            # Try to find an existing transaction with the session ID and success = "no"
+            transaction = Transaction.query.filter_by(id=session_transaction_id, success="no").first()
+            if transaction:
+                print(f"Found existing transaction with ID: {transaction.id}")
+            else:
+                # If no transaction found, check for other transactions with success="no"
+                transaction = Transaction.query.filter_by(success="no").first()
+                if transaction:
+                    print(f"Found existing transaction with no success: {transaction.id}")
+                else:
+                    print("No transaction found with success='no', creating a new one.")
+                    # Create a new transaction if none found
+                    new_transaction = Transaction(
+                        store_id=store_id,
+                        customer_name="System",  # Default customer name
+                        bill_number=f"SALE{str(uuid.uuid4())[:8]}",  # Unique bill number
+                        transaction_type="sale",  # Default to 'sale' transaction type
+                        total_selling_price=0,
+                        payment_method="cash",  # Default payment method
+                        success="no"  # Initially marked as unsuccessful
+                    )
+                    db.session.add(new_transaction)
+                    db.session.commit()
+
+                    # Store the transaction ID in the session
+                    session['transaction_id'] = new_transaction.id
+                    transaction = new_transaction
+                    print(f"Created new transaction with ID: {transaction.id}")
         else:
-            print("No transaction found, creating a new one.")
-            # Create a new transaction if no transaction is found in session
-            new_transaction = Transaction(
-                store_id=store_id,
-                customer_name="System",  # Default customer name
-                bill_number=f"SALE{str(uuid.uuid4())[:8]}",  # Unique bill number
-                transaction_type="sale",  # Default to 'sale' transaction type
-                payment_method="cash",  # Default payment method
-                success="no"  # Initially marked as unsuccessful
-            )
-            db.session.add(new_transaction)
-            db.session.commit()
+            print("No session transaction ID found, checking for other transactions with success='no'.")
+            transaction = Transaction.query.filter_by(success="no").first()
+            if transaction:
+                print(f"Found existing transaction with no success: {transaction.id}")
+            else:
+                print("No transaction found with success='no', creating a new one.")
+                # Create a new transaction if none found
+                new_transaction = Transaction(
+                    store_id=store_id,
+                    customer_name="System",  # Default customer name
+                    bill_number=f"SALE{str(uuid.uuid4())[:8]}",  # Unique bill number
+                    transaction_type="sale",  # Default to 'sale' transaction type
+                    total_selling_price=0,
+                    payment_method="cash",  # Default payment method
+                    success="no"  # Initially marked as unsuccessful
+                )
+                db.session.add(new_transaction)
+                db.session.commit()
 
-            # Store the transaction ID in the session
-            session['transaction_id'] = new_transaction.id
-            transaction = new_transaction
-            print(f"Created new transaction with ID: {transaction.id}")
-
+                # Store the transaction ID in the session
+                session['transaction_id'] = new_transaction.id
+                transaction = new_transaction
+                print(f"Created new transaction with ID: {transaction.id}")
+                
         return render_template('new_sale.html', store_id=store_id, transaction=transaction)
         # session['cart'] = cart_data
         # print(f"Cart data saved to session: {session.get('cart')}")
@@ -847,11 +879,17 @@ def checkout():
 
             # Update totals
             total_selling_price += transaction_item.total_price
-            total_cost_price += transaction_item.total_cost_price
+            total_cost_price += transaction_item.total_cost_price  # Corrected the typo here
+
+        # Ensure the transaction's total selling price is initialized if needed
+        if transaction.total_selling_price is None:
+            transaction.total_selling_price = 0  # Initialize if None
 
         # Update transaction totals and finalize
         transaction.payment_method = payment_method
-        transaction.sucess = "yes"  # Mark transaction as successful
+        transaction.total_selling_price += total_selling_price
+        transaction.success = "yes"  # Mark transaction as successful
+        print(f"{transaction.success=}, {transaction.total_selling_price=},{transaction.payment_method =}")
 
         db.session.commit()
 
