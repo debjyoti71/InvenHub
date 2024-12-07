@@ -726,7 +726,7 @@ def new_sale():
                 session['transaction_id'] = new_transaction.id
                 transaction = new_transaction
                 print(f"Created new transaction with ID: {transaction.id}")
-                
+
         return render_template('new_sale.html', store_id=store_id, transaction=transaction)
         # session['cart'] = cart_data
         # print(f"Cart data saved to session: {session.get('cart')}")
@@ -777,6 +777,8 @@ def new_sale():
 
         # Store selected products in the session (for use in checkout)
         session['cart'] = cart_data  # Save the cart dictionary in session
+        session['transaction_id'] = transaction.id # Get the transaction
+        print(f"transaction_id saved to session: {session.get('transaction_id')}")
         print(f"Cart data saved to session: {session.get('cart')}")
 
         # Redirect to checkout page
@@ -786,31 +788,25 @@ def new_sale():
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
+    current_user = User.query.filter_by(email=session.get('email')).first()
+    if not current_user:
+        flash("User not logged in. Please log in first.", "danger")
+        return redirect(url_for('login'))
+
+    user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+    if not user_store:
+        flash("No store associated with this user. Please join or create a store first.", "danger")
+        return redirect(url_for('add_store_form'))
+
     if request.method == 'GET':
-        print("GET request received on /checkout")
-        # Fetch the current user and associated store
-        current_user = User.query.filter_by(email=session.get('email')).first()
-        if not current_user:
-            flash("User not logged in. Please log in first.", "danger")
-            return redirect(url_for('login'))
-
-        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-        if not user_store:
-            flash("No store associated with this user. Please join or create a store first.", "danger")
-            return redirect(url_for('add_store_form'))
-
-        store_id = user_store.store_id
-
-        # Fetch the transaction from session
-        transaction = db.session.get(Transaction, session.get('transaction_id'))
+        # Retrieve transaction and cart data
+        transaction_id = session.get('transaction_id')
+        transaction = Transaction.query.get(transaction_id)
         if not transaction:
             flash("Transaction not found.", "danger")
             return redirect(url_for('new_sale'))
 
-        print(f"Transaction found for checkout: {transaction.id}")
-
-        # Retrieve cart from session
-        cart = session.get('cart', [])
+        cart = session.get('cart')
         if not cart:
             flash("Cart is empty.", "danger")
             return redirect(url_for('new_sale'))
@@ -829,9 +825,13 @@ def checkout():
                     'total_price': total_price,
                 })
 
-        print(f"Total selling price: {total_selling_price}")
-
-        return render_template('cart.html', store_id=store_id, transaction=transaction, products=products, total_selling_price=total_selling_price)
+        return render_template(
+            'cart.html',
+            store_id=user_store.store_id,
+            transaction=transaction,
+            products=products,
+            total_selling_price=total_selling_price,
+        )
 
     elif request.method == 'POST':
         # Handle payment confirmation as before
@@ -885,18 +885,29 @@ def checkout():
         if transaction.total_selling_price is None:
             transaction.total_selling_price = 0  # Initialize if None
 
-        # Update transaction totals and finalize
+        transaction = Transaction.query.get(session.get('transaction_id'))
+        if not transaction:
+            flash("Transaction not found.", "danger")
+            print("Transaction not found.", "danger")
+            return redirect(url_for('new_sale'))
+
+        # Update transaction fields
         transaction.payment_method = payment_method
         transaction.total_selling_price += total_selling_price
-        transaction.success = "yes"  # Mark transaction as successful
-        print(f"{transaction.success=}, {transaction.total_selling_price=},{transaction.payment_method =}")
+        transaction.success = "yes"  # Ensure this is updated
 
-        db.session.commit()
+        # Commit the changes to the database
+        try:
+            db.session.commit()
+            flash("Transaction completed successfully.", "success")
+        except Exception as e:
+            db.session.rollback()  # Rollback if something goes wrong
+            flash(f"An error occurred: {e}", "danger")
 
         # Clear the cart session data
         session.pop('cart', None)
 
-        flash("Transaction completed successfully.", "success")
+        # Redirect to dashboard
         return redirect(url_for('dashboard'))
 
 @app.route('/6007')
