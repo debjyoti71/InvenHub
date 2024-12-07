@@ -54,26 +54,42 @@ class Category(db.Model):
     C_unique_id = db.Column(db.String(20), unique=True, nullable=False)
     products = db.relationship('Product', backref='category', lazy=True, cascade='all, delete-orphan')
 
-
 class Product(db.Model):
     __tablename__ = 'product'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False, index=True)
     manufacture_date = db.Column(db.Date, nullable=True)
     expire_date = db.Column(db.Date, nullable=True)
-    cost_price = db.Column(db.Float, nullable=False)
-    selling_price = db.Column(db.Float, nullable=False)
+    cost_price = db.Column(db.Integer, nullable=False)
+    selling_price = db.Column(db.Integer, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)  # ForeignKey referencing category.id
-    P_unique_id = db.Column(db.String(20), unique=True, nullable=False)
-    sales = db.relationship('Sale', backref='product', lazy=True, cascade='all, delete-orphan')
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False, index=True)
+    P_unique_id = db.Column(db.String(20), unique=True, index=True, nullable=False)
+    transaction_items = db.relationship('TransactionItem', backref=db.backref('products_in_transaction', lazy=True))
 
-
-# Sales model
-class Sale(db.Model):
+class Transaction(db.Model):
+    __tablename__ = 'transaction'
     id = db.Column(db.Integer, primary_key=True)
+    store_id = db.Column(db.Integer, db.ForeignKey('store.id'), nullable=False)
+    transaction_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    customer_name = db.Column(db.String(100), nullable=False)
+    bill_number = db.Column(db.String(50), unique=True, nullable=False)  # This acts as the order/bill ID
+    transaction_type = db.Column(db.String(50), nullable=False)  # Or use Python Enum
+    payment_method = db.Column(db.String(50), nullable=True, default="cash")
+    sucess = db.Column(db.String(50), nullable=True, default="yes") #yes or no
+
+    transaction_items = db.relationship('TransactionItem', backref='transaction', lazy=True, cascade='all, delete-orphan')
+
+
+class TransactionItem(db.Model):
+    __tablename__ = 'transaction_item'
+    id = db.Column(db.Integer, primary_key=True)
+    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=False)  # Use 'id' instead of 'bill_number'
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    sale_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
-    quantity_sold = db.Column(db.Integer, nullable=False)
-    total_price = db.Column(db.Float, nullable=False)
-    profit = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)  # Ensure quantity > 0 in application logic
+    selling_price = db.Column(db.Integer, nullable=False)
+    cost_price = db.Column(db.Integer, nullable=False)
+    total_price = db.Column(db.Integer, nullable=False)  # selling_price * quantity
+    total_cost_price = db.Column(db.Integer, nullable=False)  # cost_price * quantity
+
+

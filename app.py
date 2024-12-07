@@ -7,10 +7,11 @@ import random
 from dotenv import load_dotenv
 import os
 from config import Config  # Import your Config class
-from models import db, User, Store, Product, UserStore, Category, Sale
+from models import db, User, Store, Product, UserStore, Category, Transaction ,TransactionItem
 import csv 
 from datetime import datetime ,timedelta
 from flask_migrate import Migrate
+import uuid
 
 # Load environment variables from .env file
 load_dotenv()
@@ -500,7 +501,7 @@ def new_product():
         current_user = User.query.filter_by(email=session.get('email')).first()
         user_store = UserStore.query.filter_by(user_id=current_user.id).first()
         store_id = user_store.store_id
-        return render_template('new_product.html',store_id=store_id)
+        return render_template('new_product.html', store_id=store_id)
 
     elif request.method == 'POST':
         # Fetch the current user based on session
@@ -557,7 +558,7 @@ def new_product():
                     selling_price=float(productSellingPrice),
                     category_id=category.id,
                 )
-                
+
                 # Set P_unique_id before committing
                 products_in_category = Product.query.filter_by(category_id=category.id).all()
                 new_product.P_unique_id = f"{category.C_unique_id}{len(products_in_category) + 1}"
@@ -567,8 +568,39 @@ def new_product():
 
                 flash("Product added successfully!", "success")
 
-            return redirect(url_for('inventory'))
+            # Now, track the stock addition as a transaction (order)
+            # Add a new transaction (order) to represent this stock addition
+            transaction = Transaction(
+                store_id=user_store.store_id,  # Correct reference to the store ID
+                customer_name="System",  # No customer for stock addition
+                bill_number=f"ORD{str(uuid.uuid4())[:8]}",  # Unique order bill number
+                transaction_type='order',  # Set type as order
+                payment_method='cash',  # Assume cash for stock additions
+                total_selling_price=0,  # No selling price for stock additions
+                total_cost_price=float(productPrice) * int(productQuantity),  # Total cost price for the added stock
+                sucess = 'yes'
+            )
 
+            db.session.add(transaction)
+            db.session.commit()
+
+            # Create a transaction item to track this stock addition for the product
+            transaction_item = TransactionItem(
+            transaction_id=transaction.id,  # Correct reference to the transaction ID
+            product_id=(new_product.id if 'new_product' in locals() else existing_product.id),  # Conditional assignment for product ID
+            quantity=int(productQuantity),  # Quantity added to stock
+            selling_price=float(productSellingPrice),  # Selling price used for stock addition (for future sales)
+            cost_price=float(productPrice),  # Cost price used for stock addition
+            total_price=0,  # No selling price for stock additions
+            total_cost_price=float(productPrice) * int(productQuantity),  # Total cost price for this product
+            profit=0  # No profit for stock additions
+        )
+            db.session.add(transaction_item)
+            db.session.commit()
+
+            flash("Stock addition (order) tracked successfully!", "success")
+            return redirect(url_for('inventory'))
+        
 @app.route('/suggest-products', methods=['GET'])
 def suggest_products():
     query = request.args.get('query', '').strip()
@@ -621,100 +653,213 @@ def suggest_categories():
         })
 
     return jsonify({"suggestions": suggestions})
-    
+
 @app.route('/new_sale', methods=['GET', 'POST'])
 def new_sale():
     if request.method == 'GET':
+        # Fetch the current user and associated store
         current_user = User.query.filter_by(email=session.get('email')).first()
+        if not current_user:
+            flash("User not logged in. Please log in first.", "danger")
+            return redirect(url_for('login'))
+
         user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        if not user_store:
+            flash("No store associated with this user. Please join or create a store first.", "danger")
+            return redirect(url_for('add_store_form'))
+
         store_id = user_store.store_id
-        return render_template('new_sale.html',store_id=store_id)
-        
-    
-# @app.route('/add-to-cart', methods=['POST'])
-# def add_to_cart():
-#     # Retrieve the cart from session
-#     cart = session.get('cart', [])
 
-#     try:
-#         product_name = request.form['productName']
-#         product_price = float(request.form['productPrice'])
-#         product_quantity = int(request.form['productQuantity'])
-#         category_id = int(request.form['category_id'])  # Ensure frontend matches this ke
+        # Initialize transaction if not yet initialized
+        session_transaction_id = session.get('transaction_id')
+        transaction = None
+        if session_transaction_id:
+            transaction = Transaction.query.get(session_transaction_id)
+            print(f"Found existing transaction with ID: {transaction.id}")
+        else:
+            print("No transaction found, creating a new one.")
+            # Create a new transaction if no transaction is found in session
+            new_transaction = Transaction(
+                store_id=store_id,
+                customer_name="System",  # Default customer name
+                bill_number=f"SALE{str(uuid.uuid4())[:8]}",  # Unique bill number
+                transaction_type="sale",  # Default to 'sale' transaction type
+                payment_method="cash",  # Default payment method
+                success="no"  # Initially marked as unsuccessful
+            )
+            db.session.add(new_transaction)
+            db.session.commit()
 
-#         # Check if the product is already in the cart
-#         for item in cart:
-#             if item['name'] == product_name:
-#                 # If the product is already in the cart, update the quantity
-#                 item['quantity'] += product_quantity
-#                 break
-#         else:
-#             # If the product is not in the cart, add it
-#             cart.append({
-#                 'name': product_name,
-#                 'price': product_price,
-#                 'quantity': product_quantity,
-#                 'catagory_id': category_id
-#             })
+            # Store the transaction ID in the session
+            session['transaction_id'] = new_transaction.id
+            transaction = new_transaction
+            print(f"Created new transaction with ID: {transaction.id}")
 
-#         # Save the updated cart back to the session
-#         session['cart'] = cart
+        return render_template('new_sale.html', store_id=store_id, transaction=transaction)
+        # session['cart'] = cart_data
+        # print(f"Cart data saved to session: {session.get('cart')}")
+        # return redirect(url_for('checkout'))
 
-#         return redirect(url_for('inventory'))
-    
-#     except KeyError as e:
-#         return jsonify({'success': False, 'message': f'Missing key: {str(e)}'}), 400
-#     except ValueError as e:
-#         return jsonify({'success': False, 'message': f'Invalid data: {str(e)}'}), 400# Get the product data from the form
-    
-# @app.route('/clear-cart', methods=['POST'])
-# def clear_cart():
-#     try:
-#         # Assuming you store the cart in a session
-#         session['cart'] = []  # Reset the cart to an empty list
-#         return jsonify({'success': True, 'message': 'Cart has been cleared!'}), 200
-#     except Exception as e:
-#         return jsonify({'success': False, 'message': f'Error clearing cart: {str(e)}'}), 500
+    elif request.method == 'POST':
+        # Fetch the current user
+        current_user = User.query.filter_by(email=session.get('email')).first()
+        if not current_user:
+            flash("User not logged in. Please log in first.", "danger")
+            return redirect(url_for('login'))
 
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        if not user_store:
+            flash("No store associated with this user. Please join or create a store first.", "danger")
+            return redirect(url_for('add_store_form'))
 
+        # Fetch the transaction using session
+        transaction = db.session.get(Transaction, session.get('transaction_id'))
+        if not transaction:
+            flash("Transaction not found.", "danger")
+            return redirect(url_for('new_sale'))
 
-# @app.route('/checkout', methods=['GET', 'POST'])
-# def checkout():
-#     # Retrieve the cart from the session
-#     cart = session.get('cart', [])
+        print(f"Transaction found for POST: {transaction.id}")
 
-#     if request.method == 'POST':
-#         store_id = request.args.get('store_id', type=int)
-        
-#         if not store_id:
-#             flash("Store ID missing!", "danger")
-#             return redirect(url_for('new_sale'))
+        # Fetch cart data from the request JSON
+        cart_data = request.get_json().get('cart')
+        if not cart_data:
+            flash("No cart data provided.", "danger")
+            return redirect(url_for('new_sale'))
 
-#         # Process the checkout (Update stock)
-#         for item in cart:
-#             product_name = item['name']
-#             catagory_id = item['catagory_id']
-#             quantity = item['quantity']
-            
-#             # Fetch the product from the database and update stock
-#             sell_product =  Product.query.filter_by(name=product_name, category_id=catagory_id).first()
+        print(f"Cart Data received: {cart_data}")
 
-#             if sell_product:
-#                 # Update stock
-#                 sell_product.stock -= int(quantity)
-#                 db.session.commit()  # Commit to reflect the changes in the database
-#                 flash(f"Stock updated for {product_name}!", "success")
-#             else:
-#                 flash(f"Product {product_name} not found.", "danger")
+        # Validate the cart data (check if product_id and quantity are present)
+        try:
+            cart_data = {key: int(value) for key, value in cart_data.items()}  # Convert string quantities to integers
+            print(f"Converted cart data: {cart_data}")
+        except ValueError:
+            flash("Invalid product or quantity input.", "danger")
+            print("Invalid cart data. Redirecting to new_sale...")
+            return redirect(url_for('new_sale'))
 
-#         # Clear the cart after checkout
-#         session['cart'] = []
+        # Ensure cart data is valid
+        if not all(isinstance(value, int) and value > 0 for value in cart_data.values()):
+            flash("Invalid product or quantity input.", "danger")
+            print("Invalid cart data. Redirecting to new_sale...")
+            return redirect(url_for('new_sale'))
 
-#         return redirect(url_for('inventory'))  # Redirect to a thank you page or order confirmation page
+        # Store selected products in the session (for use in checkout)
+        session['cart'] = cart_data  # Save the cart dictionary in session
+        print(f"Cart data saved to session: {session.get('cart')}")
 
-#     return render_template('checkout.html', cart=cart)
+        # Redirect to checkout page
+        print("Redirecting to checkout...")
+        return redirect(url_for('checkout'))
 
 
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    if request.method == 'GET':
+        print("GET request received on /checkout")
+        # Fetch the current user and associated store
+        current_user = User.query.filter_by(email=session.get('email')).first()
+        if not current_user:
+            flash("User not logged in. Please log in first.", "danger")
+            return redirect(url_for('login'))
+
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        if not user_store:
+            flash("No store associated with this user. Please join or create a store first.", "danger")
+            return redirect(url_for('add_store_form'))
+
+        store_id = user_store.store_id
+
+        # Fetch the transaction from session
+        transaction = db.session.get(Transaction, session.get('transaction_id'))
+        if not transaction:
+            flash("Transaction not found.", "danger")
+            return redirect(url_for('new_sale'))
+
+        print(f"Transaction found for checkout: {transaction.id}")
+
+        # Retrieve cart from session
+        cart = session.get('cart', [])
+        if not cart:
+            flash("Cart is empty.", "danger")
+            return redirect(url_for('new_sale'))
+
+        # Calculate total selling price
+        total_selling_price = 0
+        products = []
+        for unique_id, quantity in cart.items():
+            product = Product.query.filter_by(P_unique_id=unique_id).first()
+            if product:
+                total_price = product.selling_price * quantity
+                total_selling_price += total_price
+                products.append({
+                    'product': product,
+                    'quantity': quantity,
+                    'total_price': total_price,
+                })
+
+        print(f"Total selling price: {total_selling_price}")
+
+        return render_template('cart.html', store_id=store_id, transaction=transaction, products=products, total_selling_price=total_selling_price)
+
+    elif request.method == 'POST':
+        # Handle payment confirmation as before
+        payment_method = request.form.get('payment_method')
+        if not payment_method:
+            flash("Please select a payment method.", "danger")
+            return redirect(url_for('checkout'))
+
+        transaction = Transaction.query.get(session.get('transaction_id'))
+        if not transaction:
+            flash("Transaction not found.", "danger")
+            return redirect(url_for('new_sale'))
+
+        cart = session.get('cart', [])
+        total_selling_price = 0
+        total_cost_price = 0
+
+        for unique_id, quantity in cart.items():
+            product = Product.query.filter_by(P_unique_id=unique_id).first()
+            new_quantity = int(quantity)
+
+            if not product or new_quantity <= 0:
+                flash(f"Invalid product or quantity for product ID {unique_id}.", "danger")
+                continue
+
+            # Check if the selected quantity exceeds the available stock
+            if product.stock < new_quantity:
+                flash(f"Insufficient stock for product '{product.name}'. Available stock: {product.stock}.", "danger")
+                continue
+
+            # Deduct stock
+            product.stock -= new_quantity
+
+            # Create transaction item
+            transaction_item = TransactionItem(
+                transaction_id=transaction.id,
+                product_id=product.id,
+                quantity=new_quantity,
+                selling_price=product.selling_price,
+                cost_price=product.cost_price,
+                total_price=new_quantity * product.selling_price,
+                total_cost_price=new_quantity * product.cost_price,
+            )
+            db.session.add(transaction_item)
+
+            # Update totals
+            total_selling_price += transaction_item.total_price
+            total_cost_price += transaction_item.total_cost_price
+
+        # Update transaction totals and finalize
+        transaction.payment_method = payment_method
+        transaction.sucess = "yes"  # Mark transaction as successful
+
+        db.session.commit()
+
+        # Clear the cart session data
+        session.pop('cart', None)
+
+        flash("Transaction completed successfully.", "success")
+        return redirect(url_for('dashboard'))
 
 @app.route('/6007')
 def view_users():
