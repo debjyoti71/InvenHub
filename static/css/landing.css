@@ -1,5 +1,5 @@
 body{
-    background-image: url(images/4002676.jpg);
+    background-image: url(/static/images/4002676.jpg);
     background-position:center;
     background-attachment: fixed;
     background-size: cover;
@@ -105,7 +105,7 @@ border: 2px solid white;
 background-color: transparent;
 }
 #heros{
-background-image: url(images/ranjit-pradhan-e1IhTww3XMg-unsplash.jpg);
+background-image: url(/static/images/ranjit-pradhan-e1IhTww3XMg-unsplash.jpg);
 background-size: cover;
 }
 #lbtn{
