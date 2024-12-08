@@ -66,7 +66,7 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False, index=True)
     P_unique_id = db.Column(db.String(20), unique=True, index=True, nullable=False)
     transaction_items = db.relationship('TransactionItem', backref=db.backref('products_in_transaction', lazy=True))
-
+    
 class Transaction(db.Model):
     __tablename__ = 'transaction'
     id = db.Column(db.Integer, primary_key=True)
@@ -76,8 +76,10 @@ class Transaction(db.Model):
     bill_number = db.Column(db.String(50), unique=True, nullable=False)  # This acts as the order/bill ID
     transaction_type = db.Column(db.String(50), nullable=False)  # Or use Python Enum
     payment_method = db.Column(db.String(50), nullable=True, default="cash")
-    total_selling_price=db.Column(db.Integer, nullable=True, default= 0)
-    success = db.Column(db.String(50), nullable=True, default="yes") #yes or no
+    total_selling_price = db.Column(db.Integer, nullable=True, default=0)
+    success = db.Column(db.String(50), nullable=True, default="yes")  # yes or no
+    cart = db.Column(db.JSON, nullable=True)  # To store cart data as JSON
+    type = db.Column(db.String(50), nullable=True)  # Additional type field
 
     transaction_items = db.relationship('TransactionItem', backref='transaction', lazy=True, cascade='all, delete-orphan')
 

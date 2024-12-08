@@ -68,8 +68,8 @@
 <body>
     <div class="container">
         <h2>Checkout</h2>
-        <h2 class="section-title">Bill Number : {{transaction.bill_number}}</h2>
-        
+        <h2 class="section-title">Bill Number : {{ transaction.bill_number }}</h2>
+
         <!-- Display cart items -->
         <form method="POST">
             <h3>Review Your Cart</h3>
@@ -118,7 +118,10 @@
                     Card
                 </label>
             </div>
-            
+
+            <!-- Hidden field for transaction ID -->
+            <input type="hidden" name="transaction_id" value="{{ transaction.id }}">
+
             <button type="submit" class="btn">Complete Purchase</button>
         </form>
         
