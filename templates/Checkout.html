@@ -258,11 +258,15 @@ var(--950);
                             </tr>
                             {% endfor %}
                         {% else %}
+                            <tr>
+                                <td colspan="3">No products in the cart.</td>
+                            </tr>
+                        {% endif %}
                         </tbody>
                     </table>
                 </div>
                 <div class="col" style="height: auto; margin: 30px; display: flex; flex-direction: column;">
-                    <div class="row"><h3>Order Summmary</h3></div>
+                    <div class="row"><h3>Order Summary</h3></div>
                     <div class="row"></div>
                     <table class="table table-striped" id="checkoutTable" style="margin-top: 30px;">
                         <thead>
@@ -271,7 +275,9 @@ var(--950);
                             </tr>
                         </thead>
                         <tbody>
-                            {{ total_selling_price }}
+                            <tr>
+                                <td>{{ total_selling_price }}</td>
+                            </tr>
                         </tbody>
                     </table>
                     <label for="" style="margin-top: 50px;">Apply promocode</label>

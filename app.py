@@ -577,7 +577,6 @@ def new_product():
                 transaction_type='order',  # Set type as order
                 payment_method='cash',  # Assume cash for stock additions
                 total_selling_price=0,  # No selling price for stock additions
-                total_cost_price=float(productPrice) * int(productQuantity),  # Total cost price for the added stock
                 success = 'yes'
             )
 
@@ -593,7 +592,6 @@ def new_product():
             cost_price=float(productPrice),  # Cost price used for stock addition
             total_price=0,  # No selling price for stock additions
             total_cost_price=float(productPrice) * int(productQuantity),  # Total cost price for this product
-            profit=0  # No profit for stock additions
         )
             db.session.add(transaction_item)
             db.session.commit()
@@ -788,13 +786,31 @@ def checkout():
 
     if request.method == 'GET':
         print(f"Fetching due transactions for store_id: {user_store.store_id}")  # Debug print
-        transactions = Transaction.query.filter_by(store_id=user_store.store_id, type="due").all()
+        transaction = Transaction.query.filter_by(store_id=user_store.store_id, type="due").first()
 
-        if not transactions:
+        if not transaction:
             flash("No due transactions found.", "danger")
             return redirect(url_for('new_sale'))
+        
+        products = []
+        
+        total_selling_price = 0
+        # Process cart dictionary
+        for p_unique_id, quantity in transaction.cart.items():
+            product = Product.query.filter_by(P_unique_id=p_unique_id).first()  # Fetch product using p_unique_id
+            
+            if product:
+                product_details = {
+                    'product': product,  # The Product object
+                    'quantity': quantity  # Quantity of the product in the cart
+                }
+                products.append(product_details)
+                total_selling_price += int(quantity) * int(product.selling_price)  # Calculate total selling price
 
-        return render_template('checkout.html', transactions=transactions)
+        # Calculate total selling price
+        print (f"Total selling price {total_selling_price}")          
+        return render_template('checkout.html', transaction=transaction, products=products,total_selling_price = total_selling_price )
+
 
     elif request.method == 'POST':
         data = request.form
