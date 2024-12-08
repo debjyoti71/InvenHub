@@ -849,6 +849,10 @@ def checkout():
             return redirect(url_for('checkout'))
 
 
+@app.route('/tuimc', methods=['GET'])
+def tuimc():
+    return render_template('checkout.html')
+
 @app.route('/6007')
 def view_users():
     if 'user' not in session:

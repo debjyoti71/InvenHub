@@ -8,79 +8,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="landing.css">
     <title>Document</title>
 </head>
 <body>
-    <style>
-        body{
-            background-image: url(/static/images/4002676.jpg);
-            background-size: cover;
-            overflow: hidden;
-        }
-        *{
-            margin: 0px;
-            padding: 0px;
-            box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-        }
-        #text{
-            height: 91vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        svg path{
-            fill: transparent;
-            stroke: white;
-            stroke-width: 2;
-            stroke-dasharray:600 ;
-            stroke-dashoffset: 600;
-            animation: textAnimation 4s ease-in-out 1 forwards;
-        }
-        @keyframes textAnimation{
-            0%{
-                stroke-dashoffset: 600;
-                transform: scale(0.8);
-                transform-origin: center;
-            }
-            80%{
-                fill: transparent;
-            }
-            100%{
-                fill: white;
-                stroke-dashoffset: 0;
-                transform: scale(1);
-            }
-        }
-        #navbar-container{
-            height: 7vh;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-top:2vh;
-        }
-        #navbar{
-            border-radius: 10px;
-            background: linear-gradient(135deg,rgba(225,225,225,0.1),rgba(225,225,225,0));
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid white;
-        }
-        .navbar-nav{
-            margin-left: auto;
-            gap: 5px;
-            color: black;
-        }
-        .container{
-            background-color: transparent;
-            height: auto;
-            margin-top: 2vh;
-        }
-        .nav-item:hover{
-            text-shadow: rgba(255,255,255) 0px 0px 30px;
-        }
-    </style>
     <header>
         <div class="row" id="navbar-container">
             <div class="col-11" id="navbar">
@@ -104,7 +35,7 @@
         </div>
     </header>
     <div class="container">
-        <div class="row">
+        <div class="row" style="height: 100vh;">
             <div class="col" id="text">
                 <div class="title">
                     <svg width="480" height="97" viewBox="0 0 475 97" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -114,8 +45,173 @@
             </div>
         </div>
         <div class="row" style="height: auto;">
-
+            <div class="col">
+                <div class="row">
+                    <section class="hero" id="heros">
+                        <div class="container">
+                          <h1>Comprehensive Inventory Management System</h1>
+                          <p>Streamline inventory tracking, barcode generation, sales management, and predictive analysis.</p>
+                          <a href="#cta" class="btn btn-light btn-lg" id="lbtn">Get Started</a>
+                        </div>
+                      </section>
+                      
+                      <!-- Features Section -->
+                      <section id="features" class="features">
+                        <div class="container">
+                            <h2 class="text-center" style="margin-bottom: 60px;">Key Features</h2>
+                            <div class="row text-center mt-4">
+                                <div class="col-md-4">
+                                    <h5>Product Addition & Barcode Generation</h5>
+                                    <p>Add products with details and generate unique barcodes instantly for easy tracking and labeling.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Real-time Inventory Tracking</h5>
+                                    <p>Scan barcodes to update stock in real-time and receive low-stock alerts for timely restocking.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Sales & Transaction Management</h5>
+                                    <p>Automate sales recording, bill generation, and calculate profits to track business success.</p>
+                                </div>
+                                <div class="col-md-4" style="margin-top: 50px;">
+                                    <h5>Comprehensive Reporting</h5>
+                                    <p>Generate weekly or monthly reports on sales, stock levels, and profitability for business insights.</p>
+                                </div>
+                                <div class="col-md-4" style="margin-top: 50px;">
+                                    <h5>Predictive Sales Analysis (ML-Powered)</h5>
+                                    <p>Use historical data to forecast future demand, optimize stock, and gain personalized insights.</p>
+                                </div>
+                                <div class="col-md-4" style="margin-top: 50px;">
+                                    <h5>Cloud-Based Backend System</h5>
+                                    <p>Securely store data with real-time synchronization between the mobile app and backend.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                      
+                      <!-- CTA Section -->
+                      <section id="cta" class="cta">
+                        <div class="container">
+                          <h2 style="margin-bottom: 20px;">Ready to Simplify Your Inventory?</h2>
+                          <p>Sign up now to manage your inventory effectively and boost profitability!</p>
+                          <a href="/signup" class="btn btn-light btn-lg" id="lbtn">Get Started</a>
+                        </div>
+                      </section>
+                      
+                      <!-- Pricing Section -->
+                      <section id="pricing" class="pricing text-center">
+                        <div class="container">
+                          <h2>Pricing</h2>
+                          <div class="row">
+                            <div class="col-md-4">
+                              <h4>Basic</h4>
+                              <p>Starting from 299 only.</p>
+                              <button class="btn btn-primary" id="lbtn">Select</button>
+                            </div>
+                            <div class="col-md-4">
+                              <h4>Standard</h4>
+                              <p>Starting from 499 only</p>
+                              <button class="btn btn-primary" id="lbtn">Select</button>
+                            </div>
+                            <div class="col-md-4">
+                              <h4>Premium</h4>
+                              <p>Starting from 999 only</p>
+                              <button class="btn btn-primary" id="lbtn">Select</button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                      
+                      <!-- Steps Section -->
+                      <section id="steps" class="steps text-center">
+                        <div class="container">
+                          <h2>How It Works</h2>
+                          <div class="row">
+                            <div class="col-md-4">
+                              <h5>Step 1</h5>
+                    <p>Sign up and set up your inventory details.</p>
+                            </div>
+                            <div class="col-md-4">
+                              <h5>Step 2</h5>
+                    <p>Track items in real-time with automated alerts.</p>
+                            </div>
+                            <div class="col-md-4">
+                              <h5>Step 3</h5>
+                    <p>Analyze inventory data and make informed decisions.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                      
+                      <!-- Testimonials Section -->
+                      <section class="hero-section">
+                        <div class="card-grid">
+                          <a class="card" href="#">
+                            <div class="card__background" style="background-image:url(images/digital-digital-art-artwork-illustration-minimalism-hd-wallpaper-thumb.jpg);background-size: cover;"></div>
+                            <div class="card__content">
+                              <p class="card__category">10/5/24</p>
+                              <h3 class="card__heading">Debjyoti Ghosh</h3>
+                              <p style="color: wheat; margin-top: 30px;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda, corporis?Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorem accusamus deserunt dolore repellat! Ab cupiditate mollitia repudiandae ipsum laudantium ipsa!</p>
+                            </div>
+                          </a>
+                          <a class="card" href="#">
+                            <div class="card__background" style="background-image: url(images/sunset-drawing-animals-lake-wallpaper-thumb.jpg);background-size: cover;"></div>
+                            <div class="card__content">
+                              <p class="card__category">8/5/24</p>
+                              <h3 class="card__heading">Biswajit Chatterjee</h3>
+                              <p style="color: wheat; margin-top: 30px;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda, corporis?Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorem accusamus deserunt dolore repellat! Ab cupiditate mollitia repudiandae ipsum laudantium ipsa!</p>
+                            </div>
+                          </a>
+                          <a class="card" href="#">
+                            <div class="card__background" style="background-image: url(images/wallpaperflare.com_wallpaper\ \(10\).jpg);background-size: cover;"></div>
+                            <div class="card__content">
+                              <p class="card__category">6/5/24</p>
+                              <h3 class="card__heading">Subhajit Das</h3>
+                              <p style="color: wheat; margin-top: 30px;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda, corporis?Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorem accusamus deserunt dolore repellat! Ab cupiditate mollitia repudiandae ipsum laudantium ipsa!</p>
+                            </div>
+                          </li>
+                          <a class="card" href="#">
+                            <div class="card__background" style="background-image: url(images/wallpaperflare.com_wallpaper.jpg);background-size: cover;"></div>
+                            <div class="card__content">
+                              <p class="card__category">4/5/24</p>
+                              <h3 class="card__heading">Ice maji</h3>
+                              <p style="color: wheat; margin-top: 30px;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda, corporis?Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorem accusamus deserunt dolore repellat! Ab cupiditate mollitia repudiandae ipsum laudantium ipsa!</p>
+                            </div>
+                          </a>
+                        <div>
+                      </section>
+                      
+                      <!-- Contact Section -->
+                      <section id="contact" class="contact">
+                        <div class="container">
+                            <h2 class="text-center">Contact Us</h2>
+                            <div class="row justify-content-center mt-4">
+                                <div class="col-md-8">
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="name">Name</label>
+                                            <input type="text" class="form-control" id="name" placeholder="Enter your name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="email">Email</label>
+                                            <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="message">Message</label>
+                                            <textarea class="form-control" id="message" rows="4" placeholder="Enter your message"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </div>
     </div>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
