@@ -820,7 +820,7 @@ def checkout():
                 products.append(product_details)
                 total_selling_price += int(quantity) * int(product.selling_price)
 
-        return render_template('checkout.html', transaction=transaction, products=products, total_selling_price=total_selling_price)
+        return render_template('cart.html', transaction=transaction, products=products, total_selling_price=total_selling_price)
 
     elif request.method == 'POST':
         # Handle JSON data from the Fetch API

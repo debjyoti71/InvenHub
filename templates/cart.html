@@ -1,137 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - InvenHub</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-            margin-bottom: 20px;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        .total-price {
-            font-size: 1.2em;
-            margin-top: 20px;
-        }
-        .payment-method {
-            margin-top: 20px;
-        }
-        .btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .btn-secondary {
-            background-color: #f44336;
-        }
-        .btn:hover {
-            opacity: 0.8;
-        }
-        footer {
-            text-align: center;
-            padding: 10px 0;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
+    <title>Dashboard</title>
+    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
 
 <body>
-    <div class="container">
-        <h2>Checkout</h2>
-        <h2 class="section-title">Bill Number : {{ transaction.bill_number }}</h2>
+    <style>
+        :root {
+            --primary-blue: #3182ce;
+            --sidebar-width: 250px;
+        }
 
-        <!-- Display cart items -->
-        <form method="POST">
-            <h3>Review Your Cart</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        <th>Total Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if products %}
-                        {% for product in products %}
-                        <tr>
-                            <td>{{ product['product'].name }}</td>
-                            <td>{{ product['quantity'] }}</td>
-                            <td>{{ product['product'].selling_price }}</td>
-                            <td>{{ product['total_price'] }}</td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                    <tr>
-                        <td colspan="4">No items in your cart</td>
-                    </tr>
-                    {% endif %}
-                </tbody>
-            </table>
 
-            <!-- Calculate and display total amount -->
-            {% if products %}
-            <div class="total-price">
-                <h4>Total Price: {{ total_selling_price }}</h4>
+        .main-content {
+            padding: 2rem;
+            height: auto;
+        }
+        .form-container {
+            border-radius: 1rem;
+        }
+
+        .section-title {
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .scan-barcode-btn {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .scan-barcode-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .proceed-btn {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 2rem;
+            border: none;
+        }
+
+        .add-product-btn {
+            color: var(--primary-blue);
+            background: none;
+            border: 1px solid var(--primary-blue);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        .checkOutButton{
+            height: 40px;
+            width: auto;
+            margin-top: 20px;
+            background-color: #3182ce;
+        }
+        .btn-44,
+.btn-44 *,
+.btn-44 :after,
+.btn-44 :before,
+.btn-44:after,
+.btn-44:before {
+  border: 0 solid;
+  box-sizing: border-box;
+}
+.btn-44 {
+  -webkit-tap-highlight-color: 
+transparent;
+  -webkit-appearance: button;
+  background-color: 
+var(--950);
+  background-image: none;
+  color: 
+#fff;
+  cursor: pointer;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-size: 100%;
+  font-weight: 900;
+  line-height: 1.5;
+  margin: 0;
+  -webkit-mask-image: -webkit-radial-gradient(var(--950), #fff);
+  padding: 0;
+}
+.btn-44:disabled {
+  cursor: default;
+}
+.btn-44:-moz-focusring {
+  outline: auto;
+}
+.btn-44 svg {
+  display: block;
+  vertical-align: middle;
+}
+.btn-44 [hidden] {
+  display: none;
+}
+.btn-44 {
+  border: 1px solid;
+  border-radius: 999px;
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  padding: 1.2rem 3rem;
+  position: relative;
+  text-transform: uppercase;
+}
+.btn-44 span {
+  font-weight: 900;
+  mix-blend-mode: difference;
+}
+.btn-44:after,
+.btn-44:before {
+  background: 
+#fff;
+  content: "";
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: -100%;
+  transition: transform 0.2s cubic-bezier(0.76, 0, 0.24, 1);
+  width: 100%;
+  will-change: transform;
+}
+.btn-44:after {
+  background: 
+#dedede;
+  transition-delay: 0.13s;
+  z-index: -1;
+}
+.btn-44:hover:after,
+.btn-44:hover:before {
+  transform: translateY(100%);
+}
+    </style>
+    <div class="wrapper">
+        <aside id="sidebar">
+            <div class="d-flex">
+                <button class="toggle-btn" type="button">
+                    <i class="lni lni-grid-alt"></i>
+                </button>
+                <div class="sidebar-logo">
+                    <a href="#">InvenHub</a>
+                </div>
             </div>
-            {% endif %}
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="/dashboard" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-home (2).svg" alt=""></i>
+                        <span style="margin-left: 20px;">Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/inventory" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-inventory-50.png" alt="warehouse-1"/></i>
+                        <span style="margin-left: 20px;">Inventory</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="reports.html" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-graph-48.png" alt="warehouse-1"/></i>
+                        <span style="margin-left: 20px;">Reports</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="Orders.html" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-order-50.png" alt="warehouse-1"/></i>
+                        <span style="margin-left: 20px;">Orders</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/new_sale" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-plus.svg" alt="warehouse-1"/></i>
+                        <span style="margin-left: 20px;">New Sale</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link">
+                    <i><img height="25px" width="25px" src="/static/images/icons8-settings.svg" alt="warehouse-1"/></i>
+                    <span style="margin-left: 20px;">Settings</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <a href="/logout" class="sidebar-link">
+                    <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
+                    <span style="margin-left: 20px;">Logout</span>
+                </a>
+            </div>
+        </aside>
+        <div class="main" id="bg">
+            <div class="row align-items-center" id="Navbar">
+                <div class="col-11">
+                    <div class="row justify-content-center align-items-center">
+                        <div class="col"></div>
+                        <div class="col-5" style="height: auto;">
+                            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                        </div>
+                        <div class="col-1"><button class="btn" id="btnn" type="submit">Search</button></div>
+                        <div class="col-5"></div>
+                    </div>
+                </div>
+                <div class="col d-flex justify-content-center align-items-center" style="height: auto;">
+                    <div class="row">
+                        <div class="col">
+                            <div class="dropdown dropleft">
+                                <a class="notification-icon position-relative" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i><img height="30px" width="28px" src="/static/images/icons8-notification (3).svg" alt=""></i>
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="notificationDropdown">
+                                    <li class="dropdown-header">Notifications</li>
+                                    <li><a class="dropdown-item" href="#">New message received</a></li>
+                                    <li><a class="dropdown-item" href="#">Server alert</a></li>
+                                    <li><a class="dropdown-item" href="#">Update available</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-center" href="#">View all</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col"><a href="/account"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt=""></a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="height: 100%;">
+                <div class="col" style="height: 100%; margin: 30px;">
+                    <div class="row"><h2>Cart</h2></div>
+                    <h1 class="section-title">Bill Number : {{ transaction.bill_number }}</h1>
+                    <div class="row"></div>
+                    <table class="table table-striped" id="productTable" style="margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% if products %}
+                            {% for product in products %}
+                            <tr>
+                                <td>{{ product['product'].name }}</td>
+                                <td>{{ product['quantity'] }}</td>
+                                <td>{{ product['product'].selling_price }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3">No products in the cart.</td>
+                            </tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col" style="height: auto; margin: 30px; display: flex; flex-direction: column;">
+                    <div class="row"><h3>Order Summary</h3></div>
+                    <div class="row"></div>
+                    <table class="table table-striped" id="checkoutTable" style="margin-top: 30px;">
+                        <thead>
+                            <tr>
+                                <th>Total price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ total_selling_price }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <label for="" style="margin-top: 50px;">Apply promocode</label>
+                    <input type="text" placeholder=" Enter promotional code" style="width: 500px;border-radius: 10px; height: 40px; margin-top: 10px; background-color: #e4eefa;">
+                    <label for="option" class="form-label" style="margin-top: 30px;">Select Payment methods</label>
+                    <select class="form-select" id="business-profile" aria-label="Default select example" onchange="redirectToPage()" style="width: 200px;">
+                        <option selected>Cash</option>
+                        <option>Card</option>
+                        <option>UPI</option>
+                    </select>     
+                    <button id="proceedButton" class="btn btn-primary" style="margin-top: 40px;" onclick="proceedAndRedirect()">Proceed</button>              
+                </div>
+            </div>
             
-            <h3>Select Payment Method</h3>
-            <div class="payment-method">
-                <label for="payment_method_cash">
-                    <input type="radio" id="payment_method_cash" name="payment_method" value="cash" required>
-                    Cash
-                </label>
-                <label for="payment_method_card">
-                    <input type="radio" id="payment_method_card" name="payment_method" value="card">
-                    Card
-                </label>
-            </div>
+            <script>
+                // Pass the transaction ID directly into JavaScript
+                const transactionId = "{{ transaction.id }}";
+                const total_selling_price = "{{total_selling_price}}"
 
-            <!-- Hidden field for transaction ID -->
-            <input type="hidden" name="transaction_id" value="{{ transaction.id }}">
+                function redirectToPage() {
+                    // Get the selected value from the select element
+                    var paymentMethod = document.getElementById('business-profile').value;
 
-            <button type="submit" class="btn">Complete Purchase</button>
-        </form>
-        
-        <div class="back-to-cart">
-            <a href="{{ url_for('new_sale') }}" class="btn btn-secondary">Back to Cart</a>
-        </div>
-    </div>
+                    // Prepare the data to be sent in the POST request
+                    var data = { paymentMethod: paymentMethod, transactionId: transactionId, total_selling_price : total_selling_price };
 
-    <footer>
-        <p>&copy; 2024 InvenHub</p>
-    </footer>
+                    // Send the POST request using Fetch API
+                    fetch('/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())  // Handle response as JSON
+                    .then(data => {
+                        console.log('Success:', data);  // Handle success response
+                        if (data.message) {
+                            alert(data.message);  // Show success message if available
+                            window.location.href = "/dashboard";  // Redirect to dashboard or another page
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);  // Handle error
+                    });
+                }
+
+                function proceedAndRedirect() {
+                    // Call the redirectToPage function to handle the payment method and transaction ID POST request
+                    redirectToPage();
+
+                    // Redirect the user to the /inventory page
+                    window.location.href = "/inventory";
+                }
+            </script>
+            
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+    <script src="/static/js/dashboard.js"></script>
 </body>
 </html>
