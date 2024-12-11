@@ -72,13 +72,13 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     store_id = db.Column(db.Integer, db.ForeignKey('store.id'), nullable=False)
     transaction_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
-    customer_name = db.Column(db.String(100), nullable=False)
+    customer_name = db.Column(db.String(100), nullable=True, default = "system")
     bill_number = db.Column(db.String(50), unique=True, nullable=False)  # This acts as the order/bill ID
-    transaction_type = db.Column(db.String(50), nullable=False)  # Or use Python Enum
+    transaction_type = db.Column(db.String(50), nullable=True)  # Or use Python Enum
     payment_method = db.Column(db.String(50), nullable=True, default="cash")
     total_selling_price = db.Column(db.Integer, nullable=True, default=0)
     success = db.Column(db.String(50), nullable=True, default="yes")  # yes or no
-    cart = db.Column(db.JSON, nullable=True)  # To store cart data as JSON
+    cart = db.Column(db.JSON, nullable=True , default = {})  # To store cart data as JSON
     type = db.Column(db.String(50), nullable=True)  # Additional type field
 
     transaction_items = db.relationship('TransactionItem', backref='transaction', lazy=True, cascade='all, delete-orphan')
@@ -87,12 +87,12 @@ class Transaction(db.Model):
 class TransactionItem(db.Model):
     __tablename__ = 'transaction_item'
     id = db.Column(db.Integer, primary_key=True)
-    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=False)  # Use 'id' instead of 'bill_number'
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)  # Ensure quantity > 0 in application logic
-    selling_price = db.Column(db.Integer, nullable=False)
-    cost_price = db.Column(db.Integer, nullable=False)
-    total_price = db.Column(db.Integer, nullable=False)  # selling_price * quantity
-    total_cost_price = db.Column(db.Integer, nullable=False)  # cost_price * quantity
+    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=True)  # Use 'id' instead of 'bill_number'
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=True)
+    quantity = db.Column(db.Integer, nullable=True)  # Ensure quantity > 0 in application logic
+    selling_price = db.Column(db.Integer, nullable=True)
+    cost_price = db.Column(db.Integer, nullable=True)
+    total_price = db.Column(db.Integer, nullable=True)  # selling_price * quantity
+    total_cost_price = db.Column(db.Integer, nullable=True)  # cost_price * quantity
 
 

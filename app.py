@@ -476,7 +476,7 @@ def inventory():
 
         # Fetch all categories and their products for this store
         categories = Category.query.filter_by(store_id=store.id).all()
-        products = Product.query.join(Category).filter(Category.store_id == store.id).all()
+        products = Product.query.join(Category).with_for_update().filter(Category.store_id == store.id).all()
         # Calculate dashboard metrics
         total_products = len(products)
         top_selling = 5  # Placeholder, replace with actual logic
@@ -667,38 +667,37 @@ def new_sale():
     store_id = user_store.store_id
 
     if request.method == 'GET':
-        # Fetch existing transactions for the store
-        tr = Transaction.query.filter_by(store_id=store_id, type="due", success="no").all()
+        # Fetch existing "due" transactions for the store
+        tr = Transaction.query.with_for_update().filter_by(store_id=store_id, type="due", success="no").all()
 
-        # Create a new list with only non-empty cart transactions
-        valid_transactions = [t for t in tr if t.cart]  # Keep only transactions with non-empty carts
+        # Filter valid transactions (non-empty carts)
+        valid_transactions = [t for t in tr if t.cart]
 
-        # Remove any transactions with an empty cart and delete them from the database
-        for t in tr:
-            if not t.cart:  # Check if the cart is empty
-                print("Deleting transaction with empty cart", t.id)  # Debug print
-                db.session.delete(t)  # Delete the transaction from the database
+        # Check for an existing empty "due" transaction
+        empty_transaction = next((t for t in tr if not t.cart), None)
 
-        db.session.commit()  # Commit the deletion to the database
+        # Use the existing empty transaction if it exists; otherwise, create a new one
+        if empty_transaction:
+            print(f"Re-using empty transaction with ID: {empty_transaction.id}")  # Debug print
+            new_transaction = empty_transaction
+        else:
+            print(f"Creating a new transaction for store_id: {store_id}")  # Debug print
+            new_transaction = Transaction(
+                store_id=store_id,
+                customer_name="None",  # Default customer name "None"
+                bill_number=f"SALE{str(uuid.uuid4())[:8]}",
+                transaction_type="Sale",
+                type="due",
+                total_selling_price=0,
+                payment_method="cash",  # Default payment method
+                success="no",
+                cart={}
+            )
+            db.session.add(new_transaction)
+            db.session.commit()
+            print(f"Created transaction with ID: {new_transaction.id}")  # Debug print
 
-        # Create a new transaction with "None" as customer name
-        print(f"Creating a new transaction for store_id: {store_id}")  # Debug print
-        new_transaction = Transaction(
-            store_id=store_id,
-            customer_name="None",  # Default customer name "None"
-            bill_number=f"SALE{str(uuid.uuid4())[:8]}",
-            transaction_type="Sale",
-            type="due",
-            total_selling_price=0,
-            payment_method="cash",  # Default payment method
-            success="no",
-            cart={}
-        )
-        db.session.add(new_transaction)
-        db.session.commit()
-        print(f"Created transaction with ID: {new_transaction.id}")  # Debug print (after commit)
-
-        # Add the newly created transaction to the list at the beginning
+        # Add the valid transactions, including the (reused or new) empty transaction, to the list
         valid_transactions.insert(0, new_transaction)
 
         # Debug print transactions
@@ -707,48 +706,63 @@ def new_sale():
             print(f"Transaction: {t.id}, {t.customer_name}, {t.bill_number}, {t.type}, {t.cart}")
 
         # Render template with transactions
-        return render_template('new_sale.html', store_id=store_id, transactions=valid_transactions)
+        return render_template('new_sale2.html', store_id=store_id, transactions=valid_transactions)
 
     elif request.method == 'POST':
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Invalid or empty request data'}), 400
+
         cart_data = data.get('cart')
-        transaction_id = data.get('transaction_id')
-        
-        if not cart_data:
-            return jsonify({'error': 'Cart data is required'}), 400
-        
-        transaction = Transaction.query.get(transaction_id)
+        id = data.get('bill_number')
+        store_id = data.get('store_id')
+
+        # Log incoming data
+        print(f"Received bill_number: {id}")
+        print(f"Received store_id: {store_id}")
+        print(f"Received cart_data: {cart_data}")
+
+        if not cart_data or not id or not store_id:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        transaction = Transaction.query.filter_by(id=id).first()
         if not transaction:
-            return jsonify({'error': 'Transaction not found'}), 404
-        
-        # Initialize cart if empty
-        if not transaction.cart:
-            transaction.cart = {}
+            print(f"No transaction found for bill_number: {id}, creating a new one.")
+            transaction = Transaction(id=id, store_id=store_id, cart={})
+            db.session.add(transaction)
 
-        # Update cart with new items
-        for product_id, quantity in cart_data.items():
-            transaction.cart[product_id] = quantity
+        # Update cart
+        transaction.transaction_type = "sale"
+        transaction.cart = cart_data
 
+        # Ensure changes are saved
+        print(f"Updated cart before commit: {transaction.cart}")
         db.session.commit()
-        print( jsonify({'message': 'Cart updated successfully'}))
-        return redirect(url_for('checkout'))
+        print(f"Transaction saved with updated cart: {transaction.cart}")
+        session['transaction_id'] = transaction.id
+
+        return jsonify({'message': 'Cart updated successfully'}), 200
+
+
 
 
 @app.route('/get-cart-details', methods=['GET'])
 def get_cart_details():
     transaction_id = request.args.get('transaction_id')
-    print(f"Fetching cart details for transaction_id: {transaction_id}")  # Debug print
-
     if not transaction_id:
         return jsonify({'error': 'Transaction ID is required'}), 400
 
-    transaction = Transaction.query.get(transaction_id)
-    if not transaction or not transaction.cart:
-        return jsonify({'error': 'Transaction not found or cart is empty'}), 404
+    print(f"Fetching cart details for transaction_id: {transaction_id}")
 
-    print(f"Cart for transaction {transaction_id}: {transaction.cart}")  # Debug print
+    # Use Session.get() instead of Query.get()
+    transaction = db.session.query(Transaction).with_for_update().get(transaction_id)
+    if not transaction:
+        print(f"Transaction not found for ID: {transaction_id}")
+        return jsonify({'error': 'Transaction not found'}), 404
 
-    return jsonify({'cart': transaction.cart})
+    print(f"Cart for transaction {transaction_id}: {transaction.cart}")
+    return jsonify({'cart': transaction.cart}), 200
+
 
 @app.route('/get-product-details', methods=['GET'])
 def get_product_details():
@@ -771,103 +785,127 @@ def get_product_details():
         'stock': product.stock,
     })
 
-
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     current_user = User.query.filter_by(email=session.get('email')).first()
+
     if not current_user:
-        flash("User not logged in. Please log in first.", "danger")
+        print("User not logged in. Please log in first.", "danger")
         return redirect(url_for('login'))
 
     user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+
     if not user_store:
-        flash("No store associated with this user. Please join or create a store first.", "danger")
+        print("No store associated with this user. Please join or create a store first.", "danger")
         return redirect(url_for('add_store_form'))
 
     if request.method == 'GET':
-        print(f"Fetching due transactions for store_id: {user_store.store_id}")  # Debug print
-        transaction = Transaction.query.filter_by(store_id=user_store.store_id, type="due").first()
+        transaction_id = session.get('transaction_id')
+        transaction = Transaction.query.get(transaction_id)
 
         if not transaction:
-            flash("No due transactions found.", "danger")
+            print("No due transactions found.", "danger")
             return redirect(url_for('new_sale'))
-        
+
+        if transaction.success == 'yes':
+            print("Transaction has already been processed.", "danger")
+            return jsonify({"message": "Transaction already completed"}), 200
+
         products = []
-        
         total_selling_price = 0
-        # Process cart dictionary
         for p_unique_id, quantity in transaction.cart.items():
-            product = Product.query.filter_by(P_unique_id=p_unique_id).first()  # Fetch product using p_unique_id
-            
+            product = Product.query.filter_by(P_unique_id=p_unique_id).first()
             if product:
-                product_details = {
-                    'product': product,  # The Product object
-                    'quantity': quantity  # Quantity of the product in the cart
-                }
+                product_details = {'product': product, 'quantity': quantity}
                 products.append(product_details)
-                total_selling_price += int(quantity) * int(product.selling_price)  # Calculate total selling price
+                total_selling_price += int(quantity) * int(product.selling_price)
 
-        # Calculate total selling price
-        print (f"Total selling price {total_selling_price}")          
-        return render_template('checkout.html', transaction=transaction, products=products,total_selling_price = total_selling_price )
-
+        return render_template('checkout.html', transaction=transaction, products=products, total_selling_price=total_selling_price)
 
     elif request.method == 'POST':
-        data = request.form
-        transaction_id = data.get('transaction_id')
-        payment_method = data.get('payment_method')
+        # Handle JSON data from the Fetch API
+        data = request.get_json()
 
-        print(f"Received POST data - transaction_id: {transaction_id}, payment_method: {payment_method}")  # Debug print
+        if not data:
+            print("Invalid request data.", "danger")
+            return jsonify({"error": "Invalid request"}), 400
+
+        transaction_id = data.get('transactionId')
+        payment_method = data.get('paymentMethod')
 
         if not transaction_id or not payment_method:
-            flash("Please select a transaction and payment method.", "danger")
-            return redirect(url_for('checkout'))
+            print("Please select a transaction and payment method.", "danger")
+            return jsonify({"error": "Missing transaction ID or payment method"}), 400
 
         transaction = Transaction.query.get(transaction_id)
+
         if not transaction:
-            flash("Transaction not found.", "danger")
-            return redirect(url_for('checkout'))
+            print("Transaction not found.", "danger")
+            return jsonify({"error": "Transaction not found"}), 404
 
-        cart = transaction.cart or {}
+        # Ensure transaction hasn't been processed already
+        if transaction.success == 'yes':
+            print("Transaction has already been processed.", "danger")
+            return jsonify({"message": "Transaction already completed"}), 200
+
+        # Set success to "no" initially (in case something goes wrong later)
+        transaction.success = 'no'
+
+        cart = transaction.cart
         total_selling_price = 0
+        transaction_items = []  # List to accumulate transaction items for batch commit
+        all_stock_available = True  # Flag to track if all stock is available
 
+        # Iterate through the cart and check stock
         for unique_id, quantity in cart.items():
             product = Product.query.filter_by(P_unique_id=unique_id).first()
-            if not product or product.stock < quantity:
-                flash(f"Invalid product or insufficient stock for ID {unique_id}.", "danger")
-                continue
 
-            # Deduct stock and create transaction items
-            product.stock -= quantity
+            if not product or int(product.stock) < int(quantity):
+                print(f"Invalid product or insufficient stock for ID {unique_id}.", "danger")
+                all_stock_available = False
+                break  # If any product is unavailable, stop processing
+
+            # Deduct stock and create transaction item
+            cost_price = product.cost_price  # Assuming `cost_price` is available in your Product model
+            
+            # If cost_price is not available, you may need to handle this case.
+            if cost_price is None:
+                cost_price = 0
+            # Deduct stock and create transaction item
+            product.stock -= int(quantity)  # Deduct the stock
             transaction_item = TransactionItem(
                 transaction_id=transaction.id,
                 product_id=product.id,
                 quantity=quantity,
+                cost_price=cost_price, 
                 selling_price=product.selling_price,
                 total_price=quantity * product.selling_price,
+                total_cost_price = quantity * cost_price
             )
-            db.session.add(transaction_item)
+            transaction_items.append(transaction_item)
             total_selling_price += transaction_item.total_price
 
-        # Update transaction details
+        if not all_stock_available:
+            print("Some products are out of stock. Transaction failed.", "danger")
+            return jsonify({"error": "Insufficient stock for some products."}), 400
+
+        # Update transaction details (calculated server-side)
         transaction.payment_method = payment_method
         transaction.total_selling_price = total_selling_price
-        transaction.success = "yes"
+
+        # Only mark as success if everything went well
+        transaction.success = 'yes'
         transaction.type = "checkout"
 
         try:
-            db.session.commit()
-            flash("Transaction completed successfully.", "success")
-            return redirect(url_for('dashboard'))
+            db.session.add_all(transaction_items)  # Add all transaction items in bulk
+            db.session.commit()  # Commit changes to the database
+            print("Transaction completed successfully.", "success")
+            return jsonify({"message": "Transaction completed successfully"}), 200
         except Exception as e:
-            db.session.rollback()
-            flash(f"An error occurred: {e}", "danger")
-            return redirect(url_for('checkout'))
-
-
-@app.route('/tuimc', methods=['GET'])
-def tuimc():
-    return render_template('checkout.html')
+            db.session.rollback()  # Rollback in case of error
+            print(f"An error occurred: {e}", "danger")
+            return jsonify({"error": str(e)}), 500
 
 @app.route('/6007')
 def view_users():
