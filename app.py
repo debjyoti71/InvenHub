@@ -706,7 +706,7 @@ def new_sale():
             print(f"Transaction: {t.id}, {t.customer_name}, {t.bill_number}, {t.type}, {t.cart}")
 
         # Render template with transactions
-        return render_template('new_sale2.html', store_id=store_id, transactions=valid_transactions)
+        return render_template('new_sale.html', store_id=store_id, transactions=valid_transactions)
 
     elif request.method == 'POST':
         data = request.get_json()
