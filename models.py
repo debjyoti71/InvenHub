@@ -80,6 +80,7 @@ class Transaction(db.Model):
     success = db.Column(db.String(50), nullable=True, default="yes")  # yes or no
     cart = db.Column(db.JSON, nullable=True , default = {})  # To store cart data as JSON
     type = db.Column(db.String(50), nullable=True)  # Additional type field
+    last_updated = db.Column(db.DateTime, nullable=True, default=datetime.utcnow, onupdate=datetime.utcnow)  # Track updates
 
     transaction_items = db.relationship('TransactionItem', backref='transaction', lazy=True, cascade='all, delete-orphan')
 

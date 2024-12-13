@@ -287,7 +287,12 @@ var(--950);
                         <option selected>Cash</option>
                         <option>Card</option>
                         <option>UPI</option>
-                    </select>     
+                    </select> 
+                    <label for="option" class="form-label" style="margin-top: 30px;">want Bill</label>   
+                    <select class="form-select" id="bill" aria-label="Default select example" onchange="redirectToPage()" style="width: 200px;">
+                        <option selected>yes</option>
+                        <option>no</option>
+                    </select> 
                     <button id="proceedButton" class="btn btn-primary" style="margin-top: 40px;" onclick="proceedAndRedirect()">Proceed</button>              
                 </div>
             </div>
@@ -300,9 +305,10 @@ var(--950);
                 function redirectToPage() {
                     // Get the selected value from the select element
                     var paymentMethod = document.getElementById('business-profile').value;
+                    var want_bill = document.getElementById('bill').value;
 
                     // Prepare the data to be sent in the POST request
-                    var data = { paymentMethod: paymentMethod, transactionId: transactionId, total_selling_price : total_selling_price };
+                    var data = { paymentMethod: paymentMethod, transactionId: transactionId, want_bill : want_bill, total_selling_price : total_selling_price };
 
                     // Send the POST request using Fetch API
                     fetch('/checkout', {
