@@ -202,3 +202,17 @@ transform: translateY(100%);
   .button:active {
     top: 1px;
   }
+
+
+    .checkout-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+    }
+
+    body{
+        Overflow-x : hidden
+        }
