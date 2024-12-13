@@ -523,9 +523,10 @@ def new_product():
         product_name = request.form.get('productName')
         productPrice = request.form.get('productPrice')
         productQuantity = request.form.get('productQuantity')
+        quantity = int(productQuantity)
         productSellingPrice = request.form.get('productSellingPrice')
 
-        if productCategory and product_name and productPrice and productQuantity and productSellingPrice:
+        if productCategory and product_name and productPrice and productQuantity and productSellingPrice and quantity:
             # Check if the category exists
             category = Category.query.filter_by(category_name=productCategory, store_id=user_store.store_id).first()
             if not category:
@@ -547,10 +548,11 @@ def new_product():
                 # Update existing product
                 existing_product.cost_price = float(productPrice)  # Update cost price
                 existing_product.selling_price = float(productSellingPrice)  # Update selling price
-                existing_product.stock += int(productQuantity)  # Add to stock
+                existing_product.stock += quantity  # Add to stock
                 db.session.commit()
-                cart = {existing_product.P_unique_id: existing_product.productQuantity}
+                cart = {existing_product.P_unique_id: existing_product.stock}  # Update stock
                 flash("Product updated successfully!", "success")
+                product = existing_product  # Store the updated product for later use
             else:
                 # Add new product
                 new_product = Product(
@@ -560,8 +562,7 @@ def new_product():
                     selling_price=float(productSellingPrice),
                     category_id=category.id,                   
                 )
-                cart = {new_product.P_unique_id: new_product.productQuantity}
-
+                
                 # Set P_unique_id before committing
                 products_in_category = Product.query.filter_by(category_id=category.id).all()
                 new_product.P_unique_id = f"{category.C_unique_id}{len(products_in_category) + 1}"
@@ -569,10 +570,11 @@ def new_product():
                 db.session.add(new_product)
                 db.session.commit()
 
+                cart = {new_product.P_unique_id: new_product.stock}  # Initialize cart after committing product
                 flash("Product added successfully!", "success")
+                product = new_product  # Store the new product for later use
 
-            # Now, track the stock addition as a transaction (order)
-            # Add a new transaction (order) to represent this stock addition
+            # Track the stock addition as a transaction (order)
             transaction = Transaction(
                 store_id=user_store.store_id,  # Correct reference to the store ID
                 customer_name="System",  # No customer for stock addition
@@ -580,8 +582,8 @@ def new_product():
                 transaction_type='order',  # Set type as order
                 payment_method='cash',  # Assume cash for stock additions
                 total_selling_price=0,  # No selling price for stock additions
-                cart = cart,
-                success = 'yes'
+                cart=cart,
+                success='yes'
             )
 
             db.session.add(transaction)
@@ -589,19 +591,20 @@ def new_product():
 
             # Create a transaction item to track this stock addition for the product
             transaction_item = TransactionItem(
-            transaction_id=transaction.id,  # Correct reference to the transaction ID
-            product_id=(new_product.id if 'new_product' in locals() else existing_product.id),  # Conditional assignment for product ID
-            quantity=int(productQuantity),  # Quantity added to stock
-            selling_price=float(productSellingPrice),  # Selling price used for stock addition (for future sales)
-            cost_price=float(productPrice),  # Cost price used for stock addition
-            total_price=0,  # No selling price for stock additions
-            total_cost_price=float(productPrice) * int(productQuantity),  # Total cost price for this product
-        )
+                transaction_id=transaction.id,  # Correct reference to the transaction ID
+                product_id=product.id,  # Use the product (new or existing)
+                quantity=int(productQuantity),  # Quantity added to stock
+                selling_price=float(productSellingPrice),  # Selling price used for stock addition (for future sales)
+                cost_price=float(productPrice),  # Cost price used for stock addition
+                total_price=0,  # No selling price for stock additions
+                total_cost_price=float(productPrice) * int(productQuantity),  # Total cost price for this product
+            )
             db.session.add(transaction_item)
             db.session.commit()
 
             flash("Stock addition (order) tracked successfully!", "success")
             return redirect(url_for('inventory'))
+
         
 @app.route('/suggest-products', methods=['GET'])
 def suggest_products():
@@ -970,7 +973,7 @@ def transaction():
     if request.method == 'GET':
         # Query the transactions based on store ID and transaction type
         transactions = Transaction.query.filter_by(store_id=store_id, transaction_type=transaction_type).order_by(
-            func.coalesce(Transaction.last_updated, Transaction.transaction_date).asc()
+            func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
         ).all()
         if not transactions:
             flash("No transactions found for the selected type.", "info")

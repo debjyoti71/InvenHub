@@ -1,9 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime,timedelta
 import uuid  # To generate unique store codes
 
 # Initialize the SQLAlchemy instance
 db = SQLAlchemy()
+
+def get_india_time():
+    return datetime.utcnow() + timedelta(hours=5, minutes=30)
 
 # User model (website access role)
 class User(db.Model):
@@ -71,16 +74,16 @@ class Transaction(db.Model):
     __tablename__ = 'transaction'
     id = db.Column(db.Integer, primary_key=True)
     store_id = db.Column(db.Integer, db.ForeignKey('store.id'), nullable=False)
-    transaction_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
-    customer_name = db.Column(db.String(100), nullable=True, default = "system")
+    transaction_date = db.Column(db.DateTime, nullable=True, default=get_india_time)
+    customer_name = db.Column(db.String(100), nullable=True, default="system")
     bill_number = db.Column(db.String(50), unique=True, nullable=False)  # This acts as the order/bill ID
     transaction_type = db.Column(db.String(50), nullable=True)  # Or use Python Enum
     payment_method = db.Column(db.String(50), nullable=True, default="cash")
     total_selling_price = db.Column(db.Integer, nullable=True, default=0)
     success = db.Column(db.String(50), nullable=True, default="yes")  # yes or no
-    cart = db.Column(db.JSON, nullable=True , default = {})  # To store cart data as JSON
+    cart = db.Column(db.JSON, nullable=True, default={})  # To store cart data as JSON
     type = db.Column(db.String(50), nullable=True)  # Additional type field
-    last_updated = db.Column(db.DateTime, nullable=True, default=datetime.utcnow, onupdate=datetime.utcnow)  # Track updates
+    last_updated = db.Column(db.DateTime, nullable=True, default=get_india_time, onupdate=get_india_time)
 
     transaction_items = db.relationship('TransactionItem', backref='transaction', lazy=True, cascade='all, delete-orphan')
 
