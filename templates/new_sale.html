@@ -14,61 +14,61 @@
 </head>
 
 <body>
-        <div class="wrapper">
-            <aside id="sidebar">
-                <div class="d-flex">
-                    <button class="toggle-btn" type="button">
-                        <i class="lni lni-grid-alt"></i>
-                    </button>
-                    <div class="sidebar-logo">
-                        <a href="#">InvenHub</a>
-                    </div>
+    <div class="wrapper">
+        <aside id="sidebar">
+            <div class="d-flex">
+                <button class="toggle-btn" type="button">
+                    <i class="lni lni-grid-alt"></i>
+                </button>
+                <div class="sidebar-logo">
+                    <a href="#">InvenHub</a>
                 </div>
-                <ul class="sidebar-nav">
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link">
-                            <i><img height="25px" width="25px" src="/static/images/icons8-home (2).svg" alt=""></i>
-                            <span style="margin-left: 20px;">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="/inventory" class="sidebar-link">
-                            <i><img height="25px" width="25px" src="/static/images/icons8-inventory-50.png" alt="warehouse-1"/></i>
-                            <span style="margin-left: 20px;">Inventory</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link">
-                            <i><img height="25px" width="25px" src="/static/images/icons8-graph-48.png" alt="warehouse-1"/></i>
-                            <span style="margin-left: 20px;">Reports</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="/transactions" class="sidebar-link">
-                            <i><img height="25px" width="25px" src="/static/images/icons8-order-50.png" alt="warehouse-1"/></i>
-                            <span style="margin-left: 20px;">Transactions</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="/new_sale" class="sidebar-link">
-                            <i><img height="25px" width="25px" src="/static/images/icons8-plus.svg" alt="warehouse-1"/></i>
-                            <span style="margin-left: 20px;">New Sale</span>
-                        </a>
-                    </li>
-                </ul>
-                <div class="sidebar-footer">
-                    <a href="#" class="sidebar-link">
-                        <i><img height="25px" width="25px" src="/static/images/icons8-settings.svg" alt="warehouse-1"/></i>
-                        <span style="margin-left: 20px;">Settings</span>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="/dashboard" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-home (2).svg" alt=""></i>
+                        <span style="margin-left: 20px;">Dashboard</span>
                     </a>
-                </div>
-                <div class="sidebar-footer">
-                    <a href="{{ url_for('logout') }}" class="sidebar-link">
-                        <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
-                        <span style="margin-left: 20px;">Logout</span>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/inventory" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-inventory-50.png" alt="warehouse-1"/></i>
+                        <span style="margin-left: 20px;">Inventory</span>
                     </a>
-                </div>
-            </aside>
+                </li>
+                <li class="sidebar-item">
+                    <a href="reports.html" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-graph-48.png" alt="warehouse-1"/></i>
+                        <span style="margin-left: 20px;">Reports</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/transactions" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-order-50.png" alt="warehouse-1"/></i>
+                        <span style="margin-left: 20px;">Orders</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/new_sale" class="sidebar-link">
+                        <i><img height="25px" width="25px" src="/static/images/icons8-plus.svg" alt="warehouse-1"/></i>
+                        <span style="margin-left: 20px;">New Sale</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link">
+                    <i><img height="25px" width="25px" src="/static/images/icons8-settings.svg" alt="warehouse-1"/></i>
+                    <span style="margin-left: 20px;">Settings</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <a href="{{ url_for('logout') }}" class="sidebar-link">
+                    <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
+                    <span style="margin-left: 20px;">Logout</span>
+                </a>
+            </div>
+        </aside>
         <div class="main" id="bg">
             <div class="row align-items-center" id="Navbar">
                 <div class="col-11">
@@ -102,17 +102,19 @@
                     </div>
                 </div>
             </div>
-            <div class="row" style="height: 100%;">
+            <div class="row" id="C-from">
                 <div class="col">
                     <main class="main-content">
                         <h1 class="mb-4">Sell Items</h1>
-                        <div class="form-container">                       
+                        
+                        <div class="form-container">
+                            
                             <form id="sellItemsForm">
                                 <!-- Customer Section -->
                                 <div class="mb-4">
                                     <h3 class="section-title">Customer Details</h3>
                                     <div class="mb-3">
-                                        <input type="tel" class="form-control" placeholder="Phone Number">
+                                        <input type="tel" class="form-control" id="customer_name">
                                     </div>
                                 </div>
                 
@@ -125,8 +127,8 @@
                                         </button>
                                     </div>
                                     <div id="cartActions">
-                                        <select id="billSelect" onchange="fetchCartDetails()">
-                                            <option value="">Select a Bill Number</option>
+                                        <select id="billSelect" class="mb-3" onchange="fetchCartDetails()">
+                                            <!-- <option value="">Select a Bill Number</option> -->
                                             {% for t in transactions %}
                                                 <option value="{{ t.id }}">
                                                     Bill Number: {{ t.bill_number }} | Customer: {{ t.customer_name }}
@@ -145,21 +147,23 @@
                                         <div class="mb-3">
                                             <input type="number" id="productQuantity" class="form-control" placeholder="No. of Items" min="1" value="1">
                                         </div>
-                                        <button type="button" onclick="addToTable()" class="btn btn-primary">Add to Table</button>
+                                        <a class="button" onclick="addToTable()" >Add to Table</a>
+                                        <!-- <button type="button" onclick="addToTable()" class="btn btn-primary">Add to Table</button> -->
                                     </div>                
                                     <button type="button" class="add-product-btn" hidden>
                                         <i class="bi bi-plus"></i> Add Product
                                     </button>
-                                <!-- <div class="text-center">
+                                </div>
+                                <div class="text-center">
                                     <button type="submit" class="proceed-btn" hidden></button>
-                                </div> -->
+                                </div>
                             </form>
                         </div>
                     </main>
                 </div>
                 <div class="col">
-                    <div class="row" style="height: auto;">
-                        <div class="col-11">
+                    <div class="row" style="height:80vh;">
+                        <div class="col-11" style="overflow-y:scroll;height:100%;">
                             <h1 class="section-title">Added Products</h1>
                 <table class="table table-striped" id="productTable">
                     <thead>
@@ -185,7 +189,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="checkout-container">
+            </div>
+            <div class="row">
                 <div class="d-flex justify-content-center align-items-center">
                     <a href="/checkout">
                         <button type="button" class="btn-44" onclick="completeSale()"><span>Proceed to Checkout</span></button>
@@ -196,6 +201,7 @@
     </div>
                         
     <script>
+        fetchCartDetails();
         let selectedProduct = null;
         let productStock = 0;
         const storeId = "{{store_id}}"; // Replace with your actual store ID
@@ -234,7 +240,7 @@
                 suggestions.forEach(product => {
                     const item = document.createElement('li');
                     item.className = 'suggestion-item';
-                    item.textContent = `${product.name} - ${product.selling_price}₹ (Stock: ${product.stock})`;
+                    item.textContent = `${product.product_id} - ${product.name} - ${product.selling_price}₹ (Stock: ${product.stock})`;
                     item.onclick = () => selectProduct(product);
                     suggestionsList.appendChild(item);
                 });
@@ -339,12 +345,29 @@
                 .then(data => {
                     if (data.cart) {
                         cart = data.cart;
+                        customer_name = data.customer_name;
                         updateTableFromCart();
+                        updatecustomer();
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching cart details:', error);
                 });
+        }
+
+        function updatecustomer() {
+            console.log('Updating customer name:', customer_name);
+            
+            const customerInput = document.getElementById('customer_name');
+            
+            if (customer_name && customer_name.toLowerCase() !== 'none') {
+                // If customer_name is available and not "none", set the input field's value
+                customerInput.value = customer_name;
+            } else {
+                // If customer_name is "none" or falsy, leave the input box empty or show a placeholder
+                customerInput.value = '';  // Clear the input box
+                customerInput.placeholder = 'Please enter customer name';  // Optional: Set a placeholder message
+            }
         }
 
         function updateTableFromCart() {
@@ -375,6 +398,7 @@
                 alert('Please select a bill number before completing the sale.');
                 return;
             }
+            const customer_name = document.getElementById('customer_name').value;
 
             fetch('/new_sale', {
                 method: 'POST',
@@ -384,13 +408,14 @@
                 body: JSON.stringify({
                     store_id: storeId,
                     bill_number: billNumber,
-                    cart: cart
+                    cart: cart,
+                    customer_name: customer_name
                 }),
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success || data.message === "Cart updated successfully") {
-                    alert('Sale completed successfully!');
+                    // alert('Sale completed successfully!');
                     // Clear the table and cart
                     document.getElementById('productTableBody').innerHTML = '';
                     cart = {};
@@ -418,12 +443,11 @@
         }
         document.getElementById('animatedButton').addEventListener('click', function() {
             this.classList.toggle('active');
-          });
+        });
     </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-    crossorigin="anonymous"></script>
-<script src="/static/js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+    <script src="/static/js/dashboard.js"></script>
 </body>
 </html>

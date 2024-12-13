@@ -260,7 +260,7 @@
                         suggestions.forEach(product => {
                             const item = document.createElement('li');
                             item.className = 'list-group-item suggestion-item';
-                            item.textContent = `${product.name} - ${product.selling_price} (Stock: ${product.stock})`; // Display product details
+                            item.textContent = `${product.product_id} - ${product.name} - ${product.selling_price} (Stock: ${product.stock})`; // Display product details
                             item.onclick = () => selectProduct(product); // Set click handler for selecting a product
                             suggestionsList.appendChild(item);
                         });

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash,jsonify
-from sqlalchemy import func
+from sqlalchemy import func , or_
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -619,7 +619,10 @@ def suggest_products():
     # Fetch matching products for the store
     products = Product.query.join(Category).filter(
         Category.store_id == store_id,
-        Product.name.ilike(f"%{query}%")
+        or_(
+            Product.name.ilike(f"%{query}%"),
+            Product.P_unique_id.ilike(f"%{query}%")
+        )
     ).limit(5).all()
 
 # Prepare the suggestions list to include product details
@@ -743,6 +746,7 @@ def new_sale():
         cart_data = data.get('cart')
         id = data.get('bill_number')
         store_id = data.get('store_id')
+        customer_name = data.get('customer_name')
 
         # Log incoming data
         print(f"Received bill_number: {id}")
@@ -761,16 +765,16 @@ def new_sale():
         # Update cart
         transaction.transaction_type = "sale"
         transaction.cart = cart_data
+        if customer_name:
+            transaction.customer_name = customer_name
 
         # Ensure changes are saved
-        print(f"Updated cart before commit: {transaction.cart}")
+        print(f"Updated cart before commit: {transaction.cart} {transaction.customer_name=}")
         db.session.commit()
-        print(f"Transaction saved with updated cart: {transaction.cart}")
+        print(f"Transaction saved with updated cart: {transaction.cart} {transaction.customer_name=}")
         session['transaction_id'] = transaction.id
 
         return jsonify({'message': 'Cart updated successfully'}), 200
-
-
 
 
 @app.route('/get-cart-details', methods=['GET'])
@@ -782,13 +786,19 @@ def get_cart_details():
     print(f"Fetching cart details for transaction_id: {transaction_id}")
 
     # Use Session.get() instead of Query.get()
-    transaction = db.session.query(Transaction).with_for_update().get(transaction_id)
+    transaction = db.session.query(Transaction).with_for_update().filter(Transaction.id == transaction_id).one_or_none()
+
     if not transaction:
         print(f"Transaction not found for ID: {transaction_id}")
         return jsonify({'error': 'Transaction not found'}), 404
+    
+    response = {
+        'cart': transaction.cart,
+        'customer_name': transaction.customer_name
+    }
 
-    print(f"Cart for transaction {transaction_id}: {transaction.cart}")
-    return jsonify({'cart': transaction.cart}), 200
+    print('Response:', response)  # Log the response for debugging
+    return jsonify(response)
 
 
 @app.route('/get-product-details', methods=['GET'])
@@ -845,7 +855,7 @@ def checkout():
         products = []
         total_selling_price = 0
         for p_unique_id, quantity in transaction.cart.items():
-            product = Product.query.filter_by(P_unique_id=p_unique_id).first()
+            product = Product.query.with_for_update().filter_by(P_unique_id=p_unique_id).first()
             if product:
                 product_details = {'product': product, 'quantity': quantity}
                 products.append(product_details)
@@ -881,7 +891,7 @@ def checkout():
             return jsonify({"message": "Transaction already completed"}), 200
 
         # Set success to "no" initially (in case something goes wrong later)
-        transaction.success = 'no'
+        transaction.success = 'yes'
 
         cart = transaction.cart
         total_selling_price = 0
