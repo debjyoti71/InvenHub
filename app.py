@@ -1015,61 +1015,48 @@ def transaction():
         # Add logic for handling POST requests here (e.g., adding a new transaction)
         pass
 
-@app.route('/esp-api/print', methods=['GET', 'POST'])
+@app.route('/esp-api/print', methods=['GET'])
 def esp_api_print():
-    # Get the store_id from the query parameters
-    store_id = request.args.get('store_id')
-    
-    if not store_id:
-        response = {"message": "Store ID is required."}
-        return jsonify(response), 400
+    try:
+        store_id = request.args.get('store_id')
+        if not store_id:
+            return jsonify({"message": "store_id is required"}), 400
 
-    # Fetch store using store_id
-    store = Store.query.filter_by(id=store_id).first()
-    
-    if not store:
-        response = {"message": "Store not found."}
-        return jsonify(response), 404
+        store_id = int(store_id)  # Ensure it's an integer
 
-    if request.method == 'GET':
-        # Fetch the transaction based on store_id
-        transaction = Transaction.query.filter_by(store_id=store_id, type="bill").first()
+        # Proceed with the rest of the logic for handling the transaction and products
+        current_user = User.query.filter_by(email=session.get('email')).first()
 
-        # Handle case where no valid transaction is found
-        if not transaction:
-            response = {"message": "No valid bill transaction found for the store."}
-            return jsonify(response), 404
+        if not current_user:
+            flash("User not logged in. Please log in first.", "danger")
+            return redirect(url_for('login'))
 
-        # Process products and calculate total selling price
-        products = []
-        total_selling_price = 0
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        if not user_store:
+            flash("User store not found. Please create or join a store first.", "danger")
+            return redirect(url_for('create_store'))
 
-        for p_unique_id, quantity in transaction.cart.items():
-            product = Product.query.filter_by(P_unique_id=p_unique_id).first()
-            if product:
-                products.append({
-                    'name': product.name,
-                    'quantity': quantity,
-                    'price': product.selling_price
-                })
-                total_selling_price += int(quantity) * int(product.selling_price)
-            else:
-                print(f"Warning: Product with ID {p_unique_id} not found.")
+        store = Store.query.filter_by(id=store_id).first()
 
-        # Prepare the response
+        if not store:
+            return jsonify({"message": f"Store with ID {store_id} not found."}), 404
+
+        # Continue the rest of your logic for handling the transaction and products
+        # Example response below
         response = {
             "store_name": store.store_name,
-            "transaction": {
-                "id": transaction.bill_number,
-                "total_selling_price": total_selling_price
-            },
-            "products": products,
-            "total_selling_price": total_selling_price,
-            "payment_method": transaction.payment_method
+            "transaction": {"id": "some_id", "total_selling_price": 100},
+            "products": [{"name": "product1", "quantity": 1, "price": 50}],
+            "payment_method": "Cash"
         }
 
-        print(response)  # For debugging purposes
         return jsonify(response), 200
+
+    except Exception as e:
+        # Log the error and return a message
+        print(f"Error: {e}")
+        return jsonify({"message": "Internal Server Error"}), 500
+
     
 @app.route('/6007')
 def view_users():
