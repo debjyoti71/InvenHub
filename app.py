@@ -1054,7 +1054,9 @@ def esp_api_print():
 
         # Prepare the response
         response = {
-            "store_name": store.store_name,
+            "store":{ "store_name":store.store_name,
+                     "store_address":store.store_address
+                          },
             "transaction": {
                 "id": transaction.bill_number,
                 "customerName": transaction.customer_name,
