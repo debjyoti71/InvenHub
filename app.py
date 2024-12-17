@@ -1033,44 +1033,49 @@ def esp_api_print():
 
     if request.method == 'GET':
         transaction_id = session.get('transaction_id')
-        if not transaction_id:
-            flash("No transaction ID found in session.", "danger")
-            return redirect(url_for('new_sale'))
+        if transaction_id:
+            # If transaction ID exists in session, fetch it
+            transaction = Transaction.query.filter_by(id=transaction_id, type="bill").first()
         else:
-            transaction = Transaction.query.filter_by(id = transaction_id,type = "bill").first()
-            if not transaction:
-                print("No due transactions found.", "danger")
-                response = {"message": "No bill available for print"}
-                print(response)
-                return jsonify(response)
+            # If no transaction ID in session, fetch the first available transaction with type="bill"
+            transaction = Transaction.query.filter_by(type="bill").first()
 
+        # Step 2: Handle case where no valid transaction is found
+        if not transaction:
+            flash("No valid bill transaction found.", "danger")
+            response = {"message": "No bill available for print"}
+            return jsonify(response), 404
 
+        # Step 3: Process products and calculate total selling price
         products = []
         total_selling_price = 0
+
         for p_unique_id, quantity in transaction.cart.items():
             product = Product.query.filter_by(P_unique_id=p_unique_id).first()
             if product:
-                products.append({'product': product, 'quantity': quantity})
+                products.append({
+                    'name': product.name,
+                    'quantity': quantity,
+                    'price': product.selling_price
+                })
                 total_selling_price += int(quantity) * int(product.selling_price)
             else:
-                print(f"Product with ID {p_unique_id} not found.", "warning")
+                print(f"Warning: Product with ID {p_unique_id} not found.")
 
+        # Step 4: Prepare the response
         response = {
-            "store_name": store.store_name,
+            "store_name": store.store_name,  # Ensure 'store' object is available
             "transaction": {
                 "id": transaction.bill_number,
                 "total_selling_price": total_selling_price
             },
-            "products": [
-                {"name": p['product'].name, "quantity": p['quantity'], "price": p['product'].selling_price}
-                for p in products
-            ],
+            "products": products,
             "total_selling_price": total_selling_price,
-            "payment_method" : transaction.payment_method
+            "payment_method": transaction.payment_method
         }
-        print(response)
 
-        return jsonify(response)
+        print(response)  # For debugging purposes
+        return jsonify(response), 200
 
 @app.route('/6007')
 def view_users():
