@@ -1033,7 +1033,7 @@ def esp_api_print():
 
     if request.method == 'GET':
         transaction_id = session.get('transaction_id')
-        if transaction_id:
+        if transaction_id & transaction == Transaction.query.filter_by(id=transaction_id, type="bill").first():
             # If transaction ID exists in session, fetch it
             transaction = Transaction.query.filter_by(id=transaction_id, type="bill").first()
         else:
