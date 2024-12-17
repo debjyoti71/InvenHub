@@ -1024,18 +1024,6 @@ def esp_api_print():
 
         store_id = int(store_id)  # Ensure it's an integer
 
-        # Proceed with the rest of the logic for handling the transaction and products
-        current_user = User.query.filter_by(email=session.get('email')).first()
-
-        if not current_user:
-            flash("User not logged in. Please log in first.", "danger")
-            return redirect(url_for('login'))
-
-        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-        if not user_store:
-            flash("User store not found. Please create or join a store first.", "danger")
-            return redirect(url_for('create_store'))
-
         store = Store.query.filter_by(id=store_id).first()
 
         if not store:
