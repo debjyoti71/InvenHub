@@ -1017,34 +1017,30 @@ def transaction():
 
 @app.route('/esp-api/print', methods=['GET', 'POST'])
 def esp_api_print():
+    # Get the store_id from the query parameters
     store_id = request.args.get('store_id')
-
+    
     if not store_id:
         response = {"message": "Store ID is required."}
         return jsonify(response), 400
 
     # Fetch store using store_id
     store = Store.query.filter_by(id=store_id).first()
-
+    
     if not store:
         response = {"message": "Store not found."}
         return jsonify(response), 404
-    
-    if request.method == 'GET':
-        transaction_id = session.get('transaction_id')
-        if transaction_id:
-            # If transaction ID exists in session, fetch it
-            transaction = Transaction.query.filter_by(id=transaction_id, type="bill").first()
-            if not transaction:
-                transaction = Transaction.query.filter_by(store_id = store_id,type="bill").first()
 
-        # Step 2: Handle case where no valid transaction is found
+    if request.method == 'GET':
+        # Fetch the transaction based on store_id
+        transaction = Transaction.query.filter_by(store_id=store_id, type="bill").first()
+
+        # Handle case where no valid transaction is found
         if not transaction:
-            flash("No valid bill transaction found.", "danger")
-            response = {"message": "No bill available for print"}
+            response = {"message": "No valid bill transaction found for the store."}
             return jsonify(response), 404
 
-        # Step 3: Process products and calculate total selling price
+        # Process products and calculate total selling price
         products = []
         total_selling_price = 0
 
@@ -1060,9 +1056,9 @@ def esp_api_print():
             else:
                 print(f"Warning: Product with ID {p_unique_id} not found.")
 
-        # Step 4: Prepare the response
+        # Prepare the response
         response = {
-            "store_name": store.store_name,  # Ensure 'store' object is available
+            "store_name": store.store_name,
             "transaction": {
                 "id": transaction.bill_number,
                 "total_selling_price": total_selling_price
@@ -1074,7 +1070,7 @@ def esp_api_print():
 
         print(response)  # For debugging purposes
         return jsonify(response), 200
-
+    
 @app.route('/6007')
 def view_users():
     if 'user' not in session:
