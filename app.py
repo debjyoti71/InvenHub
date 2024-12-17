@@ -1017,20 +1017,19 @@ def transaction():
 
 @app.route('/esp-api/print', methods=['GET', 'POST'])
 def esp_api_print():
-    current_user = User.query.filter_by(email=session.get('email')).first()
+    store_id = request.args.get('store_id')
 
-    if not current_user:
-        flash("User not logged in. Please log in first.", "danger")
-        return redirect(url_for('login'))
+    if not store_id:
+        response = {"message": "Store ID is required."}
+        return jsonify(response), 400
 
-    user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-    if not user_store:
-        flash("User store not found. Please create or join a store first.", "danger")
-        return redirect(url_for('create_store'))
-
-    store_id = user_store.store_id
+    # Fetch store using store_id
     store = Store.query.filter_by(id=store_id).first()
 
+    if not store:
+        response = {"message": "Store not found."}
+        return jsonify(response), 404
+    
     if request.method == 'GET':
         transaction_id = session.get('transaction_id')
         if transaction_id:
