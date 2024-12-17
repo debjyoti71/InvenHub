@@ -1029,13 +1029,39 @@ def esp_api_print():
         if not store:
             return jsonify({"message": f"Store with ID {store_id} not found."}), 404
 
-        # Continue the rest of your logic for handling the transaction and products
-        # Example response below
+        transaction = Transaction.query.filter_by(store_id=store_id, type="bill").first()
+
+        # Handle case where no valid transaction is found
+        if not transaction:
+            response = {"message": "No valid bill transaction found for the store."}
+            return jsonify(response), 404
+
+        # Process products and calculate total selling price
+        products = []
+        total_selling_price = 0
+
+        for p_unique_id, quantity in transaction.cart.items():
+            product = Product.query.filter_by(P_unique_id=p_unique_id).first()
+            if product:
+                products.append({
+                    'name': product.name,
+                    'quantity': quantity,
+                    'price': product.selling_price
+                })
+                total_selling_price += int(quantity) * int(product.selling_price)
+            else:
+                print(f"Warning: Product with ID {p_unique_id} not found.")
+
+        # Prepare the response
         response = {
             "store_name": store.store_name,
-            "transaction": {"id": "some_id", "total_selling_price": 100},
-            "products": [{"name": "product1", "quantity": 1, "price": 50}],
-            "payment_method": "Cash"
+            "transaction": {
+                "id": transaction.bill_number,
+                "total_selling_price": total_selling_price
+            },
+            "products": products,
+            "total_selling_price": total_selling_price,
+            "payment_method": transaction.payment_method
         }
 
         return jsonify(response), 200
