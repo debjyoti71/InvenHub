@@ -258,11 +258,15 @@ var(--950);
                             </tr>
                             {% endfor %}
                         {% else %}
+                            <tr>
+                                <td colspan="3">No products in the cart.</td>
+                            </tr>
+                        {% endif %}
                         </tbody>
                     </table>
                 </div>
                 <div class="col" style="height: auto; margin: 30px; display: flex; flex-direction: column;">
-                    <div class="row"><h3>Order Summmary</h3></div>
+                    <div class="row"><h3>Order Summary</h3></div>
                     <div class="row"></div>
                     <table class="table table-striped" id="checkoutTable" style="margin-top: 30px;">
                         <thead>
@@ -271,7 +275,9 @@ var(--950);
                             </tr>
                         </thead>
                         <tbody>
-                            {{ total_selling_price }}
+                            <tr>
+                                <td>{{ total_selling_price }}</td>
+                            </tr>
                         </tbody>
                     </table>
                     <label for="" style="margin-top: 50px;">Apply promocode</label>
@@ -281,11 +287,54 @@ var(--950);
                         <option selected>Cash</option>
                         <option>Card</option>
                         <option>UPI</option>
-                    </select>
+                    </select>     
+                    <button id="proceedButton" class="btn btn-primary" style="margin-top: 40px;" onclick="proceedAndRedirect()">Proceed</button>              
                 </div>
             </div>
-        </div>
-    </div>
+            
+            <script>
+                // Pass the transaction ID directly into JavaScript
+                const transactionId = "{{ transaction.id }}";
+                const total_selling_price = "{{total_selling_price}}"
+
+                function redirectToPage() {
+                    // Get the selected value from the select element
+                    var paymentMethod = document.getElementById('business-profile').value;
+
+                    // Prepare the data to be sent in the POST request
+                    var data = { paymentMethod: paymentMethod, transactionId: transactionId, total_selling_price : total_selling_price };
+
+                    // Send the POST request using Fetch API
+                    fetch('/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())  // Handle response as JSON
+                    .then(data => {
+                        console.log('Success:', data);  // Handle success response
+                        if (data.message) {
+                            alert(data.message);  // Show success message if available
+                            window.location.href = "/dashboard";  // Redirect to dashboard or another page
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);  // Handle error
+                    });
+                }
+
+                function proceedAndRedirect() {
+                    // Call the redirectToPage function to handle the payment method and transaction ID POST request
+                    redirectToPage();
+
+                    // Redirect the user to the /inventory page
+                    window.location.href = "/inventory";
+                }
+            </script>
+            
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>

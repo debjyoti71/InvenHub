@@ -10,143 +10,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/new_sale.css">
 </head>
 
 <body>
-    <style>
-        :root {
-            --primary-blue: #3182ce;
-            --sidebar-width: 250px;
-        }
-
-
-        .main-content {
-            padding: 2rem;
-            height: auto;
-        }
-        .form-container {
-            border-radius: 1rem;
-        }
-
-        .section-title {
-            margin-top: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .scan-barcode-btn {
-            background-color: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-        }
-
-        .scan-barcode-btn i {
-            margin-right: 0.5rem;
-        }
-
-        .proceed-btn {
-            background-color: var(--primary-blue);
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 2rem;
-            border: none;
-        }
-
-        .add-product-btn {
-            color: var(--primary-blue);
-            background: none;
-            border: 1px solid var(--primary-blue);
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-        }
-        .checkOutButton{
-            height: 40px;
-            width: auto;
-            margin-top: 20px;
-            background-color: #3182ce;
-        }
-        .btn-44,
-.btn-44 *,
-.btn-44 :after,
-.btn-44 :before,
-.btn-44:after,
-.btn-44:before {
-  border: 0 solid;
-  box-sizing: border-box;
-}
-.btn-44 {
-  -webkit-tap-highlight-color: 
-transparent;
-  -webkit-appearance: button;
-  background-color: 
-var(--950);
-  background-image: none;
-  color: 
-#fff;
-  cursor: pointer;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
-    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-  font-size: 100%;
-  font-weight: 900;
-  line-height: 1.5;
-  margin: 0;
-  -webkit-mask-image: -webkit-radial-gradient(var(--950), #fff);
-  padding: 0;
-}
-.btn-44:disabled {
-  cursor: default;
-}
-.btn-44:-moz-focusring {
-  outline: auto;
-}
-.btn-44 svg {
-  display: block;
-  vertical-align: middle;
-}
-.btn-44 [hidden] {
-  display: none;
-}
-.btn-44 {
-  border: 1px solid;
-  border-radius: 999px;
-  box-sizing: border-box;
-  display: block;
-  overflow: hidden;
-  padding: 1.2rem 3rem;
-  position: relative;
-  text-transform: uppercase;
-}
-.btn-44 span {
-  font-weight: 900;
-  mix-blend-mode: difference;
-}
-.btn-44:after,
-.btn-44:before {
-  background: 
-#fff;
-  content: "";
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: -100%;
-  transition: transform 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-  width: 100%;
-  will-change: transform;
-}
-.btn-44:after {
-  background: 
-#dedede;
-  transition-delay: 0.13s;
-  z-index: -1;
-}
-.btn-44:hover:after,
-.btn-44:hover:before {
-  transform: translateY(100%);
-}
-    </style>
     <div class="wrapper">
         <aside id="sidebar">
             <div class="d-flex">
@@ -177,7 +44,7 @@ var(--950);
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="Orders.html" class="sidebar-link">
+                    <a href="/transactions" class="sidebar-link">
                         <i><img height="25px" width="25px" src="/static/images/icons8-order-50.png" alt="warehouse-1"/></i>
                         <span style="margin-left: 20px;">Orders</span>
                     </a>
@@ -196,7 +63,7 @@ var(--950);
                 </a>
             </div>
             <div class="sidebar-footer">
-                <a href="/logout" class="sidebar-link">
+                <a href="{{ url_for('logout') }}" class="sidebar-link">
                     <i><img height="25px" width="25px" src="/static/images/icons8-logout-50 (1).png" alt="warehouse-1"/></i>
                     <span style="margin-left: 20px;">Logout</span>
                 </a>
@@ -235,44 +102,33 @@ var(--950);
                     </div>
                 </div>
             </div>
-            <div class="row" style="height: 100%;">
+            <div class="row" id="C-from">
                 <div class="col">
                     <main class="main-content">
                         <h1 class="mb-4">Sell Items</h1>
                         
                         <div class="form-container">
+                            
                             <form id="sellItemsForm">
+                                <!-- Customer Section -->
+                                <div class="mb-4">
+                                    <h3 class="section-title">Customer Details</h3>
+                                    <div class="mb-3">
+                                        <input type="tel" class="form-control" id="customer_name">
+                                    </div>
+                                </div>
+                
                                 <!-- Product Section -->
-                                <div class="product-fields">
-                                    <div class="mb-3">
-                                        <label for="productName" class="form-label">Product Name</label>
-                                        <input type="text" class="form-control" name="productName" id="productName" required autocomplete="off">
-                                        <ul id="productSuggestions" class="list-group mt-2" style="display: none;"></ul>
+                                <div class="mb-4">
+                                    <h3 class="section-title">Product details</h3>
+                                    <div class="text-end mb-3">
+                                        <button type="button" class="scan-barcode-btn">
+                                            <i class="bi bi-upc-scan"></i>Scan Barcode to Autofill
+                                        </button>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="productSellingPrice" class="form-label">Price</label>
-                                        <input type="number" class="form-control" name="productSellingPrice" id="productSellingPrice" step="0.01" required readonly>
-                                    </div>
-                                    <input type="hidden" id="productId">
-                                    <div class="mb-3">
-                                        <label for="productQuantity" class="form-label">Quantity</label>
-                                        <input type="number" class="form-control" name="quantity" id="productQuantity" placeholder="No. of Items" oninput="validateQuantity()" required>
-                                    </div>
-                                    <input type="hidden" id="productManufactureDate">
-                                    <input type="hidden" id="productExpiryDate">
-                                </div>
-                        
-                                <!-- Save Product Button -->
-                                <div class="text-center">
-                                    <button type="button" class="btn btn-success" id="saveProductButton">Save Product</button>
-                                </div>
-                        
-                                <!-- Added Products Section -->
-                                <div class="mt-5">
-                                    <h2 class="section-title">Added Products</h2>
-                                    <div class="mb-3">
-                                        <label for="transactionSelect" class="form-label">Select Transaction</label>
-                                        <select id="transactionSelect" class="form-control" name="transaction">
+                                    <div id="cartActions">
+                                        <select id="billSelect" class="mb-3" onchange="fetchCartDetails()">
+                                            <!-- <option value="">Select a Bill Number</option> -->
                                             {% for t in transactions %}
                                                 <option value="{{ t.id }}">
                                                     Bill Number: {{ t.bill_number }} | Customer: {{ t.customer_name }}
@@ -280,251 +136,315 @@ var(--950);
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    <table class="table table-striped" id="productTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Product Name</th>
-                                                <th>Price</th>
-                                                <th>Quantity</th>
-                                                <th>Total Price</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                        </tbody>
-                                    </table>
-                                    <p class="text-end"><strong>Total Price: </strong><span id="totalPrice">0.00</span></p>
-                                    <div class="text-center d-flex justify-content-center align-items-center" id="proceedToCheckout">
-                                        <a href="/checkout">
-                                            <button type="button" class="btn-44" id="checkoutButton" disabled>Proceed to Checkout</button>
-                                        </a>
-                                    </div>
+                                    <div class="product-fields" id="productForm">
+                                        <div class="mb-3">
+                                            <input type="text" id="productName" class="form-control" placeholder="Product Name" autocomplete="off">
+                                            <ul id="productSuggestions"></ul>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="number" id="productSellingPrice" class="form-control" placeholder="Price" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="number" id="productQuantity" class="form-control" placeholder="No. of Items" min="1" value="1">
+                                        </div>
+                                        <a class="button" onclick="addToTable()" >Add to Table</a>
+                                        <!-- <button type="button" onclick="addToTable()" class="btn btn-primary">Add to Table</button> -->
+                                    </div>                
+                                    <button type="button" class="add-product-btn" hidden>
+                                        <i class="bi bi-plus"></i> Add Product
+                                    </button>
                                 </div>
+                                <div class="text-center">
+                                    <button type="submit" class="proceed-btn" hidden></button>
+                                </div>
+                            </form>
+                        </div>
+                    </main>
+                </div>
+                <div class="col">
+                    <div class="row" style="height:80vh;">
+                        <div class="col-11" style="overflow-y:scroll;height:100%;">
+                            <h1 class="section-title">Added Products</h1>
+                <table class="table table-striped" id="productTable">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                    </tbody>
+                </table>
+                <table class="table table-striped" id="checkoutTable">
+                    <thead>
+                        <tr>
+                            <th>Total price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="d-flex justify-content-center align-items-center">
+                    <a href="/checkout">
+                        <button type="button" class="btn-44" onclick="completeSale()"><span>Proceed to Checkout</span></button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
                         
-                                <script>
-                                    let selectedProduct = {};
-                                    let productStock = 0;
-                                    let cart = {}; // Object to store product IDs and quantities
-                        
-                                    // Fetch product suggestions based on user input
-                                    function fetchProductSuggestions(query) {
-                                        const storeId = "{{ store_id }}";
-                        
-                                        if (query.length < 2) {
-                                            hideSuggestions();
-                                            return;
-                                        }
-                        
-                                        fetch(`/suggest-products?query=${query}&store_id=${storeId}`)
-                                            .then(response => response.json())
-                                            .then(data => displayProductSuggestions(data.suggestions))
-                                            .catch(error => {
-                                                console.error('Error fetching product suggestions:', error);
-                                            });
-                                    }
-                        
-                                    function displayProductSuggestions(suggestions) {
-                                        const suggestionsList = document.getElementById('productSuggestions');
-                                        suggestionsList.innerHTML = '';
-                                        suggestionsList.style.display = 'block';
-                        
-                                        if (suggestions.length > 0) {
-                                            suggestions.forEach(product => {
-                                                const item = document.createElement('li');
-                                                item.className = 'list-group-item suggestion-item';
-                                                item.textContent = `${product.name} - ${product.selling_price} (Stock: ${product.stock})`;
-                                                item.onclick = () => selectProduct(product);
-                                                suggestionsList.appendChild(item);
-                                            });
-                                        } else {
-                                            const noResultsItem = document.createElement('li');
-                                            noResultsItem.className = 'list-group-item';
-                                            noResultsItem.textContent = 'No products found';
-                                            suggestionsList.appendChild(noResultsItem);
-                                        }
-                                    }
-                        
-                                    function hideSuggestions() {
-                                        const suggestionsList = document.getElementById('productSuggestions');
-                                        suggestionsList.style.display = 'none';
-                                    }
-                        
-                                    function selectProduct(product) {
-                                        document.getElementById('productName').value = product.name;
-                                        document.getElementById('productSellingPrice').value = product.selling_price;
-                                        document.getElementById('productQuantity').value = 1;
-                                        document.getElementById('productId').value = product.product_id;
-                        
-                                        productStock = product.stock;
-                                        selectedProduct = product;
-                        
-                                        hideSuggestions();
-                                    }
-                        
-                                    function validateQuantity() {
-                                        const quantity = document.getElementById('productQuantity').value;
-                        
-                                        if (quantity > productStock) {
-                                            alert(`You cannot order more than ${productStock} items. Please adjust the quantity.`);
-                                            document.getElementById('productQuantity').value = productStock;
-                                        }
-                                    }
-                        
-                                    function updateTable() {
-                                        const quantity = parseInt(document.getElementById('productQuantity').value, 10);
-                                        const totalPrice = quantity * selectedProduct.selling_price;
-                        
-                                        let row = document.querySelector(`#productTable tbody tr[data-product-id='${selectedProduct.product_id}']`);
-                        
-                                        if (row) {
-                                            row.querySelector('.product-quantity').textContent = quantity;
-                                            row.querySelector('.product-total-price').textContent = totalPrice.toFixed(2);
-                                            row.querySelector('input[name="quantities[]"]').value = quantity;
-                                        } else {
-                                            const newRow = document.createElement('tr');
-                                            newRow.setAttribute('data-product-id', selectedProduct.product_id);
-                        
-                                            newRow.innerHTML = `
-                                                <td>${selectedProduct.name}</td>
-                                                <td>${selectedProduct.selling_price}</td>
-                                                <td class="product-quantity">${quantity}</td>
-                                                <td class="product-total-price">${totalPrice.toFixed(2)}</td>
-                                                <input type="hidden" name="product_ids[]" value="${selectedProduct.product_id}">
-                                                <input type="hidden" name="quantities[]" value="${quantity}">
-                                            `;
-                        
-                                            document.querySelector('#productTable tbody').appendChild(newRow);
-                                        }
-                        
-                                        updateTotalPrice();
-                                    }
-                        
-                                    function updateTotalPrice() {
-                                        let total = 0;
-                        
-                                        document.querySelectorAll('#productTable tbody tr').forEach(row => {
-                                            total += parseFloat(row.querySelector('.product-total-price').textContent);
-                                        });
-                        
-                                        document.getElementById('totalPrice').textContent = total.toFixed(2);
-                                        document.getElementById('checkoutButton').disabled = total === 0;
-                                    }
-                        
-                                    function resetProductFields() {
-                                        document.getElementById('productName').value = '';
-                                        document.getElementById('productSellingPrice').value = '';
-                                        document.getElementById('productQuantity').value = '';
-                                        document.getElementById('productId').value = '';
-                                        selectedProduct = {};
-                                        productStock = 0;
-                                    }
-                        
-                                    function resetProductTable() {
-                                        const tableBody = document.querySelector('#productTable tbody');
-                                        tableBody.innerHTML = '';
-                                        document.getElementById('totalPrice').textContent = '0.00';
-                                        document.getElementById('checkoutButton').disabled = true;
-                                    }
-                        
-                                    function updateTableWithCart(cart) {
-                                        console.log("Updating table with cart:", cart);
+    <script>
+        fetchCartDetails();
+        let selectedProduct = null;
+        let productStock = 0;
+        const storeId = "{{store_id}}"; // Replace with your actual store ID
+        let cart = {};
 
-                                        const tableBody = document.querySelector('#productTable tbody');
-                                        tableBody.innerHTML = ''; // Clear existing rows
+        document.getElementById('productName').addEventListener('input', function() {
+            fetchProductSuggestions(this.value);
+        });
 
-                                        let total = 0;
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('productSuggestions').contains(e.target) && e.target.id !== 'productName') {
+                hideSuggestions();
+            }
+        });
 
-                                        Object.entries(cart).forEach(([productId, quantity]) => {
-                                            console.log(`Processing product: ${productId}, Quantity: ${quantity}`);
-                                            
-                                            fetch(`/get-product-details?product_id=${productId}`)
-                                                .then(response => response.json())
-                                                .then(product => {
-                                                    console.log("Fetched product:", product);
+        function fetchProductSuggestions(query) {
+            if (query.length < 2) {
+                hideSuggestions();
+                return;
+            }
 
-                                                    if (!product) {
-                                                        console.warn(`Product with ID ${productId} not found.`);
-                                                        return;
-                                                    }
+            fetch(`/suggest-products?query=${encodeURIComponent(query)}&store_id=${storeId}`)
+                .then(response => response.json())
+                .then(data => displayProductSuggestions(data.suggestions))
+                .catch(error => {
+                    console.error('Error fetching product suggestions:', error);
+                });
+        }
 
-                                                    const totalPrice = product.selling_price * quantity;
+        function displayProductSuggestions(suggestions) {
+            const suggestionsList = document.getElementById('productSuggestions');
+            suggestionsList.innerHTML = '';
+            suggestionsList.style.display = 'block';
 
-                                                    const row = document.createElement('tr');
-                                                    row.setAttribute('data-product-id', productId);
-                                                    row.innerHTML = `
-                                                        <td>${product.name}</td>
-                                                        <td>${product.selling_price}</td>
-                                                        <td class="product-quantity">${quantity}</td>
-                                                        <td class="product-total-price">${totalPrice.toFixed(2)}</td>
-                                                    `;
-                                                    tableBody.appendChild(row);
+            if (suggestions.length > 0) {
+                suggestions.forEach(product => {
+                    const item = document.createElement('li');
+                    item.className = 'suggestion-item';
+                    item.textContent = `${product.product_id} - ${product.name} - ${product.selling_price}₹ (Stock: ${product.stock})`;
+                    item.onclick = () => selectProduct(product);
+                    suggestionsList.appendChild(item);
+                });
+            } else {
+                const noResultsItem = document.createElement('li');
+                noResultsItem.className = 'suggestion-item';
+                noResultsItem.textContent = 'No products found';
+                suggestionsList.appendChild(noResultsItem);
+            }
+        }
 
-                                                    total += totalPrice;
-                                                    document.getElementById('totalPrice').textContent = total.toFixed(2);
+        function hideSuggestions() {
+            document.getElementById('productSuggestions').style.display = 'none';
+        }
 
-                                                    // Enable the proceed to checkout button if there's at least one item
-                                                    document.getElementById('checkoutButton').disabled = total === 0;
-                                                })
-                                                .catch(error => {
-                                                    console.error('Error fetching product details:', error);
-                                                });
-                                        });
-                                    }
-                        
-                                    document.getElementById('transactionSelect').addEventListener('change', function () {
-                                        const selectedTransactionId = this.value;
-                        
-                                        if (!selectedTransactionId) {
-                                            resetProductTable();
-                                            return;
-                                        }
-                        
-                                        fetch(`/get-cart-details?transaction_id=${selectedTransactionId}`)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                if (data.cart) {
-                                                    updateTableWithCart(data.cart);
-                                                } else {
-                                                    resetProductTable();
-                                                    alert("No products found in the selected transaction.");
-                                                }
-                                            })
-                                            .catch(error => {
-                                                console.error('Error fetching cart details:', error);
-                                                alert("Failed to fetch cart details. Please try again.");
-                                            });
-                                    });
-                        
-                                    document.getElementById('checkoutButton').addEventListener('click', function () {
-                                        const selectedTransactionId = document.getElementById('transactionSelect').value;
-                        
-                                        const productIds = [];
-                                        const quantities = [];
-                        
-                                        document.querySelectorAll('#productTable tbody tr').forEach(row => {
-                                            productIds.push(row.querySelector('input[name="product_ids[]"]').value);
-                                            quantities.push(row.querySelector('input[name="quantities[]"]').value);
-                                        });
-                        
-                                        const cartData = {};
-                                        productIds.forEach((id, index) => {
-                                            cartData[id] = quantities[index];
-                                        });
-                        
-                                        fetch('/new_sale', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ cart: cartData, transaction_id: selectedTransactionId })
-                                        })
-                                            .then(response => response.json())
-                                            .then(() => {
-                                                window.location.href = "/checkout";
-                                            })
-                                            .catch(error => {
-                                                console.error('Error saving cart:', error);
-                                            });
-                                    });
-                                </script>
+        function selectProduct(product) {
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productSellingPrice').value = product.selling_price.toFixed(2);
+            selectedProduct = product;
+            productStock = product.stock;
+            
+            const existingRow = document.querySelector(`tr[data-product-id="${product.product_id}"]`);
+            if (existingRow) {
+                const currentQuantity = cart[product.product_id] || 1;
+                document.getElementById('productQuantity').value = currentQuantity;
+            } else {
+                document.getElementById('productQuantity').value = 1;
+            }
+            
+            hideSuggestions();
+        }
 
+        function addToTable() {
+            if (!selectedProduct) {
+                alert('Please select a product first.');
+                return;
+            }
+
+            validateQuantity();
+            const quantity = parseInt(document.getElementById('productQuantity').value);
+            updateTableRow(selectedProduct.product_id, selectedProduct.name, selectedProduct.selling_price, quantity);
+
+            // Reset form
+            document.getElementById('productName').value = '';
+            document.getElementById('productSellingPrice').value = '';
+            document.getElementById('productQuantity').value = '1';
+            selectedProduct = null;
+            productStock = 0;
+        }
+
+        function updateTableRow(productId, name, price, quantity) {
+            const tableBody = document.getElementById('productTableBody');
+            const existingRow = document.querySelector(`tr[data-product-id="${productId}"]`);
+            const total = price * quantity;
+
+            if (existingRow) {
+                const quantityInput = existingRow.querySelector('.quantity-input');
+                quantityInput.value = quantity;
+                existingRow.querySelector('td:nth-child(4)').textContent = `${total.toFixed(2)}₹`;
+            } else {
+                const newRow = tableBody.insertRow();
+                newRow.setAttribute('data-product-id', productId);
+                newRow.innerHTML = `
+                    <td>${name}</td>
+                    <td>${price.toFixed(2)}₹</td>
+                    <td><input type="number" class="quantity-input" value="${quantity}" min="1" onchange="updateQuantity(this, '${productId}')"></td>
+                    <td>${total.toFixed(2)}₹</td>
+                `;
+            }
+
+            // Update cart
+            cart[productId] = quantity;
+        }
+
+        function updateQuantity(input, productId) {
+            const quantity = parseInt(input.value);
+            const productStock = productStocks[productId];
+            if (isNaN(quantity) || quantity < 1) {
+                alert('Please enter a valid quantity.');
+                input.value = cart[productId];
+                return;
+            }
+            if (!validateQuantity()) {
+                input.value = cart[productId]; // Reset the quantity to the previous value if invalid
+                return;
+            }
+
+            const row = input.closest('tr');
+            const price = parseFloat(row.cells[1].textContent.substring(1));
+            const total = price * quantity;
+
+            row.cells[3].textContent = `${total.toFixed(2)}₹`;
+            cart[productId] = quantity;
+        }
+
+        function fetchCartDetails() {
+            const transactionId = document.getElementById('billSelect').value;
+            if (!transactionId) return;
+
+            fetch(`/get-cart-details?transaction_id=${transactionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.cart) {
+                        cart = data.cart;
+                        customer_name = data.customer_name;
+                        updateTableFromCart();
+                        updatecustomer();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching cart details:', error);
+                });
+        }
+
+        function updatecustomer() {
+            console.log('Updating customer name:', customer_name);
+            
+            const customerInput = document.getElementById('customer_name');
+            
+            if (customer_name && customer_name.toLowerCase() !== 'none') {
+                // If customer_name is available and not "none", set the input field's value
+                customerInput.value = customer_name;
+            } else {
+                // If customer_name is "none" or falsy, leave the input box empty or show a placeholder
+                customerInput.value = '';  // Clear the input box
+                customerInput.placeholder = 'Please enter customer name';  // Optional: Set a placeholder message
+            }
+        }
+
+        function updateTableFromCart() {
+            const tableBody = document.getElementById('productTableBody');
+            tableBody.innerHTML = '';
+
+            for (const [productId, quantity] of Object.entries(cart)) {
+                fetch(`/get-product-details?product_id=${productId}`)
+                    .then(response => response.json())
+                    .then(product => {
+                        updateTableRow(productId, product.name, product.selling_price, quantity);
+                        productStocks[productId] = product.stock;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching product details:', error);
+                    });
+            }
+        }
+
+        function completeSale() {
+            if (Object.keys(cart).length === 0) {
+                alert('Your cart is empty. Please add some products before completing the sale.');
+                return;
+            }
+
+            const billNumber = document.getElementById('billSelect').value;
+            if (!billNumber) {
+                alert('Please select a bill number before completing the sale.');
+                return;
+            }
+            const customer_name = document.getElementById('customer_name').value;
+
+            fetch('/new_sale', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    store_id: storeId,
+                    bill_number: billNumber,
+                    cart: cart,
+                    customer_name: customer_name
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success || data.message === "Cart updated successfully") {
+                    // alert('Sale completed successfully!');
+                    // Clear the table and cart
+                    document.getElementById('productTableBody').innerHTML = '';
+                    cart = {};
+                    // Reset bill selection
+                    document.getElementById('billSelect').value = '';
+                    // Redirect to checkout page
+                    window.location.href = '/checkout';
+                } else {
+                    alert('Error completing sale: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while completing the sale. Please try again.');
+            });
+        }
+
+        function validateQuantity() {
+            const quantity = parseInt(document.getElementById('productQuantity').value);
+
+            if (quantity > productStock) {
+                alert(`You cannot order more than ${productStock} items. Please adjust the quantity.`);
+                document.getElementById('productQuantity').value = productStock;
+            }
+        }
+        document.getElementById('animatedButton').addEventListener('click', function() {
+            this.classList.toggle('active');
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
