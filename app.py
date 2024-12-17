@@ -1057,7 +1057,8 @@ def esp_api_print():
             "store_name": store.store_name,
             "transaction": {
                 "id": transaction.bill_number,
-                "total_selling_price": total_selling_price
+                "customerName": transaction.customer_name,
+                "date": transaction.transaction_date.strftime("%Y-%m-%d %H:%M:%S")
             },
             "products": products,
             "total_selling_price": total_selling_price,
