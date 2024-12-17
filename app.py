@@ -1033,12 +1033,11 @@ def esp_api_print():
 
     if request.method == 'GET':
         transaction_id = session.get('transaction_id')
-        if transaction_id & transaction == Transaction.query.filter_by(id=transaction_id, type="bill").first():
+        if transaction_id:
             # If transaction ID exists in session, fetch it
             transaction = Transaction.query.filter_by(id=transaction_id, type="bill").first()
-        else:
-            # If no transaction ID in session, fetch the first available transaction with type="bill"
-            transaction = Transaction.query.filter_by(type="bill").first()
+            if not transaction:
+                transaction = Transaction.query.filter_by(store_id = store_id,type="bill").first()
 
         # Step 2: Handle case where no valid transaction is found
         if not transaction:
