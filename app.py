@@ -577,7 +577,8 @@ def new_product():
                     payment_method='cash',
                     total_selling_price=0,
                     cart=cart,
-                    success='yes'
+                    success='yes',
+                    type = 'checkout'
                 )
                 db.session.add(transaction)
                 print(f"Transaction added: {transaction.bill_number}, Type: {transaction.transaction_type}")  # Debug
@@ -1035,13 +1036,13 @@ def esp_api_print():
         if not transaction_id:
             flash("No transaction ID found in session.", "danger")
             return redirect(url_for('new_sale'))
-
-        transaction = Transaction.query.filter_by(id = transaction_id,type = "bill").first()
-        if not transaction:
-            print("No due transactions found.", "danger")
-            response = {"message": "No bill available for print"}
-            print(response)
-            return jsonify(response)
+        else:
+            transaction = Transaction.query.filter_by(id = transaction_id,type = "bill").first()
+            if not transaction:
+                print("No due transactions found.", "danger")
+                response = {"message": "No bill available for print"}
+                print(response)
+                return jsonify(response)
 
 
         products = []
