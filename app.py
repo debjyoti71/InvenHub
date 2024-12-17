@@ -943,24 +943,24 @@ def checkout():
                 print("Transaction type set to 'bill'.", "info")
 
                 # Use threading or a task queue like Celery for the delayed change
-                # from threading import Timer
+                from threading import Timer
 
-                # def reset_transaction_type():
-                #     with app.app_context():  # Ensure the app context is available
-                #         # Query the transaction from the database
-                #         transaction_to_reset = Transaction.query.get(transaction_id)
-                #         if transaction_to_reset and transaction_to_reset.type == "bill":
-                #             # Reset the transaction type after the timer
-                #             transaction_to_reset.type = "checkout"
-                #             try:
-                #                 db.session.commit()  # Commit the change to reset the type
-                #                 print("Transaction type reset to 'checkout'.", "info")
-                #             except Exception as e:
-                #                 db.session.rollback()  # Rollback in case of any error
-                #                 print(f"Failed to reset transaction type: {e}", "danger")
+                def reset_transaction_type():
+                    with app.app_context():  # Ensure the app context is available
+                        # Query the transaction from the database
+                        transaction_to_reset = Transaction.query.get(transaction_id)
+                        if transaction_to_reset and transaction_to_reset.type == "bill":
+                            # Reset the transaction type after the timer
+                            transaction_to_reset.type = "checkout"
+                            try:
+                                db.session.commit()  # Commit the change to reset the type
+                                print("Transaction type reset to 'checkout'.", "info")
+                            except Exception as e:
+                                db.session.rollback()  # Rollback in case of any error
+                                print(f"Failed to reset transaction type: {e}", "danger")
 
-                # # Schedule the type reset after 30 seconds
-                # Timer(30, reset_transaction_type).start()
+                # Schedule the type reset after 30 seconds
+                Timer(30, reset_transaction_type).start()
 
             except Exception as e:
                 db.session.rollback()  # Rollback in case of any error setting the type to 'bill'
