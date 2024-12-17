@@ -960,7 +960,7 @@ def checkout():
                                 print(f"Failed to reset transaction type: {e}", "danger")
 
                 # Schedule the type reset after 30 seconds
-                Timer(30, reset_transaction_type).start()
+                Timer(10, reset_transaction_type).start()
 
             except Exception as e:
                 db.session.rollback()  # Rollback in case of any error setting the type to 'bill'
