@@ -581,6 +581,7 @@ def new_product():
                     type = 'checkout'
                 )
                 db.session.add(transaction)
+                db.session.commit()
                 print(f"Transaction added: {transaction.bill_number}, Type: {transaction.transaction_type}")  # Debug
 
                 # Add a transaction item
@@ -981,6 +982,8 @@ def checkout():
             print(f"An error occurred: {e}", "danger")
             return jsonify({"error": str(e)}), 500
         
+from flask import request, jsonify
+
 @app.route("/transactions", methods=["GET", "POST"])
 def transaction():
     # Check if the user is logged in
@@ -996,24 +999,70 @@ def transaction():
         return redirect(url_for('create_store'))  # Redirect to store creation page
     
     store_id = user_store.store_id
-    transaction_type = request.args.get('type', 'order').lower()  # Default to 'order' if no type is provided
+    
+    # Get the type from query parameters (default to 'order')
+    transaction_type = request.args.get('type', 'order')  # Default to 'order' if no type is specified
     
     # Handle GET request
     if request.method == 'GET':
         # Query the transactions based on store ID and transaction type
-        transactions = Transaction.query.filter_by(store_id=store_id, transaction_type=transaction_type).order_by(
-            func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
-        ).all()
+        if transaction_type == 'sale':
+            transactions = Transaction.query.filter_by(store_id=store_id, transaction_type="sale").order_by(
+                func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
+            ).all()
+        else:
+            transactions = Transaction.query.filter_by(store_id=store_id, transaction_type="order").order_by(
+                func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
+            ).all()
+
         if not transactions:
-            flash("No transactions found for the selected type.", "info")
+            flash(f"No transactions found for {transaction_type} type.", "info")
         
-        # Render the template with transactions data
+        # Render the template with the filtered transactions
         return render_template('transaction.html', transactions=transactions)
 
-    # Handle POST request (if needed)
+    # Handle POST request (for Print functionality)
     if request.method == 'POST':
-        # Add logic for handling POST requests here (e.g., adding a new transaction)
-        pass
+        try:
+            data = request.get_json()  # Parse the incoming JSON data
+            bill_number = data.get('transaction_id')
+            print(bill_number)
+            transaction = Transaction.query.filter_by(bill_number=bill_number).first()
+            print(transaction)
+            transaction_id = transaction.id
+            transaction.type = "bill"
+            try:
+                db.session.commit()  # Commit the change immediately to set the type to 'bill'
+                print("Transaction type set to 'bill'.", "info")
+
+                # Use threading or a task queue like Celery for the delayed change
+                from threading import Timer
+
+                def reset_transaction_type():
+                    with app.app_context():  # Ensure the app context is available
+                        # Query the transaction from the database
+                        transaction_to_reset = Transaction.query.get(transaction_id)
+                        if transaction_to_reset and transaction_to_reset.type == "bill":
+                            # Reset the transaction type after the timer
+                            transaction_to_reset.type = "checkout"
+                            try:
+                                db.session.commit()  # Commit the change to reset the type
+                                print("Transaction type reset to 'checkout'.", "info")
+                            except Exception as e:
+                                db.session.rollback()  # Rollback in case of any error
+                                print(f"Failed to reset transaction type: {e}", "danger")
+
+                # Schedule the type reset after 30 seconds
+                Timer(10, reset_transaction_type).start()
+
+            except Exception as e:
+                db.session.rollback()  # Rollback in case of any error setting the type to 'bill'
+                print(f"Failed to set transaction type to 'bill': {e}", "danger")
+                return jsonify({"error": str(e)}), 500
+            return jsonify({"message": "Invoice printed successfully", "bill_number": bill_number}), 200
+        
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
 @app.route('/esp-api/print', methods=['GET'])
 def esp_api_print():

@@ -14,26 +14,45 @@ class User(db.Model):
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    age = db.Column(db.String(15), nullable=False , default = '--')
-    gender = db.Column(db.String(15), nullable=False , default = '--')
+    age = db.Column(db.String(15), nullable=False, default='--')
+    gender = db.Column(db.String(15), nullable=False, default='--')
     phone = db.Column(db.String(15), nullable=False)
     password = db.Column(db.String(200), nullable=False)  # Password should be hashed
-    role_name = db.Column(db.String(20), nullable=False, default='User')  # Website role (Admin, User)
+    role_name = db.Column(db.String(20), nullable=False, default='User')
 
-    # Relationship to UserStore (linking to stores)
-    stores = db.relationship('Store', secondary='user_store', backref='users')
-    user_store = db.relationship('UserStore', backref='user_relation', lazy=True)
+    # Relationships
+    stores = db.relationship(
+        'Store',
+        secondary='user_store',
+        backref='users',
+        overlaps='user_store,user_relation'
+    )
+    user_store = db.relationship(
+        'UserStore',
+        backref='user_relation',
+        lazy=True,
+        overlaps='stores,users'
+    )
+
 
 # UserStore model (store-specific roles: Store Manager, Employee)
 class UserStore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     store_id = db.Column(db.Integer, db.ForeignKey('store.id'), nullable=False)
-    role_name = db.Column(db.String(50), nullable=False)  # Store-specific role (e.g., Store Manager, Employee) # pore role name ta change kore debo
-    
+    role_name = db.Column(db.String(50), nullable=False)
+
     # Relationships
-    user = db.relationship('User', backref='user_store_relation', overlaps='stores,users',lazy=True)  # Change 'user' to 'user_store_back'
-    store = db.relationship('Store', backref='user_store', overlaps='stores,users',lazy=True)
+    user = db.relationship(
+        'User',
+        backref='user_store_relation',
+        overlaps='stores,users,user_store'
+    )
+    store = db.relationship(
+        'Store',
+        backref='user_store_relation',
+        overlaps='stores,users'
+    )
 
 
 class Store(db.Model):
@@ -44,10 +63,18 @@ class Store(db.Model):
     owner_name = db.Column(db.String(255), nullable=False)
     business_email = db.Column(db.String(255), nullable=False)
     gstNumber = db.Column(db.String(255), nullable=False)
-    store_type = db.Column(db.String(255), nullable=False,default='Retail')
+    store_type = db.Column(db.String(255), nullable=False, default='Retail')
     profit = db.Column(db.Float, nullable=False, default=0.0)
     unique_code = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+
+    # Relationships
     categories = db.relationship('Category', backref='store', lazy=True, cascade='all, delete-orphan')
+    user_store = db.relationship(
+        'UserStore',
+        backref='store_relation',
+        overlaps='users,stores'
+    )
+
 
 class Category(db.Model):
     __tablename__ = 'category'
@@ -77,8 +104,9 @@ class Transaction(db.Model):
     transaction_date = db.Column(db.DateTime, nullable=True, default=get_india_time)
     customer_name = db.Column(db.String(100), nullable=True, default="system")
     bill_number = db.Column(db.String(50), unique=True, nullable=False)  # This acts as the order/bill ID
-    transaction_type = db.Column(db.String(50), nullable=True)  # Or use Python Enum
+    transaction_type = db.Column(db.String(50), nullable=True , default = "due")  # Or use Python Enum
     payment_method = db.Column(db.String(50), nullable=True, default="cash")
+    total_cost_price = db.Column(db.Integer, nullable=True, default=0)  # cost_price * quantity
     total_selling_price = db.Column(db.Integer, nullable=True, default=0)
     success = db.Column(db.String(50), nullable=True, default="yes")  # yes or no
     cart = db.Column(db.JSON, nullable=True, default={})  # To store cart data as JSON
