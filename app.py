@@ -296,10 +296,9 @@ def dashboard():
         for product in products:
             total_stock += product.stock
             if product.stock<=product.low_stock:
-                low_stock_quantity = product.low_stock - product.stock
-                low_stock_data[product.name] = low_stock_quantity
+                low_stock_data[product.name] = product.stock
     
-        low_stock_data = dict(sorted(low_stock_data.items(), key=lambda item: item[1], reverse=True))           
+        low_stock_data = dict(sorted(low_stock_data.items(), key=lambda item: item[1], reverse=False))           
         print(f"{low_stock_data=}")    
         print(f"{total_stock=}")
            
