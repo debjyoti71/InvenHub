@@ -42,12 +42,6 @@
   background-color: var(--300);
   color: white;
 }
-#copy-btn{
-  border-radius: 15px;
-  width: auto;
-  margin-left: 20px;
-  border-color: black;
-}
 
 #bg{
   background-color:#c2ddf5 ;

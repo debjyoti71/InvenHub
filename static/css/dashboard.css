@@ -249,3 +249,9 @@ p {
 #num{
     font-weight: bolder;
 }
+#copy-btn{
+    border-radius: 15px;
+    width: auto;
+    margin-left: 20px;
+    border-color: black;
+  }
