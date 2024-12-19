@@ -173,6 +173,7 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Product id</th>
                                     <th>Category</th>
                                     <th>Product Name</th>
                                     <th>Buying Price</th>
@@ -184,6 +185,7 @@
                                 {% if products %}
                                     {% for product in products %}
                                         <tr>
+                                            <td>{{ product.P_unique_id }}</td>
                                             <td>{{ product.category.category_name }}</td>
                                             <td>{{ product.name }}</td>
                                             <td>{{ product.cost_price }}</td>

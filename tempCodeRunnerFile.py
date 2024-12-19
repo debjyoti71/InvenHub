@@ -1,21 +1,40 @@
-import requests
+# # Wrap the logic inside the application context
+# with app.app_context():
+#     for item in transactions_data:
+#         date = item["date"]
+#         quantity = item["quantity"]
+#         sell_price = item["sell_price"]
+#         cost_price = item["cost_price"]
+#         product = item["product"]
 
-# Define the URL for the endpoint
-url = "https://invenhub.onrender.com/esp-api/print?store_id=7"
+#         # Define the cart as needed (e.g., a single product with its details)
+#         cart = [
+#             {
+#                 "product_name": product,
+#                 "quantity": quantity,
+#             }
+#         ]
 
-# Send a GET request to the server
-response = requests.get(url)
+#         # Create the transaction object
+#         transaction = Transaction(
+#             store_id=store_id,
+#             transaction_date=date,
+#             updated_date=date,
+#             customer_name="System",
+#             bill_number=f"ORD{store_id}{str(uuid.uuid4())[:7]}",
+#             transaction_type='order',
+#             payment_method='cash',
+#             total_selling_price=sell_price * quantity,
+#             total_cost_price=cost_price * quantity,
+#             cart=cart,
+#             success='yes',
+#             type='checkout'
+#         )
 
-# Check the status code
-print(f"Status Code: {response.status_code}")
+#         # Add the transaction to the session
+#         db.session.add(transaction)
 
-# Print the raw response content to inspect what is returned
-print("Response Text:", response.text)
+#     # Commit all the transactions to the database
+#     db.session.commit()
 
-# If the response is in JSON format, parse it
-try:
-    data = response.json()
-    print("Response Data:")
-    print(data)
-except requests.exceptions.JSONDecodeError:
-    print("Response is not in JSON format.")
+        

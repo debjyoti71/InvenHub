@@ -303,7 +303,7 @@
                 
                     // Check URL for the 'type' parameter
                     const urlParams = new URLSearchParams(window.location.search);
-                    const type = urlParams.get('type');
+                    const type = urlParams.get('type').toLowerCase();
                 
                     // Set the default state based on the URL parameter
                     if (type === 'sale') {

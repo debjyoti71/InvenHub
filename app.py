@@ -299,12 +299,12 @@ def dashboard():
                 low_stock_data[product.name] = product.stock
     
         low_stock_data = dict(sorted(low_stock_data.items(), key=lambda item: item[1], reverse=False))           
-        print(f"{low_stock_data=}")    
-        print(f"{total_stock=}")
+        # print(f"{low_stock_data=}")    
+        # print(f"{total_stock=}")
            
         return render_template(
             'dashboard.html',
-            daily_data = daily_data,    
+            daily_data = dict(list(daily_data.items())[-10:]),  
             monthly_data=monthly_data,
             low_stock_data=low_stock_data,
             total_stock=total_stock,
@@ -1079,16 +1079,20 @@ def transaction():
     if request.method == 'GET':
         # Query the transactions based on store ID and transaction type
         if transaction_type == 'sale':
-            transactions = Transaction.query.filter_by(store_id=store_id, transaction_type="sale").order_by(
-                func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
-            ).all()
+            transactions = Transaction.query.with_for_update().filter(
+                    Transaction.store_id == store_id,
+                    func.lower(Transaction.transaction_type) == "sale").order_by(
+                    func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
+                ).all()
         else:
-            transactions = Transaction.query.filter_by(store_id=store_id, transaction_type="order").order_by(
-                func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
-            ).all()
+            transactions = Transaction.query.with_for_update().filter(
+                    Transaction.store_id == store_id,
+                    func.lower(Transaction.transaction_type) == "order").order_by(
+                    func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
+                ).all()
 
         if not transactions:
-            flash(f"No transactions found for {transaction_type} type.", "info")
+            print(f"No transactions found for {transaction_type} type.", "info")
         
         # Render the template with the filtered transactions
         return render_template('transaction.html', transactions=transactions)
