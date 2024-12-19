@@ -251,7 +251,6 @@ p {
 }
 .duration{
     border-color: black;
-    margin-top: 10px;
     border-radius:50px;
     width: auto;
     background-color: var(--100);
