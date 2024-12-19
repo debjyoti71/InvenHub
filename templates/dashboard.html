@@ -204,9 +204,9 @@
                                     <tbody id="ordersTable">
                                         {% for product_name, low_stock_quantity in low_stock_data.items() %}
                                         <tr>
-                                            <td style="width: 10%;">{{ loop.index }}</td> <!-- This outputs the row number -->
-                                            <td style="width: 80%; display: flex; justify-content: space-evenly;">{{ product_name }}</td>
-                                            <td style="width: 10%;">{{ low_stock_quantity }}</td>
+                                            <td style="width: 5%;">{{ loop.index }}</td> <!-- This outputs the row number -->
+                                            <td style="width: 90%; display: flex; justify-content: space-evenly;">{{ product_name }}</td>
+                                            <td style="width: 5%;">{{ low_stock_quantity }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>                                    
