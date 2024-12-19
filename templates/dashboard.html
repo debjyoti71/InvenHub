@@ -15,34 +15,6 @@
 </head>
 
 <body>
-    <style>
-        .SCont{
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
-    border-radius: 15px;
-    background-color: #f2f8fd;
-}
-        .LCont{
-    height: 60%;
-    width: 92%;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
-    border-radius: 15px;
-    background-color: #f2f8fd;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px;
-    padding: 20px;
-    margin-right: 2px;
-}
-#heding-cont{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-#num{
-    font-weight: bolder;
-}
-    </style>
     <div class="wrapper">
         <aside id="sidebar">
             <div class="d-flex">
@@ -125,13 +97,9 @@
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-center" href="#">View all</a></li>
                                 </ul>
+                            </div>
                         </div>
-                        </div>
-                        <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
-                            <a href="{{ url_for('account') }}">
-                                <i><img id="account-icon" height="30px" width="30px" src="/static/images/icons8-account-50.png" alt="warehouse-1"/></i>
-                            </a>
-                        </div>
+                        <div class="col"><a href="{{ url_for('account') }}"><img height="30px" width="28px" src="images/icons8-account-50.png" alt=""></a></div>
                     </div>
                 </div>
             </div>
