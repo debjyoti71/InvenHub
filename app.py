@@ -287,8 +287,8 @@ def dashboard():
             daily_data[day]["selling_price"] += total_selling_price
 
         # Log the calculated values (for debugging)
-        print(f"Monthly Data: {monthly_data}")
-        print(f"Daily Data: {daily_data}")
+        # print(f"Monthly Data: {monthly_data}")
+        # print(f"Daily Data: {daily_data}")
 
         products = Product.query.join(Category).with_for_update().filter(Category.store_id == store_id).all()
         low_stock_data = {}
@@ -304,7 +304,7 @@ def dashboard():
            
         return render_template(
             'dashboard.html',
-            daily_data = dict(list(daily_data.items())[-10:]),  
+            daily_data = daily_data ,  
             monthly_data=monthly_data,
             low_stock_data=low_stock_data,
             total_stock=total_stock,
