@@ -233,11 +233,67 @@ def login():
     return render_template('login.html')
 
 # Dashboard (only accessible to logged-in users)
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    return render_template('dashboard.html', username=session['user'], email=session['email'])
+    if request.method == 'GET':
+        # Fetch the current user based on session
+        email = session.get('email')
+        if not email:
+            flash("User not logged in. Please log in first.", "danger")
+            return redirect(url_for('login'))
+
+        current_user = User.query.filter_by(email=email).first()
+        if not current_user:
+            flash("User not found. Please log in again.", "danger")
+            return redirect(url_for('login'))
+
+        # Fetch the user's associated store
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        if not user_store:
+            flash("No store associated with this user. Please join or create a store first.", "danger")
+            return redirect(url_for('add_store_form'))
+        
+        store_id = user_store.store_id
+
+        # Fetch transactions for the user's store
+        transactions = Transaction.query.with_for_update().filter_by(store_id=store_id).all()
+        if not transactions:
+            flash("No transactions found for this store.", "info")
+            return render_template(
+                'dashboard.html',
+                monthly_data={},
+            )
+
+        # Calculate monthly selling and cost prices
+        monthly_data = {}
+        daily_data = {}
+        for transaction in transactions:
+            month = transaction.transaction_date.strftime("%Y-%m")
+            day = transaction.transaction_date.strftime("%Y-%m-%d")
+            total_cost_price = transaction.total_cost_price or 0
+            total_selling_price = transaction.total_selling_price or 0
+
+            if month not in monthly_data:
+                monthly_data[month] = {"cost_price": 0, "selling_price": 0}
+
+            if day not in daily_data:
+                daily_data[day] = {"cost_price": 0, "selling_price": 0}
+
+            monthly_data[month]["cost_price"] += total_cost_price
+            monthly_data[month]["selling_price"] += total_selling_price
+
+            daily_data[day]["cost_price"] += total_cost_price
+            daily_data[day]["selling_price"] += total_selling_price
+
+        # Log the calculated values (for debugging)
+        print(f"Monthly Data: {monthly_data}")
+        print(f"Daily Data: {daily_data}")
+
+        return render_template(
+            'dashboard.html',
+            daily_data = daily_data,    
+            monthly_data=monthly_data,
+        )
 
 @app.route('/add_store', methods=['GET'])
 def add_store_form():
@@ -572,10 +628,11 @@ def new_product():
                 transaction = Transaction(
                     store_id=store_id,
                     customer_name="System",
-                    bill_number=f"ORD{str(uuid.uuid4())[:8]}",
+                    bill_number=f"ORD{store_id}{str(uuid.uuid4())[:7]}",
                     transaction_type='order',
                     payment_method='cash',
                     total_selling_price=0,
+                    total_cost_price=float(productPrice) * quantity,
                     cart=cart,
                     success='yes',
                     type = 'checkout'
@@ -717,7 +774,7 @@ def new_sale():
             new_transaction = Transaction(
                 store_id=store_id,
                 customer_name="None",  # Default customer name "None"
-                bill_number=f"SALE{str(uuid.uuid4())[:8]}",
+                bill_number=f"SALE{store_id}{str(uuid.uuid4())[:6]}",
                 transaction_type="Sale",
                 type="due",
                 total_selling_price=0,

@@ -11,9 +11,38 @@
         integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
         <link rel="stylesheet" href="/static/css/dashboard.css">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 </head>
 
 <body>
+    <style>
+        .SCont{
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+    border-radius: 15px;
+    background-color: #f2f8fd;
+}
+        .LCont{
+    height: 60%;
+    width: 92%;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+    border-radius: 15px;
+    background-color: #f2f8fd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    padding: 20px;
+    margin-right: 2px;
+}
+#heding-cont{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#num{
+    font-weight: bolder;
+}
+    </style>
     <div class="wrapper">
         <aside id="sidebar">
             <div class="d-flex">
@@ -69,9 +98,9 @@
                 </a>
             </div>
         </aside>
-        <div class="main">
-            <div class="row justify-content-center align-items-center" style="height: 8vh; background-color: #c2ddf5;">
-                <div class="col-10">
+        <div class="main" id="bg">
+            <div class="row align-items-center" id="Navbar">
+                <div class="col-11">
                     <div class="row justify-content-center align-items-center">
                         <div class="col"></div>
                         <div class="col-5" style="height: auto;">
@@ -81,68 +110,183 @@
                         <div class="col-5"></div>
                     </div>
                 </div>
-                <div class="col"></div>
-                <div class="col"></div>
-                <div class="col"></div>
-                <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
-                    <div class="dropdown dropleft">
-                        <a class="notification-icon position-relative" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i><img height="30px" width="30px" src="/static/images/icons8-notification (3).svg" alt=""></i>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="notificationDropdown">
-                            <li class="dropdown-header">Notifications</li>
-                            <li><a class="dropdown-item" href="#">New message received</a></li>
-                            <li><a class="dropdown-item" href="#">Server alert</a></li>
-                            <li><a class="dropdown-item" href="#">Update available</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-center" href="#">View all</a></li>
-                        </ul>
-                </div>
-                </div>
-                <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
-                    <a href="{{ url_for('account') }}">
-                        <i><img id="account-icon" height="30px" width="30px" src="/static/images/icons8-account-50.png" alt="warehouse-1"/></i>
-                    </a>
-                </div>
-                <div class="col"></div>
-            </div>
-            <div class="row" style="height: 100%;">
-                <div class="col-8" style="background-color: #c2ddf5;">
-                    <div class="row" style="height: 100%;">
-                        <div class="col"></div>
-                        <div class="col-11">
-                            <div class="row" style="height: 25%;">
-                                <div class="col-12 mb-3" id="border"><h5 style="margin-top: 10px;">Sales Overview</h5></div>
-                              </div>
-                              <div class="row" style="height:43%;">
-                                <div class="col-12 mb-3" id="border"><h5 style="margin-top: 10px;">Sales & Purchase</h5></div>
-                              </div>
-                              <div class="row" style="height: 22%;">
-                                <div class="col-12" id="border"><h5 style="margin-top: 10px;">Top Selling Stock</h5></div>
-                              </div>
+                <div class="col d-flex justify-content-center align-items-center" style="height: auto;">
+                    <div class="row">
+                        <div class="col">
+                            <div class="dropdown dropleft">
+                                <a class="notification-icon position-relative" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i><img height="30px" width="30px" src="/static/images/icons8-notification (3).svg" alt=""></i>
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="notificationDropdown">
+                                    <li class="dropdown-header">Notifications</li>
+                                    <li><a class="dropdown-item" href="#">New message received</a></li>
+                                    <li><a class="dropdown-item" href="#">Server alert</a></li>
+                                    <li><a class="dropdown-item" href="#">Update available</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-center" href="#">View all</a></li>
+                                </ul>
                         </div>
-                        <div class="col"></div>
+                        </div>
+                        <div class="col d-flex justify-content-center align-items-center" style="height: 100%;">
+                            <a href="{{ url_for('account') }}">
+                                <i><img id="account-icon" height="30px" width="30px" src="/static/images/icons8-account-50.png" alt="warehouse-1"/></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="col-4" style="background-color: #c2ddf5;">
-                    <div class="row" style="height: 100%;">
-                        <div class="col-11">
-                            <div class="row" style="height: 40%;">
-                                <div class="col-12 mb-3" id="border"><h5 style="margin-top: 10px;">Inventory Summary</h5></div>
-                              </div>
-                              <div class="row" style="height:52% ;">
-                                <div class="col-12 mb-3" id="border"><h5 style="margin-top: 10px;">Low Quantity Stock</h5></div>
-                              </div>
+            </div>
+            <div class="row" style="height: 25%;margin-top: 10px;">
+                {% set sorted_months = monthly_data.keys()|list|sort %}
+                {% set this_month = sorted_months[-1] if sorted_months|length > 0 else None %}
+                {% set last_month = sorted_months[-2] if sorted_months|length > 1 else None %}
+
+                <div class="col" style="display: flex; justify-content: space-around;">
+                    <div class="SCont" style="height: 100%;width: 80%;">
+                        <div class="row" style="height: 30%;">
+                            <div class="col" id="heding-cont"><h4>Cost Price</h4></div>
                         </div>
-                        <div class="col"></div>
+                        <div class="row" style="height: 30%;">
+                            <div class="col" id="heding-cont"><h5>This Month</h5></div>
+                            <div class="col" id="heding-cont"><h5>Last Month</h5></div>
+                        </div>
+                        <div class="row" style="height: 40%;">
+                            <div class="col" id="heding-cont">
+                                <h5 id="num">
+                                    {{ monthly_data[this_month].cost_price if this_month and monthly_data[this_month].cost_price != 0 else "N/A" }}
+                                </h5>
+                            </div>
+                            <div class="col" id="heding-cont">
+                                <h5 id="num">
+                                    {{ monthly_data[last_month].cost_price if last_month and monthly_data[last_month].cost_price != 0 else "N/A" }}
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col" style="display: flex; justify-content: space-around;">
+                    <div class="SCont" style="height: 100%;width: 80%;">
+                        <div class="row" style="height: 30%;">
+                            <div class="col" id="heding-cont"><h4>Selling Price</h4></div>
+                        </div>
+                        <div class="row" style="height: 30%;">
+                            <div class="col" id="heding-cont"><h5>This Month</h5></div>
+                            <div class="col" id="heding-cont"><h5>Last Month</h5></div>
+                        </div>
+                        <div class="row" style="height: 40%;">
+                            <div class="col" id="heding-cont">
+                                <h5 id="num">
+                                    {{ monthly_data[this_month].selling_price if this_month and monthly_data[this_month].selling_price != 0 else "N/A" }}
+                                </h5>
+                            </div>
+                            <div class="col" id="heding-cont">
+                                <h5 id="num">
+                                    {{ monthly_data[last_month].selling_price if last_month and monthly_data[last_month].selling_price != 0 else "N/A" }}
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col" style="display: flex; justify-content: space-around;">
+                    <div class="SCont" style="height: 100%;width: 80%;">
+                        <div class="row" style="height: 30%;">
+                            <div class="col" id="heding-cont"><h4>Inventory</h4></div>
+                        </div>
+                        <div class="row" style="height: 30%;">
+                            <div class="col" id="heding-cont"><h5>Total Stock</h5></div>
+                            <div class="col" id="heding-cont"><h5>Low Stock</h5></div>
+                        </div>
+                        <div class="row" style="height: 40%;">
+                            <div class="col" id="heding-cont"><h5 id="num">86267</h5></div>
+                            <div class="col" id="heding-cont"><h5 id="num">12466</h5></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="height: auto; min-height: 100%; width: 100%;">
+                <div class="col-8" style="display: flex; justify-content: space-around;">
+                    <div class="LCont">
+                        <div class="col" style="padding: 30px;">
+                            <div class="row" style="height: 20%;">
+                                <div class="col" id="heding-cont"><h4>Purchase & Sales</h4></div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <canvas id="myChart" style="width:90%; max-width: 100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col" style="display: flex; justify-content: space-around;">
+                    <div class="SCont" style="height: 60%; width: 80%; margin: 20px; margin-left: 60px;">
+                        <div class="row" style="height: 14%;">
+                            <div class="col" id="heding-cont"><h4>Low Quantity Stocks</h4></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"></div>
+                            <div class="col-10">
+                                <table class="table" style="height: auto;font-size: 18px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Sl</th>
+                                            <th style="width: 80%; display: flex; justify-content: space-evenly;">Item</th>
+                                            <th style="width: 10%;">Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTable">
+                                        <tr>
+                                            <td style="width: 10%;">1</td>
+                                            <td style="width: 80%; display: flex; justify-content: space-evenly;">Lays</td>    
+                                            <td style="width: 10%;">3</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        // Pass the daily_data and monthly_data from Flask
+        const dailyData = JSON.parse('{{ daily_data|tojson }}');
+
+        // Extract x-axis and y-axis data for daily chart
+        const xValuesDaily = Object.keys(dailyData);
+        const purchaseDataDaily = xValuesDaily.map(date => dailyData[date].cost_price || 0);
+        const salesDataDaily = xValuesDaily.map(date => dailyData[date].selling_price || 0);
+
+        // Render the daily chart
+        new Chart("myChart", {
+            type: "line",
+            data: {
+                labels: xValuesDaily,
+                datasets: [
+                    { 
+                        label: "Purchase",
+                        data: purchaseDataDaily,
+                        borderColor: "#50a2e0",
+                        fill: false
+                    },
+                    { 
+                        label: "Sales",
+                        data: salesDataDaily,
+                        borderColor: "#174875",
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                legend: { display: true }
+            }
+        });
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-        crossorigin="anonymous"></script>
-    <script src="/static/js/dashboard.js"></script>
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+<script src="/static/js/dashboard.js"></script>
 </body>
 </html>
