@@ -268,8 +268,9 @@ def dashboard():
         monthly_data = {}
         daily_data = {}
         for transaction in transactions:
-            month = transaction.transaction_date.strftime("%Y-%m")
-            day = transaction.transaction_date.strftime("%Y-%m-%d")
+            date = transaction.last_updated if not transaction.last_updated else transaction.transaction_date
+            month = date.strftime("%Y-%m")
+            day = date.strftime("%Y-%m-%d")
             total_cost_price = transaction.total_cost_price or 0
             total_selling_price = transaction.total_selling_price or 0
 
@@ -289,10 +290,25 @@ def dashboard():
         print(f"Monthly Data: {monthly_data}")
         print(f"Daily Data: {daily_data}")
 
+        products = Product.query.join(Category).with_for_update().filter(Category.store_id == store_id).all()
+        low_stock_data = {}
+        total_stock = 0
+        for product in products:
+            total_stock += product.stock
+            if product.stock<=product.low_stock:
+                low_stock_quantity = product.low_stock - product.stock
+                low_stock_data[product.name] = low_stock_quantity
+    
+        low_stock_data = dict(sorted(low_stock_data.items(), key=lambda item: item[1], reverse=True))           
+        print(f"{low_stock_data=}")    
+        print(f"{total_stock=}")
+           
         return render_template(
             'dashboard.html',
             daily_data = daily_data,    
             monthly_data=monthly_data,
+            low_stock_data=low_stock_data,
+            total_stock=total_stock,
         )
 
 @app.route('/add_store', methods=['GET'])

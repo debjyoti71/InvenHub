@@ -196,8 +196,8 @@
                             <div class="col" id="heding-cont"><h5>Low Stock</h5></div>
                         </div>
                         <div class="row" style="height: 40%;">
-                            <div class="col" id="heding-cont"><h5 id="num">86267</h5></div>
-                            <div class="col" id="heding-cont"><h5 id="num">12466</h5></div>
+                            <div class="col" id="heding-cont"><h5 id="num">{{total_stock}}</h5></div>
+                            <div class="col" id="heding-cont"><h5 id="num">{{ low_stock_data|length }}</h5></div>
                         </div>
                     </div>
                 </div>
@@ -234,12 +234,14 @@
                                         </tr>
                                     </thead>
                                     <tbody id="ordersTable">
+                                        {% for product_name, low_stock_quantity in low_stock_data.items() %}
                                         <tr>
-                                            <td style="width: 10%;">1</td>
-                                            <td style="width: 80%; display: flex; justify-content: space-evenly;">Lays</td>    
-                                            <td style="width: 10%;">3</td>
+                                            <td style="width: 10%;">{{ loop.index }}</td> <!-- This outputs the row number -->
+                                            <td style="width: 80%; display: flex; justify-content: space-evenly;">{{ product_name }}</td>
+                                            <td style="width: 10%;">{{ low_stock_quantity }}</td>
                                         </tr>
-                                    </tbody>
+                                        {% endfor %}
+                                    </tbody>                                    
                                 </table>
                             </div>
                             <div class="col"></div>

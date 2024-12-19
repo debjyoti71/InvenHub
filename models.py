@@ -93,6 +93,7 @@ class Product(db.Model):
     cost_price = db.Column(db.Integer, nullable=False)
     selling_price = db.Column(db.Integer, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
+    low_stock = db.Column(db.Integer, nullable=True, default=5)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False, index=True)
     P_unique_id = db.Column(db.String(20), unique=True, index=True, nullable=False)
     transaction_items = db.relationship('TransactionItem', backref=db.backref('products_in_transaction', lazy=True))
