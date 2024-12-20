@@ -280,7 +280,7 @@
                                 {% for transaction in transactions %}
                                 <tr>
                                     <td>{{ transaction.bill_number }}</td>
-                                    <td>{{ transaction.last_updated.strftime('%Y-%m-%d %H:%M:%S') if transaction.last_updated else transaction.transaction_date }}</td>    
+                                    <td>{{ transaction.last_updated }}</td>    
                                     <td>{{ transaction.customer_name }}</td>
                                     <td>{{ transaction.total_selling_price }}</td>
                                     <td>{{ transaction.payment_method }}</td>               

@@ -252,59 +252,66 @@ def dashboard():
         if not user_store:
             flash("No store associated with this user. Please join or create a store first.", "danger")
             return redirect(url_for('add_store_form'))
-        
+
         store_id = user_store.store_id
 
-        # Fetch transactions for the user's store
-        transactions = Transaction.query.with_for_update().filter_by(store_id=store_id).all()
-        if not transactions:
-            flash("No transactions found for this store.", "info")
-            return render_template(
-                'dashboard.html',
-                monthly_data={},
+        # Fetch and aggregate transactions at the database level
+        transactions_summary = (
+            db.session.query(
+                func.date_trunc('month', Transaction.transaction_date).label('month'),
+                func.sum(Transaction.total_cost_price).label('total_cost_price'),
+                func.sum(Transaction.total_selling_price).label('total_selling_price')
             )
+            .filter_by(store_id=store_id)
+            .group_by(func.date_trunc('month', Transaction.transaction_date))
+            .all()
+        )
 
-        # Calculate monthly selling and cost prices
-        monthly_data = {}
-        daily_data = {}
-        for transaction in transactions:
-            date = transaction.last_updated if not transaction.last_updated else transaction.transaction_date
-            month = date.strftime("%Y-%m")
-            day = date.strftime("%Y-%m-%d")
-            total_cost_price = transaction.total_cost_price or 0
-            total_selling_price = transaction.total_selling_price or 0
+        # Convert the aggregated data to a dictionary
+        monthly_data = {
+            record.month.strftime("%Y-%m"): {
+                "cost_price": record.total_cost_price or 0,
+                "selling_price": record.total_selling_price or 0
+            }
+            for record in transactions_summary
+        }
 
-            if month not in monthly_data:
-                monthly_data[month] = {"cost_price": 0, "selling_price": 0}
+        # Fetch daily transactions (if needed)
+        daily_transactions_summary = (
+            db.session.query(
+                func.date_trunc('day', Transaction.transaction_date).label('day'),
+                func.sum(Transaction.total_cost_price).label('total_cost_price'),
+                func.sum(Transaction.total_selling_price).label('total_selling_price')
+            )
+            .filter_by(store_id=store_id)
+            .group_by(func.date_trunc('day', Transaction.transaction_date))
+            .all()
+        )
 
-            if day not in daily_data:
-                daily_data[day] = {"cost_price": 0, "selling_price": 0}
+        daily_data = {
+            record.day.strftime("%Y-%m-%d"): {
+                "cost_price": record.total_cost_price or 0,
+                "selling_price": record.total_selling_price or 0
+            }
+            for record in daily_transactions_summary
+        }
 
-            monthly_data[month]["cost_price"] += total_cost_price
-            monthly_data[month]["selling_price"] += total_selling_price
-
-            daily_data[day]["cost_price"] += total_cost_price
-            daily_data[day]["selling_price"] += total_selling_price
-
-        # Log the calculated values (for debugging)
-        # print(f"Monthly Data: {monthly_data}")
-        # print(f"Daily Data: {daily_data}")
-
-        products = Product.query.join(Category).with_for_update().filter(Category.store_id == store_id).all()
+        # Fetch products and low stock data
+        products = Product.query.join(Category).filter(Category.store_id == store_id).all()
         low_stock_data = {}
         total_stock = 0
         for product in products:
             total_stock += product.stock
-            if product.stock<=product.low_stock:
+            if product.stock <= product.low_stock:
                 low_stock_data[product.name] = product.stock
-    
-        low_stock_data = dict(sorted(low_stock_data.items(), key=lambda item: item[1], reverse=False))           
-        # print(f"{low_stock_data=}")    
-        # print(f"{total_stock=}")
-           
+
+        # Sort low stock data
+        low_stock_data = dict(sorted(low_stock_data.items(), key=lambda item: item[1]))
+
+        # Render the dashboard
         return render_template(
             'dashboard.html',
-            daily_data = daily_data ,  
+            daily_data=daily_data,
             monthly_data=monthly_data,
             low_stock_data=low_stock_data,
             total_stock=total_stock,
@@ -1063,39 +1070,58 @@ def transaction():
     if not current_user:
         flash("User not logged in. Please log in first.", "danger")
         return redirect(url_for('login'))  # Redirect to login page
-    
+
     # Check if the user has an associated store
     user_store = UserStore.query.filter_by(user_id=current_user.id).first()
     if not user_store:
         flash("User store not found. Please create or join a store first.", "danger")
         return redirect(url_for('create_store'))  # Redirect to store creation page
-    
+
     store_id = user_store.store_id
-    
+
     # Get the type from query parameters (default to 'order')
-    transaction_type = request.args.get('type', 'order')  # Default to 'order' if no type is specified
-    
+    transaction_type = request.args.get('type', 'order').lower()
+
     # Handle GET request
     if request.method == 'GET':
-        # Query the transactions based on store ID and transaction type
-        if transaction_type == 'sale':
-            transactions = Transaction.query.with_for_update().filter(
-                    Transaction.store_id == store_id,
-                    func.lower(Transaction.transaction_type) == "sale").order_by(
-                    func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
-                ).all()
-        else:
-            transactions = Transaction.query.with_for_update().filter(
-                    Transaction.store_id == store_id,
-                    func.lower(Transaction.transaction_type) == "order").order_by(
-                    func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc()
-                ).all()
+        # Fetch transactions with necessary fields
+        transactions = (
+            db.session.query(
+                Transaction.bill_number,
+                Transaction.last_updated,
+                Transaction.transaction_date,
+                Transaction.customer_name,
+                Transaction.total_selling_price,
+                Transaction.payment_method,
+                Transaction.type.label("type"),
+            )
+            .filter(
+                Transaction.store_id == store_id,
+                func.lower(Transaction.transaction_type) == transaction_type,
+            )
+            .order_by(func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc())
+            .all()
+        )
 
         if not transactions:
-            print(f"No transactions found for {transaction_type} type.", "info")
-        
-        # Render the template with the filtered transactions
-        return render_template('transaction.html', transactions=transactions)
+            flash(f"No transactions found for type '{transaction_type}'.", "info")
+            return render_template('transaction.html', transactions=[])
+
+        # Process transactions into a dictionary for rendering
+        processed_transactions = [
+            {
+                "bill_number": t.bill_number,
+                "last_updated": t.last_updated.strftime('%Y-%m-%d %H:%M:%S') if t.last_updated else t.transaction_date.strftime('%Y-%m-%d %H:%M:%S'),
+                "customer_name": t.customer_name or "N/A",
+                "total_selling_price": t.total_selling_price or 0.0,
+                "payment_method": t.payment_method or "N/A",
+                "type": t.type.capitalize(),
+            }
+            for t in transactions
+        ]
+
+        # Render the template with the processed transactions
+        return render_template('transaction.html', transactions=processed_transactions)
 
     # Handle POST request (for Print functionality)
     if request.method == 'POST':
