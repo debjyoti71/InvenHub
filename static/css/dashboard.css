@@ -249,3 +249,11 @@ p {
 #num{
     font-weight: bolder;
 }
+.duration{
+    border-color: black;
+    border-radius:50px;
+    width: auto;
+    background-color: var(--100);
+    color: black;
+    padding: 5px;
+  }

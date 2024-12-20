@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" type="x-icon" href="static/images/New_Template-Photoroom__2_-removebg-preview.png">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
@@ -175,15 +176,18 @@
                     <div class="LCont">
                         <div class="col" style="padding: 30px;">
                             <div class="row" style="height: 20%;">
-                                <div class="col" id="heding-cont">
+                                <div class="col"></div>
+                                <div class="col-8" id="heding-cont">
                                     <h4>Purchase & Sales</h4>
-                                    <select id="dataSwitch" style="margin-top: 10px;">
+                                </div>
+                                <div class="col">
+                                    <select id="dataSwitch" class="duration">
                                         <option value="daily">Daily Data</option>
                                         <option value="monthly">Monthly Data</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row" style="height: 80%;">
                                 <div class="col">
                                     <canvas id="myChart" style="width:90%; max-width: 100%;"></canvas>
                                 </div>
