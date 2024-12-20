@@ -11,3 +11,14 @@ function toggleSidebar(open) {
     mini = true;
   }
 }
+function updateTime() {
+  const clockElement = document.getElementById('clock');
+  const now = new Date();
+  clockElement.textContent = now.toLocaleString();
+}
+
+// Update time every second
+setInterval(updateTime, 1000);
+
+// Initialize time immediately
+updateTime();
