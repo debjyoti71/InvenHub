@@ -22,6 +22,10 @@
     --blackColor:black;
     --grayColor:gray;
 }
+@font-face {
+    font-family: 'digitalll';
+    src: url(digital.ttf);
+}
 ::-webkit-scrollbar {
     width: 15px;
   }
@@ -53,7 +57,10 @@ h1 {
 
 body {
     font-family: 'Poppins', sans-serif;
+<<<<<<< HEAD
     /* overflow-y: hidden; */
+=======
+>>>>>>> 6a2a70d4334a7b93634d2f4f5769519a4e8c9e5e
 }
 
 .wrapper {
@@ -265,6 +272,7 @@ p {
     height: 100%;
     width: auto;
     color: black;
+    font-family: 'digitalll';
     font-size: 1.25rem;
     border-radius: 8px;
     border: 0.5px solid var(--700);
