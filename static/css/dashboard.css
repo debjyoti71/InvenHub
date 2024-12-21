@@ -22,6 +22,10 @@
     --blackColor:black;
     --grayColor:gray;
 }
+@font-face {
+    font-family: 'digitalll';
+    src: url(digital.ttf);
+}
 ::-webkit-scrollbar {
     width: 15px;
   }
@@ -264,6 +268,7 @@ p {
     height: 100%;
     width: auto;
     color: black;
+    font-family: 'digitalll';
     font-size: 1.25rem;
     border-radius: 8px;
     border: 0.5px solid var(--700);
