@@ -1115,7 +1115,7 @@ def transaction():
                 "customer_name": t.customer_name or "N/A",
                 "total_selling_price": t.total_selling_price or 0.0,
                 "payment_method": t.payment_method or "N/A",
-                "type": t.type.capitalize(),
+                "type": t.type,
             }
             for t in transactions
         ]
