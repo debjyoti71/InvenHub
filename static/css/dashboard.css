@@ -53,7 +53,7 @@ h1 {
 
 body {
     font-family: 'Poppins', sans-serif;
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
 }
 
 .wrapper {

@@ -7,6 +7,7 @@ from flask_mail import Mail, Message
 import random
 from dotenv import load_dotenv
 import os
+import time
 from config import Config  # Import your Config class
 from models import db, User, Store, Product, UserStore, Category, Transaction ,TransactionItem
 import csv 
@@ -134,6 +135,7 @@ def signup():
     
     return render_template('signup.html')
 
+# Send OTP to User Email
 @app.route('/send_otp', methods=['GET', 'POST'])
 def send_otp():
     user_data = session.get('temp_user')
@@ -152,16 +154,13 @@ def send_otp():
         sender=app.config['MAIL_USERNAME'], 
         recipients=[email]
     )
-    # Render HTML Template
-    msg.html = render_template(
-        'otpMail_template.html',
-        otp=otp  # Pass the dynamic OTP value to the template
-    )
+    msg.html = render_template('otpMail_template.html', otp=otp)
 
     mail.send(msg)
 
     return redirect(url_for('verify_otp'))
 
+# Verify OTP
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
     if request.method == 'POST':
@@ -200,7 +199,7 @@ def verify_otp():
 
     return render_template('otp_verification.html')
 
-# Handle login form submission
+# Login Route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -231,6 +230,108 @@ def login():
             return 'Email does not exist.'
 
     return render_template('login.html')
+
+# Forgot Password Route - Request OTP
+@app.route('/forget-password', methods=['GET', 'POST'])
+def forget_password():
+    if request.method == 'GET':
+        return render_template('forget_password.html')  # Form to input email
+
+    if request.method == 'POST':
+        email = request.form['email']
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            flash('Email not found in our records.', 'danger')
+            return redirect(url_for('forget_password'))
+
+        otp = random.randint(100000, 999999)
+        session['otp'] = otp  # Store OTP in session
+        session['email'] = email  # Store email for verification
+        session['otp_timestamp'] = time.time()  # Store OTP timestamp to handle expiration
+
+        # Send OTP to user's email
+        msg = Message(
+            'Your One-Time Password (OTP)',
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[email]
+        )
+        msg.html = render_template('otpMail_template.html', otp=otp)
+
+        try:
+            mail.send(msg)
+            flash('OTP sent to your email.', 'success')
+        except Exception:
+            flash('Failed to send OTP. Please try again.', 'danger')
+            return redirect(url_for('forget_password'))
+
+        return redirect(url_for('fpverify_otp'))
+
+
+# Step 2: Verify OTP for Password Reset
+@app.route('/forget-password-verify-otp', methods=['GET', 'POST'])
+def fpverify_otp():
+    if request.method == 'GET':
+        return render_template('otp_verification.html')  # Form to input OTP
+
+    if request.method == 'POST':
+        entered_otp = request.form['otp']
+        stored_otp = session.get('otp')
+        email = session.get('email')
+        otp_timestamp = session.get('otp_timestamp')
+
+        if not stored_otp or not email or not otp_timestamp:
+            flash('Session expired or invalid.', 'danger')
+            return redirect(url_for('forget_password'))
+
+        # Check if OTP expired (e.g., after 10 minutes)
+        if time.time() - otp_timestamp > 600:  # 10 minutes
+            flash('OTP expired. Please request a new one.', 'danger')
+            session.pop('otp', None)
+            session.pop('otp_timestamp', None)
+            return redirect(url_for('forget_password'))
+
+        if str(entered_otp) == str(stored_otp):
+            session.pop('otp', None)  # Remove OTP after verification
+            flash('OTP verified successfully.', 'success')
+            return redirect(url_for('reset_password'))
+
+        flash('Invalid OTP. Please try again.', 'danger')
+        return redirect(url_for('fpverify_otp'))
+
+
+# Step 3: Reset Password
+@app.route('/forget-password-reset-password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'GET':
+        return render_template('forget-password-reset_password.html')  # Form to input new password
+
+    if request.method == 'POST':
+        new_password = request.form['password']
+        email = session.get('email')
+
+        if not email:
+            flash('Session expired. Please restart the process.', 'danger')
+            return redirect(url_for('forget_password'))
+
+        if len(new_password) < 6:  # Ensure a minimum length for password
+            flash('Password must be at least 6 characters long.', 'danger')
+            return redirect(url_for('reset_password'))
+
+        # Hash the password before saving it
+        hashed_password = generate_password_hash(new_password)
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.password = hashed_password  # Use hashed passwords for security
+            db.session.commit()
+
+            session.pop('email', None)  # Clear email from session
+            flash('Password reset successfully. You can now log in.', 'success')
+            return redirect(url_for('login'))
+
+        flash('User not found. Please restart the process.', 'danger')
+        return redirect(url_for('forget_password'))
 
 # Dashboard (only accessible to logged-in users)
 @app.route('/dashboard', methods=['GET', 'POST'])
