@@ -257,3 +257,17 @@ p {
     color: black;
     padding: 5px;
   }
+  #clock{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: auto;
+    color: black;
+    font-size: 1.25rem;
+    border-radius: 8px;
+    border: 0.5px solid var(--700);
+background: linear-gradient(225deg, #afc7dd, #d0ecff);
+box-shadow:  -6px 6px 15px #a9c0d5,
+             6px -6px 15px #dbfaff;
+}
