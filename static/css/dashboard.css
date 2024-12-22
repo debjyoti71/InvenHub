@@ -24,7 +24,7 @@
 }
 @font-face {
     font-family: 'digitalll';
-    src: url(digital.ttf);
+    src: url(/InvenHub/static/fonts/digital.ttf);
 }
 ::-webkit-scrollbar {
     width: 15px;
@@ -57,10 +57,6 @@ h1 {
 
 body {
     font-family: 'Poppins', sans-serif;
-<<<<<<< HEAD
-    /* overflow-y: hidden; */
-=======
->>>>>>> 6a2a70d4334a7b93634d2f4f5769519a4e8c9e5e
 }
 
 .wrapper {
