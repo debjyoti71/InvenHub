@@ -254,10 +254,10 @@ p {
     font-weight: bolder;
 }
 .duration{
-    border-color: black;
-    border-radius:50px;
+    border: 0.2px solid black;
+    border-radius:5px;
     width: auto;
-    background-color: var(--100);
+    background-color: transparent;
     color: black;
     padding: 5px;
   }
