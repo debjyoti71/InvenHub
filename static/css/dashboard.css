@@ -24,7 +24,7 @@
 }
 @font-face {
     font-family: 'digitalll';
-    src: url(/InvenHub/static/fonts/digital.ttf);
+    src: url(/static/fonts/digital.ttf);
 }
 ::-webkit-scrollbar {
     width: 15px;
