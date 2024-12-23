@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import os
 import time
 from config import Config  # Import your Config class
-from models import db, User, Store, Product, UserStore, Category, Transaction ,TransactionItem
+from models import db, User, Store, Product , Temp_product, UserStore, Category, Transaction ,TransactionItem
 import csv 
 from datetime import datetime ,timedelta
 from flask_migrate import Migrate
@@ -771,8 +771,60 @@ def new_product():
             flash("An error occurred while processing the request. Please try again.", "danger")
             return redirect(url_for('new_product'))
 
+@app.route('/delete_product/<int:product_id>', methods=['POST'])
+def delete_product(product_id):
+    current_user = User.query.filter_by(email=session.get('email')).first()
+    user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+    store_id = user_store.store_id
 
+    print(f"Attempting to delete product with ID: {product_id}")
+    
+    # Ensure product ID is treated as a string to match the database column type
+    product = Product.query.filter_by(P_unique_id=str(product_id)).first()
+    
+    if not product:
+        print(f"No product found with ID: {product_id}")
+        return redirect(url_for('inventory'))
+    
+    try:
+        # Delete the product
+        db.session.delete(product)
+        print(f"{product.name} is deleted")
+
+        # Create a new record in Temp_product
+        new_temp_product = Temp_product(
+            name=product.name,
+            store_id=store_id,
+            quantity=product.stock,  # Assuming `stock` represents the quantity
+            manufacture_date=product.manufacture_date,
+            expire_date=product.expire_date,
+            cost_price=product.cost_price,
+            selling_price=product.selling_price,
+            stock=product.stock,
+            category_id=product.category_id,
+            P_unique_id=product.P_unique_id,
+        )
+        db.session.add(new_temp_product)
+        print(f"Temporary record {new_temp_product.name} is created")
         
+        # Commit the changes
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while deleting product or creating temp record: {e}")
+
+    return redirect(url_for('inventory'))
+
+@app.route('/all_deleted_products', methods=['GET'])
+def all_deleted_products():
+    current_user = User.query.filter_by(email=session.get('email')).first()
+    user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+    store_id = user_store.store_id
+    temp_products = Temp_product.query.filter_by(store_id=store_id).all()
+    return render_template('all_deleted_products.html', temp_products=temp_products)
+
+
 @app.route('/suggest-products', methods=['GET'])
 def suggest_products():
     query = request.args.get('query', '').strip()

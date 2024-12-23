@@ -97,6 +97,21 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False, index=True)
     P_unique_id = db.Column(db.String(20), unique=True, index=True, nullable=False)
     transaction_items = db.relationship('TransactionItem', backref=db.backref('products_in_transaction', lazy=True))
+
+class Temp_product(db.Model):
+    __tablename__ = 'temp_product'
+    id = db.Column(db.Integer, primary_key=True)
+    store_id = db.Column(db.Integer, db.ForeignKey('store.id'), nullable=False)
+    name = db.Column(db.String(50), nullable=False, index=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    manufacture_date = db.Column(db.Date, nullable=True)
+    expire_date = db.Column(db.Date, nullable=True)
+    cost_price = db.Column(db.Integer, nullable=False)
+    selling_price = db.Column(db.Integer, nullable=False)
+    stock = db.Column(db.Integer, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False, index=True)
+    P_unique_id = db.Column(db.String(20), unique=True, index=True, nullable=False)
+    delete_date = db.Column(db.DateTime, nullable=True, default=get_india_time)
     
 class Transaction(db.Model):
     __tablename__ = 'transaction'
