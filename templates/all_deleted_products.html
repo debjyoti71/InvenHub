@@ -1,0 +1,28 @@
+<table id="deleted-products">
+  <thead>
+    <tr>
+      <th>Product ID</th>
+      <th>Product Name</th>
+      <th>cost_price</th>
+      <th>quantity</th>
+      <th>selling_price</th>
+      <th>delete_date</th>
+    </tr>
+  </thead>
+  <tbody id="deleted-temp_products-body">
+    {% if temp_products %}
+        {% for temp_product in temp_products %}
+            <tr>
+                <td>{{ temp_product.P_unique_id }}</td>
+                <td>{{ temp_product.name }}</td>
+                <td>{{ temp_product.cost_price }}</td>
+                <td>{{ temp_product.quantity }}</td>
+                <td>{{ temp_product.selling_price }}</td>
+                <td>{{ temp_product.delete_date }}</td>
+            </tr> 
+        {% endfor %}
+    {% endif %}
+  </tbody>
+</table>  
+
+<button class="btn my-3" id="btnnn" onclick="window.location.href='/inventory'">Inventory</button>    
