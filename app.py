@@ -246,92 +246,75 @@ def forget_password():
             return redirect(url_for('forget_password'))
 
         otp = random.randint(100000, 999999)
-        session['otp'] = otp  # Store OTP in session
+        session['otp'] = otp  # Store OTP in session  # Store OTP in session
         session['email'] = email  # Store email for verification
         session['otp_timestamp'] = time.time()  # Store OTP timestamp to handle expiration
 
-        # Send OTP to user's email
+        # Send OTP to user’s email
         msg = Message(
-            'Your One-Time Password (OTP)',
-            sender=app.config['MAIL_USERNAME'],
+            'Your One-Time Password (OTP)', 
+            sender=app.config['MAIL_USERNAME'], 
             recipients=[email]
         )
         msg.html = render_template('otpMail_template.html', otp=otp)
 
-        try:
-            mail.send(msg)
-            flash('OTP sent to your email.', 'success')
-        except Exception:
-            flash('Failed to send OTP. Please try again.', 'danger')
-            return redirect(url_for('forget_password'))
-
+        mail.send(msg)
         return redirect(url_for('fpverify_otp'))
 
 
 # Step 2: Verify OTP for Password Reset
-@app.route('/forget-password-verify-otp', methods=['GET', 'POST'])
+@app.route('/fpverify_otp', methods=['GET', 'POST'])
 def fpverify_otp():
     if request.method == 'GET':
-        return render_template('otp_verification.html')  # Form to input OTP
-
+        return render_template('resetPasswordOTP.html')
+    
     if request.method == 'POST':
-        entered_otp = request.form['otp']
-        stored_otp = session.get('otp')
-        email = session.get('email')
-        otp_timestamp = session.get('otp_timestamp')
+        otp = ''.join([request.form[f'otp{i}'] for i in range(1, 7)])  # Combine OTP digits
 
-        if not stored_otp or not email or not otp_timestamp:
-            flash('Session expired or invalid.', 'danger')
-            return redirect(url_for('forget_password'))
+        if 'otp' in session and otp == str(session['otp']):
+            session.pop('otp', None)  # Clear OTP after successful verification
 
-        # Check if OTP expired (e.g., after 10 minutes)
-        if time.time() - otp_timestamp > 600:  # 10 minutes
-            flash('OTP expired. Please request a new one.', 'danger')
-            session.pop('otp', None)
-            session.pop('otp_timestamp', None)
-            return redirect(url_for('forget_password'))
+        return redirect(url_for('reset_password'))
 
-        if str(entered_otp) == str(stored_otp):
-            session.pop('otp', None)  # Remove OTP after verification
-            flash('OTP verified successfully.', 'success')
-            return redirect(url_for('reset_password'))
-
-        flash('Invalid OTP. Please try again.', 'danger')
-        return redirect(url_for('fpverify_otp'))
-
-
-# Step 3: Reset Password
-@app.route('/forget-password-reset-password', methods=['GET', 'POST'])
+@app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     if request.method == 'GET':
-        return render_template('forget-password-reset_password.html')  # Form to input new password
+        return render_template('resetPasswordNewPass.html')
 
     if request.method == 'POST':
-        new_password = request.form['password']
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
         email = session.get('email')
 
         if not email:
-            flash('Session expired. Please restart the process.', 'danger')
+            flash('Session expired. Please restart the reset process.', 'danger')
             return redirect(url_for('forget_password'))
 
-        if len(new_password) < 6:  # Ensure a minimum length for password
-            flash('Password must be at least 6 characters long.', 'danger')
+        if not password or not confirm_password:
+            flash('All fields are required.', 'danger')
             return redirect(url_for('reset_password'))
 
-        # Hash the password before saving it
-        hashed_password = generate_password_hash(new_password)
+        if password != confirm_password:
+            flash('Passwords do not match. Please try again.', 'danger')
+            return redirect(url_for('reset_password'))
 
-        user = User.query.filter_by(email=email).first()
-        if user:
-            user.password = hashed_password  # Use hashed passwords for security
-            db.session.commit()
+        try:
+            hashed_password = generate_password_hash(password)
+            user = User.query.filter_by(email=email).first()
 
-            session.pop('email', None)  # Clear email from session
-            flash('Password reset successfully. You can now log in.', 'success')
-            return redirect(url_for('login'))
-
-        flash('User not found. Please restart the process.', 'danger')
-        return redirect(url_for('forget_password'))
+            if user:
+                user.password = hashed_password
+                db.session.commit()
+                session.pop('email', None)
+                flash('Password reset successfully. You can now log in.', 'success')
+                return redirect(url_for('login'))
+            else:
+                flash('User not found. Please restart the process.', 'danger')
+                return redirect(url_for('forget_password'))
+        except Exception as e:
+            db.session.rollback()
+            flash('An unexpected error occurred. Please try again later.', 'danger')
+            return redirect(url_for('reset_password'))
 
 # Dashboard (only accessible to logged-in users)
 @app.route('/dashboard', methods=['GET', 'POST'])
