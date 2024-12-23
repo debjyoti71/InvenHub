@@ -1,0 +1,104 @@
+<div class="row" style="height: auto;">
+    <h5 class="text">My account</h5>
+</div>
+<div class="row" id="profileHeading" style="height: auto;">
+    <div class="col"></div>
+    <div class="col-8">
+        <div class="text-center"><h2>Personal information</h2></div>
+    </div>
+    <div class="col">
+        <button class="button-30" id="edit-btn" role="button">Edit</button>
+        <button class="button-30" id="save-btn" role="button" style="display: none;">Save</button>
+        <button class="button-30" id="cancel-btn" role="button" style="display: none;">Cancel</button>
+    </div>
+</div>
+<div class="row" id="profileContainer">
+    <div class="col"></div>
+    <div class="col">
+        <form id="personal-info-form">
+            <div class="profileCard">
+                <div class="row" style="padding: 20px;">
+                    <div class="col" style="gap: 20px;">
+                        <label for="name">Name</label>
+                        <div class="name" id="data-field">
+                            <input type="text" id="first-name" value="{{ user.first_name }}" disabled>
+                            <input type="text" id="last-name" value="{{ user.last_name }}" disabled>
+                        </div>
+                        <label for="age">Age</label>
+                        <div class="name" id="data-field">
+                            <input type="number" id="age" value="21" disabled>
+                        </div>
+                        <label for="gender">Gender</label>
+                        <div class="name" id="data-field">
+                            <input type="text" id="gender" value="Male" disabled>
+                        </div>
+                        <label for="contact">Contact number</label>
+                        <div class="name" id="data-field">
+                            <input type="text" id="phone" value="{{ user.phone }}" disabled>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label for="email">Email</label>
+                        <div class="name" id="data-field">
+                            <input type="email" id="email" value="{{ user.email }}" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+
+<script>
+    const editButton = document.getElementById("edit-btn");
+    const saveButton = document.getElementById("save-btn");
+    const cancelButton = document.getElementById("cancel-btn");
+    const inputs = document.querySelectorAll("#personal-info-form input");
+
+    editButton.addEventListener("click", () => {
+        inputs.forEach(input => input.disabled = false); // Enable input fields
+        editButton.style.display = "none";
+        saveButton.style.display = "inline-block";
+        cancelButton.style.display = "inline-block";
+    });
+
+    cancelButton.addEventListener("click", () => {
+        inputs.forEach(input => input.disabled = true); // Disable input fields
+        editButton.style.display = "inline-block";
+        saveButton.style.display = "none";
+        cancelButton.style.display = "none";
+    });
+
+    saveButton.addEventListener("click", () => {
+        const formData = {
+            first_name: document.getElementById("first-name").value,
+            last_name: document.getElementById("last-name").value,
+            age: document.getElementById("age").value,
+            gender: document.getElementById("gender").value,
+            phone: document.getElementById("phone").value,
+            email: document.getElementById("email").value
+        };
+
+        fetch("/update_profile", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Profile updated successfully!");
+            } else {
+                alert("Failed to update profile.");
+            }
+            inputs.forEach(input => input.disabled = true); // Disable input fields
+            editButton.style.display = "inline-block";
+            saveButton.style.display = "none";
+            cancelButton.style.display = "none";
+        })
+        .catch(err => console.error(err));
+    });
+</script>

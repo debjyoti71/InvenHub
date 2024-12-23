@@ -118,7 +118,8 @@
                     <div class="text-center"><h2>Personal information</h2></div>
                 </div>
                 <div class="col">
-                    <button class="button-30" role="button">Edit</button>
+                    <button class="button-30" role="button" id="editButton" onclick="makeEditable()" style="visibility: visible;">Edit</button>
+                    <button class="button-30" role="button" id="saveButton" onclick="makeNonEditable()" style="visibility: hidden;">Save</button>
                 </div>
             </div>
             <div class="row" id="profileContainer">
@@ -128,17 +129,17 @@
                         <div class="row" style="padding: 20px;">
                             <div class="col" style="gap: 20px;">
                                 <label for="name">Name</label>
-                                <div class="name" id="data-field">{{ user.first_name }} {{ user.last_name }}</div>
+                                <div class="editable" id="data-field" style="border: unset;">{{ user.first_name }} {{ user.last_name }}</div>
                                 <label for="name">Age</label>
-                                <div class="name" id="data-field">21</div>
+                                <div class="editable" id="data-field" style="border: unset;">21</div>
                                 <label for="name">Gender</label>
-                                <div class="name" id="data-field">Male</div>
+                                <div class="editable" id="data-field" style="border: unset;">Male</div>
                                 <label for="name">Contact number</label>
-                                <div class="name" id="data-field">{{ user.phone }}</div>
+                                <div class="editable" id="data-field" style="border: unset;">{{ user.phone }}</div>
                             </div>
                             <div class="col">
                                 <label for="name">Email</label>
-                                <div class="name" id="data-field">{{ user.email }}</div>
+                                <div class="data-field" id="data-field">{{ user.email }}</div>
                             </div>
                         </div>
                     </div>
@@ -157,7 +158,7 @@
                             <div class="row" style="padding: 20px;">
                                 <div class="col" style="gap: 20px;">
                                     <label for="name">Store name</label>
-                                    <div id="data-field">{{ store.store_name }}</div>
+                                    <div class="editable" id="data-field">{{ store.store_name }}</div>
                                     <label for="name">Owner's name</label>
                                     <div id="data-field">{{ store.owner_name }}</div>
                                     <label for="name">Store address</label>
@@ -200,7 +201,29 @@
                 })
                 .catch(err => alert("Failed to copy: " + err));
         });
-         
+        function makeEditable() {
+    const editableDivs = document.querySelectorAll(".editable");
+    editableDivs.forEach(function(div) {
+        div.contentEditable = true;
+        div.style.border = "0.5px solid black";
+    });
+    var editButton = document.getElementById('editButton');
+    var saveButton = document.getElementById('saveButton');
+    editButton.style.visibility="hidden";
+    saveButton.style.visibility="visible";
+}
+
+function makeNonEditable() {
+    const editableDivs = document.querySelectorAll(".editable");
+    editableDivs.forEach(function(div) {
+        div.contentEditable = false;
+        div.style.border = "unset";
+    });
+    var editButton = document.getElementById('editButton');
+    var saveButton = document.getElementById('saveButton');
+    editButton.style.visibility="visible";
+    saveButton.style.visibility="hidden";
+}
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
