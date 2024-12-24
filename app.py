@@ -638,7 +638,7 @@ def account():
             user.last_name = last_name
             user.age = age
             user.gender = gender
-            user.phone_number = phone_number
+            user.phone = phone_number
 
             # Update store details if provided
             if store_name:
