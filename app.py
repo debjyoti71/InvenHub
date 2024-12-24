@@ -628,6 +628,7 @@ def account():
             gender = data['gender']
             phone_number = data['contact_number']
             store_name = data.get('store_name')  # Use .get() to avoid KeyError if not present
+            owner_name = data.get('owner_name')
 
             # Update user details
             user = User.query.get(data['user_id'])  # Retrieve user by ID
@@ -646,6 +647,7 @@ def account():
                 store = Store.query.filter_by(id=user_store.store_id).first()
                 if store:
                     store.store_name = store_name
+                    store.owner_name = owner_name
                 else:
                     return jsonify({"error": "Store not found"}), 404
 
