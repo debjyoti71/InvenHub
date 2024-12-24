@@ -597,7 +597,7 @@ def join_store():
         return redirect(url_for('join_store'))
 
 
-@app.route('/account')
+@app.route('/account', methods=['GET', 'POST'])
 def account():
     if 'user' not in session:
         return redirect(url_for('login'))  # Redirect to login if not logged in
@@ -613,7 +613,57 @@ def account():
     # Debugging statement to see the stores
     print("Stores:", stores)
 
-    return render_template('account_details.html', username=session['user'], email=session['email'], user=user, stores=stores)
+    if request.method == 'GET':
+        return render_template('account_details.html', username=session['user'], email=session['email'], user=user, stores=stores)
+
+    elif request.method == 'POST':
+        try:
+            # Parse the incoming JSON data
+            data = request.get_json()
+            print("Received data:", data)
+
+            # Extract user details
+            first_name, last_name = data['name'].split()
+            age = int(data['age'])  # Ensure age is stored as an integer
+            gender = data['gender']
+            phone_number = data['contact_number']
+            store_name = data.get('store_name')  # Use .get() to avoid KeyError if not present
+
+            # Update user details
+            user = User.query.get(data['user_id'])  # Retrieve user by ID
+            if not user:
+                return jsonify({"error": "User not found"}), 404
+
+            user.first_name = first_name
+            user.last_name = last_name
+            user.age = age
+            user.gender = gender
+            user.phone_number = phone_number
+
+            # Update store details if provided
+            if store_name:
+                user_store = UserStore.query.filter_by(user_id=user.id).first()
+                store = Store.query.filter_by(id=user_store.store_id).first()
+                if store:
+                    store.store_name = store_name
+                else:
+                    return jsonify({"error": "Store not found"}), 404
+
+            # Commit changes to the database
+            db.session.commit()
+
+            print("Account details updated successfully!")
+            return jsonify({"message": "Account details updated successfully!"}), 200
+
+        except ValueError as e:
+            print("Error while updating account:", e)
+            return jsonify({"error": "Invalid input data"}), 400
+        except KeyError as e:
+            print("Missing data field:", e)
+            return jsonify({"error": f"Missing field: {e}"}), 400
+        except Exception as e:
+            print("Unexpected error:", e)
+            return jsonify({"error": "An unexpected error occurred"}), 500
 
 
 @app.route('/inventory', methods=['GET', 'POST'])
@@ -637,9 +687,21 @@ def inventory():
             flash("Store not found.", "danger")
             return redirect(url_for('dashboard'))
 
-        # Fetch all categories and their products for this store
-        categories = Category.query.filter_by(store_id=store.id).all()
-        products = Product.query.join(Category).with_for_update().filter(Category.store_id == store.id).all()
+        # Fetch all categories and their products for this sto
+        categories = Category.query.with_for_update().filter_by(store_id=store.id).all()
+        products = Product.query.with_for_update().filter(Product.category_id.in_([category.id for category in categories])).all()
+
+        # Organize products by category
+        products_by_category = {category.id: [] for category in categories}
+        for product in products:
+            products_by_category[product.category_id].append(product)
+
+        # Filter out categories without products
+        filtered_categories = [category for category in categories if products_by_category[category.id]]
+
+        # Debugging output
+        print(filtered_categories, products_by_category)
+
         # Calculate dashboard metrics
         total_products = len(products)
         top_selling = 5  # Placeholder, replace with actual logic
@@ -648,7 +710,7 @@ def inventory():
         return render_template(
             'inventory.html',
             products=products,
-            categories=categories,  # Pass categories to template
+            categories=filtered_categories,  # Pass categories to template
             total_products=total_products,
             top_selling=top_selling,
             low_stock=low_stock,
@@ -702,7 +764,7 @@ def new_product():
                 category = Category.query.filter_by(category_name=productCategory, store_id=store_id).first()
                 if not category:
                     categories_in_store = Category.query.filter_by(store_id=store_id).all()
-                    C_unique_id = f"{store_id}{len(categories_in_store)+1}"
+                    C_unique_id = f"{store_id}{len(categories_in_store)+1}0"
                     category = Category(category_name=productCategory, store_id=store_id, C_unique_id=C_unique_id)
                     db.session.add(category)
                     print(f"New category created: {category.category_name}, ID: {C_unique_id}")  # Debug

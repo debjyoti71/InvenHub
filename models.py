@@ -110,7 +110,7 @@ class Temp_product(db.Model):
     selling_price = db.Column(db.Integer, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False, index=True)
-    P_unique_id = db.Column(db.String(20), unique=True, index=True, nullable=False)
+    P_unique_id = db.Column(db.String(20), index=True, nullable=False)
     delete_date = db.Column(db.DateTime, nullable=True, default=get_india_time)
     
 class Transaction(db.Model):
