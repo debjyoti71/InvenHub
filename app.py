@@ -628,7 +628,7 @@ def account():
             gender = data['gender']
             phone_number = data['contact_number']
             store_name = data.get('store_name')  # Use .get() to avoid KeyError if not present
-            owner_name = data.get('owner_name')
+            owner_name = data.get("owner's_name")
 
             # Update user details
             user = User.query.get(data['user_id'])  # Retrieve user by ID
