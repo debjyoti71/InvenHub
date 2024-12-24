@@ -94,10 +94,16 @@
                 <div class="col-11">
                     <div class="row justify-content-center align-items-center">
                         <div class="col"></div>
+                        
                         <div class="col-5" style="height: auto;">
-                            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                            <input class="form-control" id="searchInput" type="search" placeholder="Search for categories or products..." autocomplete="off" aria-label="Search">
+                            <ul id="productSuggestions" class="list-group" style="display: none;"></ul> 
                         </div>
-                        <div class="col-1"><button class="btn" id="btnn" type="submit">Search</button></div>
+                        <div class="col-1">
+                            <button class="btn" id="btnn" type="submit">Search</button>
+                        </div>
+                        <input type="hidden" id="storeInput" value="{{ store_id }}">
+                        
                         <div class="col-5">
                             <div class="row">
                                 <div class="col"></div>
@@ -320,5 +326,6 @@
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>
 <script src="/static/js/dashboard.js"></script>
+<script src = "/static/js/search_bar.js"></script>
 </body>
 </html>

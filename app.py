@@ -399,6 +399,7 @@ def dashboard():
             monthly_data=monthly_data,
             low_stock_data=low_stock_data,
             total_stock=total_stock,
+            store_id=store_id,
         )
 
 @app.route('/add_store', methods=['GET'])
@@ -962,6 +963,54 @@ def suggest_categories():
         })
 
     return jsonify({"suggestions": suggestions})
+
+@app.route('/suggest', methods=['GET'])
+def suggest():
+    query = request.args.get('query', '').strip()
+    store_id = request.args.get('store_id', type=int)
+
+    if not query or not store_id:
+        return jsonify({"categories": [], "products": []})
+
+    # Fetch matching categories
+    categories = Category.query.filter(
+        Category.store_id == store_id,
+        Category.category_name.ilike(f"%{query}%")
+    ).limit(5).all()
+
+    # Fetch matching products
+    products = Product.query.join(Category).filter(
+        Category.store_id == store_id,
+        or_(
+            Product.name.ilike(f"%{query}%"),
+            Product.P_unique_id.ilike(f"%{query}%"),
+            Category.category_name.ilike(f"%{query}%")  
+        )
+    ).limit(5).all()
+
+    # Prepare category suggestions
+    category_suggestions = [{"name": category.category_name, "category_id": category.C_unique_id} for category in categories]
+
+    # Prepare product suggestions
+    product_suggestions = [{
+        "product_id": product.P_unique_id,
+        "name": product.name,
+        "selling_price": product.selling_price,
+        "stock": product.stock,
+        "category_name": product.category.category_name,  # Category name
+        "category_id": product.category.C_unique_id
+    } for product in products]
+
+    return jsonify({"categories": category_suggestions, "products": product_suggestions})
+
+
+@app.route("/search_bar", methods=["GET", "POST"])
+def search_bar():
+    if request.method == "GET":
+        current_user = User.query.filter_by(email=session.get('email')).first()
+        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        store_id = user_store.store_id
+        return render_template('search_bar.html',store_id= store_id)
 
 @app.route('/new_sale', methods=['GET', 'POST'])
 def new_sale():
