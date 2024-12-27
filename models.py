@@ -18,6 +18,7 @@ class User(db.Model):
     gender = db.Column(db.String(15), nullable=False, default='--')
     phone = db.Column(db.String(15), nullable=False)
     password = db.Column(db.String(200), nullable=False)  # Password should be hashed
+    profile_picture = db.Column(db.String(120), nullable=True, default="/static/images/icons8-account-50.png")
     role_name = db.Column(db.String(20), nullable=False, default='User')
 
     # Relationships
