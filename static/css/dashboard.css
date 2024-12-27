@@ -276,3 +276,6 @@ background: linear-gradient(225deg, #afc7dd, #d0ecff);
 box-shadow:  -6px 6px 15px #a9c0d5,
              6px -6px 15px #dbfaff;
 }
+#productSuggestions{
+    position: absolute;
+}
