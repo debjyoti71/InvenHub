@@ -686,6 +686,7 @@ def inventory():
 
         # Fetch the products for the user's store
         store = Store.query.filter_by(id=user_store.store_id).first()
+        store_id = store.id
         if not store:
             flash("Store not found.", "danger")
             return redirect(url_for('dashboard'))
@@ -717,6 +718,7 @@ def inventory():
             total_products=total_products,
             top_selling=top_selling,
             low_stock=low_stock,
+            store_id = store_id,
         )
 
     elif request.method == 'POST':
