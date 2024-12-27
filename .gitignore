@@ -21,6 +21,8 @@ instance/
 db_changes.py
 forcasting.py
 req.py
+copy_db.py
+tempCodeRunnerFile.py
 
 # Ignore specific data files (e.g., dataset or user data)
 static/updated_kalimati_tarkari_dataset_modified.csv
