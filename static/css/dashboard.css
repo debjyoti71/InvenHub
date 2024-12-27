@@ -278,4 +278,5 @@ box-shadow:  -6px 6px 15px #a9c0d5,
 }
 #productSuggestions{
     position: absolute;
+    z-index: 999;
 }
