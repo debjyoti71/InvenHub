@@ -219,34 +219,20 @@
             function makeNonEditable() {
                 const editableDivs = document.querySelectorAll(".editable");
                 const updatedData = {}; // Object to store updated values
-                let isChanged = false; // Flag to track changes
-
+        
                 editableDivs.forEach(function(div) {
                     div.contentEditable = false;
                     div.style.border = "unset";
-
+        
                     // Get label (if exists) or ID to form data keys
                     const label = div.previousElementSibling ? div.previousElementSibling.textContent.trim() : div.id;
-                    const newValue = div.textContent.trim();
-                    const oldValue = div.getAttribute("data-old-value"); // Assuming you set this attribute with initial value
-
-                    // Check if the value has changed
-                    if (newValue !== oldValue) {
-                        isChanged = true;
-                    }
-
-                    updatedData[label.toLowerCase().replace(/\s/g, "_")] = newValue;
+                    updatedData[label.toLowerCase().replace(/\s/g, "_")] = div.textContent.trim();
                 });
-
-                if (!isChanged) {
-                    // No changes, so no need to post data
-                    return;
-                }
-
+        
                 // Add user_id to the data
                 const userId = "{{ user.id }}"; // Replace with dynamic ID
                 updatedData["user_id"] = userId;
-
+        
                 // Post the data to the server
                 fetch('/account', {
                     method: 'POST',
@@ -266,7 +252,7 @@
                     console.error("Error:", error);
                     alert("An error occurred while saving.");
                 });
-
+        
                 document.getElementById('editButton').style.visibility = "visible";
                 document.getElementById('saveButton').style.visibility = "hidden";
             }
