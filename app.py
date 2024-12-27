@@ -9,11 +9,11 @@ from dotenv import load_dotenv
 import os
 import time
 from config import Config  # Import your Config class
-from models import db, User, Store, Product , Temp_product, UserStore, Category, Transaction ,TransactionItem
 import csv 
 from datetime import datetime ,timedelta
 from flask_migrate import Migrate
 import uuid
+from models import db, User, Store, Product , Temp_product, UserStore, Category, Transaction ,TransactionItem
 
 # Load environment variables from .env file
 load_dotenv()
@@ -35,8 +35,7 @@ import psycopg2
 
 def calculate_database_size():
     # PostgreSQL connection parameters
-    database_url = os.getenv('DATABASE_URL')
-    db_url = database_url = os.getenv('DATABASE_URL')
+    db_url = os.getenv('DATABASE_URL')
 
     try:
         # Connect to the PostgreSQL database
