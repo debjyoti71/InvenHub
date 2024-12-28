@@ -126,7 +126,13 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="col"><a href="/account"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt=""></a></div>
+                        <div 
+                        {% if (user.profile_picture) %}
+                            class="col"><a href="/account"><img height="30px" width="28px" src= {{user.profile_picture}} alt=""></a>
+                        {% else %}
+                            class="col"><a href="/account"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt=""></a>
+                        {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
