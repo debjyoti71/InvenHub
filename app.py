@@ -620,7 +620,9 @@ def account():
         try:
             # Parse the incoming JSON data
             data = request.get_json()
+            file = request.files.get('pic')
             print("Received data:", data)
+            print("Received file:", file)
 
             # Extract user details
             first_name, last_name = data['name'].split()
@@ -631,7 +633,6 @@ def account():
             owner_name = data.get("owner's_name")
 
             # Update user details
-            user = User.query.get(data['user_id'])  # Retrieve user by ID
             if not user:
                 return jsonify({"error": "User not found"}), 404
 
