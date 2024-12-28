@@ -92,3 +92,25 @@
   box-shadow: #D6D6E7 0 3px 7px inset;
   transform: translateY(2px);
 }
+#profile-image {
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background-size:cover;
+  margin-bottom: 1rem;
+}
+#profile-label{
+  height: 3rem;
+  width: 15rem;
+  background-color: var(--800);
+  border-radius: 8px;
+  color: var(--100);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+#acc{
+  border-radius: 50%;
+}
