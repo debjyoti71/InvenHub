@@ -716,7 +716,6 @@ def profile_picture(user_id):
         return "Profile picture not found", 404
 
 
-
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():
     if request.method == 'GET':
@@ -1197,6 +1196,21 @@ def new_sale():
         session['transaction_id'] = transaction.id
 
         return jsonify({'message': 'Cart updated successfully'}), 200
+    
+@app.route('/getProductByBarcode/<barcode>', methods=['GET'])
+def get_product_by_barcode(barcode):
+    product = Product.query.filter_by(P_unique_id=str(barcode)).first()  # Query the database
+    if product:
+        print(f"Product found: {product.name}, {product.selling_price}, {product.P_unique_id}")  # Debug print
+        return jsonify({
+            'product': {
+                'name': product.name,
+                'price': product.selling_price,
+                'p_unique_id': product.P_unique_id
+            }
+        })
+    else:
+        return jsonify({'error': 'Product not found'}), 404
 
 
 @app.route('/get-cart-details', methods=['GET'])
