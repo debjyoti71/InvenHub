@@ -105,13 +105,13 @@
                                 </ul>
                             </div>
                         </div>
-                        <div 
-                        {% if (user.profile_picture) %}
-                            class="col"><a href="/account"><img height="30px" width="28px" src= {{user.profile_picture}} alt=""></a>
-                        {% else %}
-                            class="col"><a href="/account"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt="" id="acc"></a>
-                        {% endif %}
-                        </div>
+                        <div class="col">
+                            {% if user.profile_picture %}
+                                <a href="/account"><img height="30px" width="28px" src="{{ url_for('profile_picture', user_id=user.id) }}" alt=""></a>
+                            {% else %}
+                                <a href="/account"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt="" id="acc"></a>
+                            {% endif %}
+                        </div>                        
                     </div>
                 </div>
             </div>
@@ -131,15 +131,21 @@
                 <div class="col"></div>
                 <div class="col-8" style="display: flex;justify-content: center;align-items: center;flex-direction: column;">
                     <div class="row">
-                        <div class="col-md-4" id="profile-image" style="background-image: url(/static/images/rb_4707.png);">
-                        </div>
-                    </div>
+                        {% if user.profile_picture %}
+                            <!-- Display user's profile picture if available -->
+                            <img src="{{ url_for('profile_picture', user_id=user.id) }}" alt="User Profile Picture" style="width: 150px; height: 150px; border-radius: 50%;">
+                        {% else %}
+                            <!-- Display default image if no profile picture is set -->
+                            <div class="col-md-4" id="profile-image" style="background-image: url(/static/images/default-profile.png);">
+                            </div>
+                        {% endif %}
+                    </div>                    
                     <div class="row">
                         <div class="col">
                             <label for="file-input" style="display: none;"; id="profile-label">Update Profile Image</label>
                             <input type="file" accept="image/jpeg, image/png, image/jpg" id="file-input" hidden>
                         </div>
-                    </div>
+                    </div>                    
                 </div>
                 <div class="col"></div>
             </div>

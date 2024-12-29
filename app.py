@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash,jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash,jsonify , send_file, redirect ,make_response
 from sqlalchemy import func , or_
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +7,7 @@ from flask_mail import Mail, Message
 import random
 from dotenv import load_dotenv
 import os
+from io import BytesIO
 import time
 from config import Config  # Import your Config class
 import csv 
@@ -620,9 +621,7 @@ def account():
         try:
             # Parse the incoming JSON data
             data = request.get_json()
-            file = request.files.get('pic')
             print("Received data:", data)
-            print("Received file:", file)
 
             # Extract user details
             first_name, last_name = data['name'].split()
@@ -667,6 +666,55 @@ def account():
         except Exception as e:
             print("Unexpected error:", e)
             return jsonify({"error": "An unexpected error occurred"}), 500
+        
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    current_user = User.query.filter_by(email=session.get('email')).first()
+
+    if request.method == "POST":
+        if 'profile_picture' not in request.files:
+            return jsonify({"error": "No file part"}), 400  # Bad Request
+
+        file = request.files['profile_picture']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400  # Bad Request
+
+        if not allowed_file(file.filename):
+            return jsonify({"error": "Invalid file type. Allowed types: png, jpg, jpeg, gif"}), 400
+
+        try:
+            # Save the file to the server with a unique filename
+            filename = secure_filename(file.filename)
+            filepath = os.path.join('uploads', filename)  # Store the file in the 'uploads' folder
+            file.save(filepath)
+
+            # Update the user profile picture path in the database
+            current_user.profile_picture = filepath
+            db.session.commit()
+            return jsonify({"message": "Profile picture uploaded successfully!"}), 200
+
+        except Exception as e:
+            db.session.rollback()
+            print(f'Error uploading file: {e}')
+            return jsonify({"error": "Error uploading file"}), 500
+            
+# Route: Serve Profile Picture
+@app.route('/profile_picture/<int:user_id>')
+def profile_picture(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.profile_picture:
+        response = make_response(user.profile_picture)
+        response.headers.set('Content-Type', user.mimetype or 'application/octet-stream')
+        response.headers.set('Content-Disposition', 'inline; filename=profile_picture')
+        return response
+    else:
+        return "Profile picture not found", 404
+
 
 
 @app.route('/inventory', methods=['GET', 'POST'])
@@ -1004,15 +1052,6 @@ def suggest():
     } for product in products]
 
     return jsonify({"categories": category_suggestions, "products": product_suggestions})
-
-
-@app.route("/search_bar", methods=["GET", "POST"])
-def search_bar():
-    if request.method == "GET":
-        current_user = User.query.filter_by(email=session.get('email')).first()
-        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-        store_id = user_store.store_id
-        return render_template('search_bar.html',store_id= store_id)
 
 @app.route('/new_sale', methods=['GET', 'POST'])
 def new_sale():
