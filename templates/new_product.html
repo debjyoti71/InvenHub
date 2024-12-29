@@ -131,64 +131,62 @@
                 <div class="col"><a href="/account"><i><img height="30px" width="30px" src="/static/images/icons8-account-50.png" alt=""></i></a></div>
                 <div class="col"></div>
             </div>
-            <div class="row" style="height: 100%;background-color: #c2ddf5;">
-                <div class="col">
-                    <div class="main-content" style="height: 100%;">
-                        <div class="main-content">
+            <div class="row" style="height: 100%; background-color: #c2ddf5;">
+                <form id="addProductForm" action="/new_product" method="POST" class="d-flex flex-wrap w-100">
+                    <!-- Left Column: Product Details -->
+                    <div class="col-lg-6">
+                        <div class="main-content p-4">
                             <h3>Add New Product</h3>
-                            <form id="addProductForm" action="/new_product" method="POST">
-                                <div class="mb-3">
-                                    <label for="productCategory" class="form-label">Category</label>
-                                    <input type="text" class="form-control" name="productCategory" id="productCategory" required autocomplete="off">
-                                    <ul id="categorySuggestions" class="list-group mt-2" style="display: none;"></ul>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="productName" class="form-label">Product Name</label>
-                                    <input type="text" class="form-control" name="productName" id="productName" required autocomplete="off">
-                                    <ul id="productSuggestions" class="list-group mt-2" style="display: none;"></ul>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="productPrice" class="form-label">Cost Price</label>
-                                    <input type="number" class="form-control" name="productPrice" id="productPrice" step="0.01" required>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="productQuantity" class="form-label">Quantity</label>
-                                    <input type="number" class="form-control" name="productQuantity" min="1" id="productQuantity" required>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="productSellingPrice" class="form-label">Selling Price</label>
-                                    <input type="number" class="form-control" name="productSellingPrice" id="productSellingPrice" step="0.01" required>
-                                </div>
-                                
-                                <!-- Hidden fields to store additional product details -->
-                                <input type="hidden" id="productId">
-                                <input type="hidden" id="productManufactureDate">
-                                <input type="hidden" id="productExpiryDate">
-                                                                   
+                            <div class="mb-3">
+                                <label for="productCategory" class="form-label">Category</label>
+                                <input type="text" class="form-control" name="productCategory" id="productCategory" required autocomplete="off">
+                                <ul id="categorySuggestions" class="list-group mt-2" style="display: none;"></ul>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productName" class="form-label">Product Name</label>
+                                <input type="text" class="form-control" name="productName" id="productName" required autocomplete="off">
+                                <ul id="productSuggestions" class="list-group mt-2" style="display: none;"></ul>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productPrice" class="form-label">Cost Price</label>
+                                <input type="number" class="form-control" name="productPrice" id="productPrice" step="0.01" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productQuantity" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" name="productQuantity" min="1" id="productQuantity" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productSellingPrice" class="form-label">Selling Price</label>
+                                <input type="number" class="form-control" name="productSellingPrice" id="productSellingPrice" step="0.01" required>
+                            </div>
+            
+                            <!-- Hidden fields for additional product details -->
+                            <input type="hidden" id="productId" name="productId">
+                            <input type="hidden" id="productManufactureDate" name="productManufactureDate">
+                            <input type="hidden" id="productExpiryDate" name="productExpiryDate">
+            
+                            <!-- Form Buttons -->
+                            <div class="d-flex gap-3">
                                 <button type="submit" class="btn btn-primary">Add Product</button>
                                 <button type="button" class="btn btn-secondary" onclick="goBack()">Cancel</button>
-                            </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col" style="height: 100%;">
-                    <div class="row" style="height: auto;">
-                        <label for="option" class="form-label" style="margin-top: 30px;">Want Barcode</label>   
-                    <select class="form-select" id="bill" aria-label="Default select example" style="width: 200px;">
-                        <option selected>Yes</option>
-                        <option>No</option>
-                    </select>
-                    <select class="form-select" id="bill" aria-label="Default select example" style="width: 100px; margin-left: 2rem;">
-                        <option value="">1</option>
-                        <option value="">Quantity</option>
-                    </select>
+            
+                    <!-- Right Column: Barcode and Illustration -->
+                    <div class="col-lg-6 d-flex flex-column align-items-center justify-content-center">
+                        <div class="mb-4 w-100">
+                            <label for="want_barcode" class="form-label">Want Barcode</label>
+                            <select class="form-select" id="want_barcode" name="want_barcode" aria-label="Do you want a barcode?" style="width: 200px;">
+                                <option selected>NO</option>
+                                <option>Yes</option>
+                            </select>
+                            <input type="number" class="form-control mt-2" id="barcode_quantity" name="barcode_quantity" min="1" style="width: 80px;" disabled>
+                        </div>
+                        <img src="/static/images/undraw_add_tasks_re_s5yj.svg" alt="Illustration" class="img-fluid" style="height: 60%; width: 90%;">
                     </div>
-                    <img src="/static/images/undraw_add_tasks_re_s5yj.svg" alt="" style="height: 60%; width: 90%; margin-top: 10%;">
-                </div>
-            </div>
+                </form>
+            </div>            
             <script>
                 // Function to fetch category suggestions based on user input
                 function fetchCategorySuggestions(query) {
@@ -335,6 +333,13 @@
                 function goBack() {
                     window.location.href = '/inventory';
                 }
+                document.getElementById('want_barcode').addEventListener('change', function () {
+                    const barcodeInput = document.getElementById('barcode_quantity');
+                    barcodeInput.disabled = this.value === 'NO';
+                    if (barcodeInput.disabled) {
+                        barcodeInput.value = ''; // Clear the input if disabled
+                    }
+                });
             </script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"

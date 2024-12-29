@@ -46,8 +46,8 @@ function makeNonEditable() {
     });
 
     // Add user_id to the data
-    const userId = "{{ user.id }}"; // Replace with dynamic ID
-    updatedData["user_id"] = userId;
+    const user_id = document.getElementById('userinput').value;
+    updatedData["user_id"] = user_id;
 
     // Post the data to the server
     fetch('/account', {

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash,jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash,jsonify , send_file, redirect ,make_response
 from sqlalchemy import func , or_
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +7,7 @@ from flask_mail import Mail, Message
 import random
 from dotenv import load_dotenv
 import os
+from io import BytesIO
 import time
 from config import Config  # Import your Config class
 import csv 
@@ -631,7 +632,6 @@ def account():
             owner_name = data.get("owner's_name")
 
             # Update user details
-            user = User.query.get(data['user_id'])  # Retrieve user by ID
             if not user:
                 return jsonify({"error": "User not found"}), 404
 
@@ -666,6 +666,54 @@ def account():
         except Exception as e:
             print("Unexpected error:", e)
             return jsonify({"error": "An unexpected error occurred"}), 500
+        
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    current_user = User.query.filter_by(email=session.get('email')).first()
+
+    if request.method == "POST":
+        if 'profile_picture' not in request.files:
+            return jsonify({"error": "No file part"}), 400  # Bad Request
+
+        file = request.files['profile_picture']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400  # Bad Request
+
+        if not allowed_file(file.filename):
+            return jsonify({"error": "Invalid file type. Allowed types: png, jpg, jpeg, gif"}), 400
+
+        try:
+            # Save the file to the server with a unique filename
+            filename = secure_filename(file.filename)
+            filepath = os.path.join('uploads', filename)  # Store the file in the 'uploads' folder
+            file.save(filepath)
+
+            # Update the user profile picture path in the database
+            current_user.profile_picture = filepath
+            db.session.commit()
+            return jsonify({"message": "Profile picture uploaded successfully!"}), 200
+
+        except Exception as e:
+            db.session.rollback()
+            print(f'Error uploading file: {e}')
+            return jsonify({"error": "Error uploading file"}), 500
+            
+# Route: Serve Profile Picture
+@app.route('/profile_picture/<int:user_id>')
+def profile_picture(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.profile_picture:
+        response = make_response(user.profile_picture)
+        response.headers.set('Content-Type', user.mimetype or 'application/octet-stream')
+        response.headers.set('Content-Disposition', 'inline; filename=profile_picture')
+        return response
+    else:
+        return "Profile picture not found", 404
 
 
 @app.route('/inventory', methods=['GET', 'POST'])
@@ -727,115 +775,138 @@ def inventory():
 @app.route('/new_product', methods=['GET', 'POST'])
 def new_product():
     if request.method == 'GET':
-        # Fetch the current user and store
         current_user = User.query.filter_by(email=session.get('email')).first()
+        if not current_user:
+            flash("User not logged in. Please log in first.", "danger")
+            return redirect(url_for('login'))
+
         user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+        if not user_store:
+            flash("No store associated with this user. Please join or create a store first.", "danger")
+            return redirect(url_for('add_store_form'))
+
         store_id = user_store.store_id
-        print(f"GET: Current user: {current_user.email}, Store ID: {store_id}")  # Debug
+        print(f"GET: Current user email: {current_user.email}, Store ID: {store_id}")  # Debug
         return render_template('new_product.html', store_id=store_id)
 
     elif request.method == 'POST':
         try:
-            # Fetch the current user
+            # Fetch Current User and Store
             current_user = User.query.filter_by(email=session.get('email')).first()
-            if not current_user:
-                flash("User not logged in. Please log in first.", "danger")
-                return redirect(url_for('login'))
-
-            print(f"POST: Current user: {current_user.email}")  # Debug
-
-            # Fetch the user's associated store
             user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-            if not user_store:
-                flash("No store associated with this user. Please join or create a store first.", "danger")
-                return redirect(url_for('add_store_form'))
-
             store_id = user_store.store_id
-            print(f"Store ID: {store_id}")  # Debug
 
-            # Fetch form data
-            productCategory = request.form.get('productCategory')
-            product_name = request.form.get('productName')
-            productPrice = request.form.get('productPrice')
-            productQuantity = request.form.get('productQuantity')
-            quantity = int(productQuantity)
-            productSellingPrice = request.form.get('productSellingPrice')
+            print(f"POST: Current user email: {current_user.email}, Store ID: {store_id}")  # Debug
 
-            print(f"Form Data: {productCategory}, {product_name}, {productPrice}, {productQuantity}, {productSellingPrice}")  # Debug
+            # Parse Form Data
+            form_data = {
+                "productCategory": request.form.get('productCategory'),
+                "productName": request.form.get('productName'),
+                "productPrice": float(request.form.get('productPrice')),
+                "productQuantity": int(request.form.get('productQuantity')),
+                "productSellingPrice": float(request.form.get('productSellingPrice')),
+                "want_barcode": 'yes' if request.form.get('want_barcode', '').lower() == 'yes' else 'no',
+                "barcode_quantity": int(request.form.get('barcode_quantity')) if request.form.get('barcode_quantity') else 0
+            }
 
-            if productCategory and product_name and productPrice and productQuantity and productSellingPrice and quantity:
-                # Check or create the category
-                category = Category.query.filter_by(category_name=productCategory, store_id=store_id).first()
-                if not category:
-                    categories_in_store = Category.query.filter_by(store_id=store_id).all()
-                    C_unique_id = f"{store_id}{len(categories_in_store)+1}0"
-                    category = Category(category_name=productCategory, store_id=store_id, C_unique_id=C_unique_id)
-                    db.session.add(category)
-                    print(f"New category created: {category.category_name}, ID: {C_unique_id}")  # Debug
+            print(f"Form Data: {form_data}")  # Debug
 
-                # Check or update the product
-                existing_product = Product.query.filter_by(name=product_name, category_id=category.id).first()
-                if existing_product:
-                    existing_product.cost_price = float(productPrice)
-                    existing_product.selling_price = float(productSellingPrice)
-                    existing_product.stock += quantity
-                    print(f"Product updated: {existing_product.name}, New Stock: {existing_product.stock}")  # Debug
-                    product = existing_product
-                else:
-                    products_in_category = Product.query.filter_by(category_id=category.id).all()
-                    P_unique_id = f"{category.C_unique_id}{len(products_in_category) + 1}"
-                    product = Product(
-                        name=product_name,
-                        cost_price=float(productPrice),
-                        stock=quantity,
-                        selling_price=float(productSellingPrice),
-                        category_id=category.id,
-                        P_unique_id=P_unique_id
-                    )
-                    db.session.add(product)
-                    print(f"New product added: {product.name}, Unique ID: {P_unique_id}")  # Debug
+            # Validate Form Data
+            if not form_data["productCategory"] or not form_data["productName"] or form_data["productPrice"] <= 0 or form_data["productQuantity"] <= 0 or form_data["productSellingPrice"] <= 0:
+                flash("Please fill out all fields correctly.", "danger")
+                return redirect(url_for('new_product'))
 
-                # Track the stock addition as a transaction
-                cart = {product.P_unique_id: quantity}
-                transaction = Transaction(
-                    store_id=store_id,
-                    customer_name="System",
-                    bill_number=f"ORD{store_id}{str(uuid.uuid4())[:7]}",
-                    transaction_type='order',
-                    payment_method='cash',
-                    total_selling_price=0,
-                    total_cost_price=float(productPrice) * quantity,
-                    cart=cart,
-                    success='yes',
-                    type = 'checkout'
-                )
-                db.session.add(transaction)
-                db.session.commit()
-                print(f"Transaction added: {transaction.bill_number}, Type: {transaction.transaction_type}")  # Debug
+            # Handle Category
+            category = handle_category(form_data["productCategory"], store_id)
+            print(f"Category handled: {category.category_name}, ID: {category.C_unique_id}")  # Debug
 
-                # Add a transaction item
-                transaction_item = TransactionItem(
-                    transaction_id=transaction.id,
-                    product_id=product.id,
-                    quantity=quantity,
-                    selling_price=float(productSellingPrice),
-                    cost_price=float(productPrice),
-                    total_price=0,
-                    total_cost_price=float(productPrice) * quantity
-                )
-                db.session.add(transaction_item)
-                print(f"Transaction item added: Product {product.name}, Quantity: {quantity}")  # Debug
+            # Handle Product
+            product = handle_product(form_data, category)
+            print(f"Product handled: {product.name}, Stock: {product.stock}, Barcode: {product.want_barcode}, barcode quantity: {product.barcode_quantity}")  # Debug
 
-                # Commit all changes in one go
-                db.session.commit()
-                flash("Product and stock addition successfully processed!", "success")
-                return redirect(url_for('inventory'))
+            # Handle Barcode Logic
+            if form_data["want_barcode"] == "yes" and form_data["barcode_quantity"] > 0:
+                schedule_barcode_reset(product.id)
+                print(f"Barcode reset scheduled for product ID: {product.id}, quantity: {product.barcode_quantity}")  # Debug
+
+            # Record Transaction
+            record_transaction(store_id, product, form_data["productQuantity"], form_data["productPrice"])
+            print(f"Transaction recorded for Product: {product.name}, Quantity: {form_data['productQuantity']}")  # Debug
+
+            flash("Product successfully added and stock updated!", "success")
+            return redirect(url_for('inventory'))
 
         except Exception as e:
             db.session.rollback()
-            print(f"Error occurred: {e}")  # Debug error
-            flash("An error occurred while processing the request. Please try again.", "danger")
+            print(f"Error occurred: {str(e)}")  # Debug
+            flash("An error occurred while processing your request.", "danger")
             return redirect(url_for('new_product'))
+
+# Helper Functions
+def handle_category(category_name, store_id):
+    category = Category.query.filter_by(category_name=category_name, store_id=store_id).first()
+    if not category:
+        categories_in_store = Category.query.filter_by(store_id=store_id).count()
+        C_unique_id = f"{store_id}{categories_in_store + 1}0"
+        category = Category(category_name=category_name, store_id=store_id, C_unique_id=C_unique_id)
+        db.session.add(category)
+        db.session.commit()
+        print(f"New Category Created: {category_name}, Unique ID: {C_unique_id}")  # Debug
+    return category
+
+def handle_product(form_data, category):
+    product = Product.query.filter_by(name=form_data["productName"], category_id=category.id).first()
+    if product:
+        product.cost_price = form_data["productPrice"]
+        product.selling_price = form_data["productSellingPrice"]
+        product.stock += form_data["productQuantity"]
+        product.want_barcode = form_data["want_barcode"]
+        product.barcode_quantity = form_data["barcode_quantity"]
+        print(f"Existing Product Updated: {product.name}, New Stock: {product.stock}")  # Debug
+    else:
+        products_in_category = Product.query.filter_by(category_id=category.id).count()
+        P_unique_id = f"{category.C_unique_id}{products_in_category + 1}"
+        product = Product(
+            name=form_data["productName"],
+            cost_price=form_data["productPrice"],
+            selling_price=form_data["productSellingPrice"],
+            stock=form_data["productQuantity"],
+            category_id=category.id,
+            P_unique_id=P_unique_id,
+            want_barcode=form_data["want_barcode"],
+            barcode_quantity=form_data["barcode_quantity"]
+        )
+        db.session.add(product)
+        print(f"New Product Added: {product.name}, Unique ID: {P_unique_id}")  # Debug
+    db.session.commit()
+    return product
+
+def schedule_barcode_reset(product_id):
+    from threading import Timer
+    def reset_barcode():
+        with app.app_context():
+            product = Product.query.get(product_id)
+            if product and product.want_barcode:
+                product.want_barcode = "no"
+                db.session.commit()
+                print(f"Barcode Reset: Product ID {product.id}, want_barcode set to 'no'")  # Debug
+    Timer(10, reset_barcode).start()
+
+def record_transaction(store_id, product, quantity, cost_price):
+    transaction = Transaction(
+        store_id=store_id,
+        customer_name="System",
+        bill_number=f"ORD{store_id}{str(uuid.uuid4())[:7]}",
+        transaction_type="order",
+        payment_method="cash",
+        total_selling_price=0,
+        total_cost_price=cost_price * quantity,
+        cart={product.P_unique_id: quantity},
+        success="yes",
+    )
+    db.session.add(transaction)
+    db.session.commit()
+    print(f"Transaction Recorded: Bill Number {transaction.bill_number}, Product {product.name}, Quantity {quantity}")  # Debug
 
 @app.route('/delete_product/<int:product_id>', methods=['POST'])
 def delete_product(product_id):
@@ -881,6 +952,34 @@ def delete_product(product_id):
         print(f"Error while deleting product or creating temp record: {e}")
 
     return redirect(url_for('inventory'))
+
+@app.route('/print_product_barcode/<int:product_id>', methods=['POST'])
+def print_product_barcode(product_id):
+    barcode_quantity = request.form.get('barcode_quantity')
+    current_user = User.query.filter_by(email=session.get('email')).first()
+    user_store = UserStore.query.filter_by(user_id=current_user.id).first()
+    store_id = user_store.store_id
+    
+    print(f"Attempting to print barcode for product with ID: {product_id}")
+    
+    # Ensure product ID is treated as a string to match the database column type
+    product = Product.query.filter_by(P_unique_id=str(product_id)).first()
+    
+    if not product:
+        print(f"No product found with ID: {product_id}")
+        return redirect(url_for('inventory'))
+    
+    try:
+        product.want_barcode = "yes"
+        product.barcode_quantity = barcode_quantity
+        db.session.commit()
+        print(f"Product with ID: {product_id} genarate barcode")
+        schedule_barcode_reset(product.id)
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while printing barcode: {e}")
+
+    return redirect(url_for('inventory'))    
 
 @app.route('/all_deleted_products', methods=['GET'])
 def all_deleted_products():
@@ -1004,15 +1103,6 @@ def suggest():
 
     return jsonify({"categories": category_suggestions, "products": product_suggestions})
 
-
-@app.route("/search_bar", methods=["GET", "POST"])
-def search_bar():
-    if request.method == "GET":
-        current_user = User.query.filter_by(email=session.get('email')).first()
-        user_store = UserStore.query.filter_by(user_id=current_user.id).first()
-        store_id = user_store.store_id
-        return render_template('search_bar.html',store_id= store_id)
-
 @app.route('/new_sale', methods=['GET', 'POST'])
 def new_sale():
     current_user = User.query.filter_by(email=session.get('email')).first()
@@ -1106,6 +1196,21 @@ def new_sale():
         session['transaction_id'] = transaction.id
 
         return jsonify({'message': 'Cart updated successfully'}), 200
+    
+@app.route('/getProductByBarcode/<barcode>', methods=['GET'])
+def get_product_by_barcode(barcode):
+    product = Product.query.filter_by(P_unique_id=str(barcode)).first()  # Query the database
+    if product:
+        print(f"Product found: {product.name}, {product.selling_price}, {product.P_unique_id}")  # Debug print
+        return jsonify({
+            'product': {
+                'name': product.name,
+                'price': product.selling_price,
+                'p_unique_id': product.P_unique_id
+            }
+        })
+    else:
+        return jsonify({'error': 'Product not found'}), 404
 
 
 @app.route('/get-cart-details', methods=['GET'])
@@ -1475,7 +1580,35 @@ def esp_api_print():
         print(f"Error: {e}")
         return jsonify({"message": "Internal Server Error"}), 500
 
+@app.route('/esp-api/print_barcode', methods=['GET'])       
+def esp_api_print_barcode():
+    try:
+        store_id = request.args.get('store_id')
+        if not store_id:
+            return jsonify({"message": "store_id is required"}), 400
+
+        store_id = int(store_id)  # Ensure it's an integer
+
+        store = Store.query.filter_by(id=store_id).first()
+
+        if not store:
+            return jsonify({"message": f"Store with ID {store_id} not found."}), 404
+
+        product = Product.query.join(Category).with_for_update().filter(Category.store_id == store_id,Product.want_barcode != "no").first()
+        if not product:
+            return jsonify({"message": "No product found to print barcode"}), 404
+        
+        response = {"product_id": product.P_unique_id,
+                    "product_name": product.name,
+                    "barcode quantity": product.barcode_quantity
+                    }   
+        return jsonify(response), 200
     
+    except Exception as e:
+        # Log the error and return a message
+        print(f"Error: {e}")
+        return jsonify({"message": "Internal Server Error"}), 500
+        
 @app.route('/6007')
 def view_users():
     if 'user' not in session:

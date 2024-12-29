@@ -18,7 +18,8 @@ class User(db.Model):
     gender = db.Column(db.String(15), nullable=False, default='--')
     phone = db.Column(db.String(15), nullable=False)
     password = db.Column(db.String(200), nullable=False)  # Password should be hashed
-    profile_picture = db.Column(db.String(120), nullable=True, default="/static/images/icons8-account-50.png")
+    profile_picture = db.Column(db.LargeBinary, nullable=True)
+    mimetype = db.Column(db.Text, nullable=True)
     role_name = db.Column(db.String(20), nullable=False, default='User')
 
     # Relationships
@@ -97,6 +98,8 @@ class Product(db.Model):
     low_stock = db.Column(db.Integer, nullable=True, default=5)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False, index=True)
     P_unique_id = db.Column(db.String(20), unique=True, index=True, nullable=False)
+    want_barcode = db.Column(db.String(20),nullable = True, default = "false")
+    barcode_quantity = db.Column(db.Integer,nullable = True, default =0)
     transaction_items = db.relationship('TransactionItem', backref=db.backref('products_in_transaction', lazy=True))
 
 class Temp_product(db.Model):

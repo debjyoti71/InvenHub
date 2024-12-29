@@ -222,11 +222,16 @@
                                                     </button>
                                                 </form>
                                             </td>
-                                            <td style="display: flex; justify-content: center;align-items: center;"><button>Print</button></td>
+                                            <td>
+                                                <form action="{{ url_for('print_product_barcode', product_id=product.P_unique_id)}}" method="POST" class="d-inline">
+                                                    <button type="submit" style="display: flex; justify-content: center;align-items: center;">Print</button>
+                                                    <input type="number" class="form-control mt-2" id="barcode_quantity" name="barcode_quantity" min="1" style="width: 80px;">
+                                                    <!-- <img alt='Barcode Generator TEC-IT' src='https://barcode.tec-it.com/barcode.ashx?data={{product.P_unique_id}}&code=Code128&translate-esc=on'/> -->
+                                                </form>
+                                            </td>                                    
                                         </tr>
                                     {% endfor %}
                                 {% else %}
-                                    <tr>
                                         <td colspan="5" class="no-products">No products available. Add a new product.</td>
                                     </tr>
                                 {% endif %}
