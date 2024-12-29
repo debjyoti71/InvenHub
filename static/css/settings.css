@@ -1,0 +1,74 @@
+
+.container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+    padding: 30px;
+    width: 90%;
+}
+
+h2, h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.list-group-item {
+    background-color: transparent;
+    border: none;
+    color: #34495e;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover, .list-group-item.active {
+    background-color: #3498db;
+    color: white;
+    border-radius: 5px;
+}
+.btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+.btn-success {
+    background-color: #2ecc71;
+    border-color: #2ecc71;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #27ae60;
+    border-color: #27ae60;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.form-check-input:checked {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.tab-pane {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
