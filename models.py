@@ -98,6 +98,8 @@ class Product(db.Model):
     low_stock = db.Column(db.Integer, nullable=True, default=5)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False, index=True)
     P_unique_id = db.Column(db.String(20), unique=True, index=True, nullable=False)
+    want_barcode = db.Column(db.String(20),nullable = True, default = "false")
+    barcode_quantity = db.Column(db.Integer,nullable = True, default =0)
     transaction_items = db.relationship('TransactionItem', backref=db.backref('products_in_transaction', lazy=True))
 
 class Temp_product(db.Model):
