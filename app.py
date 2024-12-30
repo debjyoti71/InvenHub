@@ -400,6 +400,7 @@ def dashboard():
             low_stock_data=low_stock_data,
             total_stock=total_stock,
             store_id=store_id,
+            user = current_user,
         )
 
 @app.route('/settings', methods=['GET'])
@@ -824,6 +825,7 @@ def inventory():
             top_selling=top_selling,
             low_stock=low_stock,
             store_id = store_id,
+            user = current_user,
         )
 
     elif request.method == 'POST':
@@ -845,7 +847,7 @@ def new_product():
 
         store_id = user_store.store_id
         print(f"GET: Current user email: {current_user.email}, Store ID: {store_id}")  # Debug
-        return render_template('new_product.html', store_id=store_id)
+        return render_template('new_product.html', store_id=store_id,user = current_user,)
 
     elif request.method == 'POST':
         try:
