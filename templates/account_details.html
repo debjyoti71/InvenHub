@@ -133,10 +133,10 @@
                     <div class="row">
                         {% if user.profile_picture %}
                             <!-- Display user's profile picture if available -->
-                            <img src="{{ url_for('profile_picture', user_id=user.id) }}" alt="User Profile Picture" style="width: 150px; height: 150px; border-radius: 50%;">
+                            <img id="profile-preview" src="{{ url_for('profile_picture', user_id=user.id) }}" alt="User Profile Picture" style="width: 150px; height: 150px; border-radius: 50%;">
                         {% else %}
                             <!-- Display default image if no profile picture is set -->
-                            <div class="col-md-4" id="profile-image" style="background-image: url(/static/images/rb_4707.png);">
+                            <div id="profile-preview" class="col-md-4" style="background-image: url(/static/images/rb_4707.png); width: 150px; height: 150px; border-radius: 50%; background-size: cover;">
                             </div>
                         {% endif %}
                     </div>                    

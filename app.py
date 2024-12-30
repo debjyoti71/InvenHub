@@ -643,12 +643,13 @@ def account():
                     file_data = file.read()
                     mimetype = file.mimetype
                     print(f"Debug: File read successfully. MIME type: {mimetype}")
+                    user.profile_picture = file_data
+                    user.mimetype = mimetype
                 else:
                     print(f"Debug: File type not allowed: {file.filename}")
                     return jsonify({"error": "Invalid file type"}), 400
             else:
                 print("Debug: No profile picture uploaded.")
-                file_data, mimetype = None, None
 
             # Extract user details
             full_name = data.get('name')
@@ -682,8 +683,7 @@ def account():
             user.age = age
             user.gender = gender
             user.phone = phone_number
-            user.profile_picture = file_data
-            user.mimetype = mimetype
+            
 
             # Update store details if provided
             if store_name:
