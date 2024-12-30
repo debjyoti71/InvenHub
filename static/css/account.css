@@ -92,7 +92,7 @@
   box-shadow: #D6D6E7 0 3px 7px inset;
   transform: translateY(2px);
 }
-#profile-image {
+.profile-image {
   width: 350px;
   height: 350px;
   border-radius: 50%;
@@ -113,4 +113,5 @@
 }
 #acc{
   border-radius: 50%;
+  padding: unset;
 }

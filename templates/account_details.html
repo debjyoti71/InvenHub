@@ -107,9 +107,9 @@
                         </div>
                         <div class="col">
                             {% if user.profile_picture %}
-                                <a href="/account"><img height="30px" width="28px" src="{{ url_for('profile_picture', user_id=user.id) }}" alt=""></a>
+                                <a href="/account"><img height="30px" width="30px" src="{{ url_for('profile_picture', user_id=user.id) }}" alt="" id="acc"></a>
                             {% else %}
-                                <a href="/account"><img height="30px" width="28px" src="/static/images/icons8-account-50.png" alt="" id="acc"></a>
+                                <a href="/account"><img height="30px" width="30px" src="/static/images/icons8-account-50.png" alt="" id="acc"></a>
                             {% endif %}
                         </div>                        
                     </div>
@@ -133,10 +133,19 @@
                     <div class="row">
                         {% if user.profile_picture %}
                             <!-- Display user's profile picture if available -->
-                            <img id="profile-preview" src="{{ url_for('profile_picture', user_id=user.id) }}" alt="User Profile Picture" style="width: 150px; height: 150px; border-radius: 50%;">
+                            <img id="profile-preview" src="{{ url_for('profile_picture', user_id=user.id) }}" alt="User Profile Picture" style="width: 350px;
+                            height: 350px;
+                            border-radius: 999px;
+                            background-size:cover;
+                            margin-bottom: 1rem;
+                            padding: unset;">
                         {% else %}
                             <!-- Display default image if no profile picture is set -->
-                            <div id="profile-preview" class="col-md-4" style="background-image: url(/static/images/rb_4707.png); width: 150px; height: 150px; border-radius: 50%; background-size: cover;">
+                            <div id="profile-preview" class="col-md-4" style="background-image: url(/static/images/rb_4707.png);width: 350px;
+                            height: 350px;
+                            border-radius: 999px;
+                            background-size:cover;
+                            margin-bottom: 1rem;">
                             </div>
                         {% endif %}
                     </div>                    
