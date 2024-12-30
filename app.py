@@ -660,11 +660,6 @@ def account():
             print(f"Debug: Parsed name - First name: {first_name}, Last name: {last_name}")
 
             age = data.get('age')
-            if not age.isdigit():
-                print(f"Debug: Invalid age value: {age}")
-                return jsonify({"error": "Invalid age value"}), 400
-            age = int(age)
-
             gender = data.get('gender')
             phone_number = data.get('contact_number')
             print(f"Debug: Gender: {gender}, Phone number: {phone_number}")
