@@ -675,8 +675,10 @@ def allowed_file(filename):
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     current_user = User.query.filter_by(email=session.get('email')).first()
+    if request.method == 'GET' :
+        return render_template('upload.html')  # Render the upload form
 
-    if request.method == "POST":
+    elif request.method == "POST":
         if 'profile_picture' not in request.files:
             return jsonify({"error": "No file part"}), 400  # Bad Request
 
@@ -702,6 +704,7 @@ def upload():
             db.session.rollback()
             print(f'Error uploading file: {e}')
             return jsonify({"error": "Error uploading file"}), 500
+    return jsonify({"message": "Profile picture uploaded successfully"}), 200
             
 # Route: Serve Profile Picture
 @app.route('/profile_picture/<int:user_id>')
