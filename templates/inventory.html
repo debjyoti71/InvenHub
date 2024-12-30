@@ -224,8 +224,14 @@
                                             </td>
                                             <td>
                                                 <form action="{{ url_for('print_product_barcode', product_id=product.P_unique_id)}}" method="POST" class="d-inline">
-                                                    <button type="submit" style="display: flex; justify-content: center;align-items: center;">Print</button>
-                                                    <input type="number" class="form-control mt-2" id="barcode_quantity" name="barcode_quantity" min="1" style="width: 80px;">
+                                                    <div class="row">
+                                                        <div class="col" style="display: flex; justify-content: center;align-items: center;">
+                                                            <input type="number" class="form-control mt-2" id="barcode_quantity" name="barcode_quantity" min="1" style="width: 80px;">
+                                                        </div>
+                                                        <div class="col" style="display: flex; justify-content: center;align-items: center;">
+                                                            <button class="btn-22" type="submit"><span>Print</span></button>
+                                                        </div>
+                                                    </div>
                                                     <!-- <img alt='Barcode Generator TEC-IT' src='https://barcode.tec-it.com/barcode.ashx?data={{product.P_unique_id}}&code=Code128&translate-esc=on'/> -->
                                                 </form>
                                             </td>                                    

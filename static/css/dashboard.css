@@ -280,3 +280,42 @@ box-shadow:  -6px 6px 15px #a9c0d5,
     position: absolute;
     z-index: 999;
 }
+.btn-22 {
+    background-color: var(--700); /* Green background */
+    color: white; /* White text */
+    border: none; /* Remove default border */
+    padding: 6px 12px;
+    font-size: 16px; /* Font size */
+    font-weight: bold; /* Bold text */
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06); /* Subtle shadow */
+  }
+  
+  .btn-22:hover {
+    background-color: var(--800); /* Darker green on hover */
+    transform: scale(1.1); /* Slightly enlarge on hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15), 0 2px 5px rgba(0, 0, 0, 0.1); /* Enhanced shadow on hover */
+  }
+  
+  .btn-22:active {
+    transform: scale(0.95); /* Slightly shrink on click */
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15); /* Reduced shadow on click */
+  }
+  
+  /* Optional animated pulse effect */
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    50% {
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15), 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  .btn-22:focus {
+    outline: none; /* Remove default focus outline */
+    animation: pulse 1s infinite; /* Add pulse animation on focus */
+  }
+  
