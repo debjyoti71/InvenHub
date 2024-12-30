@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash,jsonify , send_file, redirect ,make_response
+from flask import Flask, render_template, request, redirect, url_for, session, flash,jsonify , send_from_directory, redirect ,make_response 
 from sqlalchemy import func , or_
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -402,6 +402,10 @@ def dashboard():
             store_id=store_id,
         )
 
+@app.route('/settings', methods=['GET'])
+def settings():
+    return render_template('settings.html')  # HTML file for the settings page        
+
 @app.route('/add_store', methods=['GET'])
 def add_store_form():
     return render_template('add_store.html')  # HTML file for the add store form
@@ -598,41 +602,79 @@ def join_store():
         return redirect(url_for('join_store'))
 
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = 'uploads'
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/account', methods=['GET', 'POST'])
 def account():
     if 'user' not in session:
+        print("Debug: User not in session. Redirecting to login.")
         return redirect(url_for('login'))  # Redirect to login if not logged in
     
     email = session['email']
+    print(f"Debug: Logged-in user's email: {email}")
     user = User.query.filter_by(email=email).first()
     
     if user is None:
+        print("Debug: User not found in database. Redirecting to dashboard.")
         return redirect(url_for('dashboard'))  # If user doesn't exist, redirect to dashboard
     
     stores = user.stores  # Fetch all stores associated with the user
-    
-    # Debugging statement to see the stores
-    print("Stores:", stores)
+    print(f"Debug: User's associated stores: {stores}")
 
     if request.method == 'GET':
+        print("Debug: Rendering account details page.")
         return render_template('account_details.html', username=session['user'], email=session['email'], user=user, stores=stores)
 
     elif request.method == 'POST':
         try:
-            # Parse the incoming JSON data
-            data = request.get_json()
-            print("Received data:", data)
+            print("Debug: Handling POST request for account update.")
+            data = request.form
+            print(f"Debug: Received form data: {data}")
+
+            # Handle profile picture upload
+            if 'profile_picture' in request.files:
+                file = request.files['profile_picture']
+                print(f"Debug: Profile picture uploaded: {file.filename}")
+                if allowed_file(file.filename):
+                    file_data = file.read()
+                    mimetype = file.mimetype
+                    print(f"Debug: File read successfully. MIME type: {mimetype}")
+                else:
+                    print(f"Debug: File type not allowed: {file.filename}")
+                    return jsonify({"error": "Invalid file type"}), 400
+            else:
+                print("Debug: No profile picture uploaded.")
+                file_data, mimetype = None, None
 
             # Extract user details
-            first_name, last_name = data['name'].split()
-            age = int(data['age'])  # Ensure age is stored as an integer
-            gender = data['gender']
-            phone_number = data['contact_number']
-            store_name = data.get('store_name')  # Use .get() to avoid KeyError if not present
+            full_name = data.get('name')
+            if not full_name or ' ' not in full_name:
+                print("Debug: Invalid or missing full name.")
+                return jsonify({"error": "Invalid or missing full name"}), 400
+            first_name, last_name = full_name.split()
+            print(f"Debug: Parsed name - First name: {first_name}, Last name: {last_name}")
+
+            age = data.get('age')
+            if not age.isdigit():
+                print(f"Debug: Invalid age value: {age}")
+                return jsonify({"error": "Invalid age value"}), 400
+            age = int(age)
+
+            gender = data.get('gender')
+            phone_number = data.get('contact_number')
+            print(f"Debug: Gender: {gender}, Phone number: {phone_number}")
+
+            store_name = data.get('store_name')
             owner_name = data.get("owner's_name")
+            print(f"Debug: Store name: {store_name}, Owner's name: {owner_name}")
 
             # Update user details
             if not user:
+                print("Debug: User not found during update process.")
                 return jsonify({"error": "User not found"}), 404
 
             user.first_name = first_name
@@ -640,84 +682,102 @@ def account():
             user.age = age
             user.gender = gender
             user.phone = phone_number
+            user.profile_picture = file_data
+            user.mimetype = mimetype
 
             # Update store details if provided
             if store_name:
                 user_store = UserStore.query.filter_by(user_id=user.id).first()
-                store = Store.query.filter_by(id=user_store.store_id).first()
-                if store:
-                    store.store_name = store_name
-                    store.owner_name = owner_name
+                if user_store:
+                    print(f"Debug: Found UserStore entry: {user_store}")
+                    store = Store.query.filter_by(id=user_store.store_id).first()
+                    if store:
+                        print(f"Debug: Found Store entry: {store}")
+                        store.store_name = store_name
+                        store.owner_name = owner_name
+                    else:
+                        print("Debug: Store not found in database.")
+                        return jsonify({"error": "Store not found"}), 404
                 else:
-                    return jsonify({"error": "Store not found"}), 404
+                    print("Debug: No UserStore entry found for the user.")
 
             # Commit changes to the database
             db.session.commit()
-
-            print("Account details updated successfully!")
+            print("Debug: Account details updated successfully.")
             return jsonify({"message": "Account details updated successfully!"}), 200
 
         except ValueError as e:
-            print("Error while updating account:", e)
+            print(f"Debug: ValueError occurred: {e}")
             return jsonify({"error": "Invalid input data"}), 400
         except KeyError as e:
-            print("Missing data field:", e)
+            print(f"Debug: KeyError occurred: Missing field {e}")
             return jsonify({"error": f"Missing field: {e}"}), 400
         except Exception as e:
-            print("Unexpected error:", e)
+            print(f"Debug: Unexpected error occurred: {e}")
             return jsonify({"error": "An unexpected error occurred"}), 500
-        
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-        
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
-    current_user = User.query.filter_by(email=session.get('email')).first()
-    if request.method == 'GET' :
-        return render_template('upload.html')  # Render the upload form
+    if 'email' not in session:
+        flash("You need to log in first.", "error")
+        return render_template('upload.html')
 
-    elif request.method == "POST":
-        if 'profile_picture' not in request.files:
-            return jsonify({"error": "No file part"}), 400  # Bad Request
+    current_user = User.query.filter_by(email=session['email']).first()
+    if not current_user:
+        return jsonify({"error": "User not found"}), 404
 
-        file = request.files['profile_picture']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400  # Bad Request
+    if request.method == 'GET':
+        return render_template('upload.html')
 
-        if not allowed_file(file.filename):
-            return jsonify({"error": "Invalid file type. Allowed types: png, jpg, jpeg, gif"}), 400
+    if 'profile_picture' not in request.files:
+        flash("No file part.", "error")
+        return render_template('upload.html')
 
-        try:
-            # Save the file to the server with a unique filename
-            filename = secure_filename(file.filename)
-            filepath = os.path.join('uploads', filename)  # Store the file in the 'uploads' folder
-            file.save(filepath)
+    file = request.files['profile_picture']
+    print(f"{file=}")
+    if file.filename == '':
+        flash("No selected file.", "error")
+        return render_template('upload.html')
 
-            # Update the user profile picture path in the database
-            current_user.profile_picture = filepath
-            db.session.commit()
-            return jsonify({"message": "Profile picture uploaded successfully!"}), 200
+    if not allowed_file(file.filename):
+        flash("Invalid file type. Allowed types: png, jpg, jpeg", "error")
+        return render_template('upload.html')
 
-        except Exception as e:
-            db.session.rollback()
-            print(f'Error uploading file: {e}')
-            return jsonify({"error": "Error uploading file"}), 500
-    return jsonify({"message": "Profile picture uploaded successfully"}), 200
-            
-# Route: Serve Profile Picture
+    try:
+        # Read file as binary
+        file_data = file.read()
+        mimetype = file.mimetype
+        print(f"File uploaded: {file.filename}, MIME type: {mimetype}")  # Debug log
+
+        if not file_data:
+            flash("Uploaded file is empty.", "error")
+            return render_template('upload.html')
+
+        # Update the user profile with the binary data and MIME type
+        current_user.profile_picture = file_data
+        current_user.mimetype = mimetype
+        db.session.commit()
+
+        flash("Profile picture uploaded successfully!", "success")
+        return render_template('upload.html')
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error uploading file: {str(e)}")  # Debug log
+        flash("An error occurred while uploading the file.", "error")
+        return render_template('upload.html')
+
 @app.route('/profile_picture/<int:user_id>')
 def profile_picture(user_id):
-    user = User.query.get_or_404(user_id)
+    user = User.query.with_for_update().get_or_404(user_id)
     if user.profile_picture:
+        # Create a response with the binary data
         response = make_response(user.profile_picture)
-        response.headers.set('Content-Type', user.mimetype or 'application/octet-stream')
+        response.headers.set('Content-Type', user.mimetype)
         response.headers.set('Content-Disposition', 'inline; filename=profile_picture')
         return response
     else:
         return "Profile picture not found", 404
-
 
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():

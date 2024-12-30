@@ -34,7 +34,7 @@ function makeEditable() {
 // Make Non-Editable and Post Data
 function makeNonEditable() {
     const editableDivs = document.querySelectorAll(".editable");
-    const updatedData = {}; // Object to store updated values
+    const updatedData = new FormData(); // Use FormData to handle file uploads and text data
 
     editableDivs.forEach(function(div) {
         div.contentEditable = false;
@@ -42,20 +42,23 @@ function makeNonEditable() {
 
         // Get label (if exists) or ID to form data keys
         const label = div.previousElementSibling ? div.previousElementSibling.textContent.trim() : div.id;
-        updatedData[label.toLowerCase().replace(/\s/g, "_")] = div.textContent.trim();
+        updatedData.append(label.toLowerCase().replace(/\s/g, "_"), div.textContent.trim());
     });
 
     // Add user_id to the data
     const user_id = document.getElementById('userinput').value;
-    updatedData["user_id"] = user_id;
+    updatedData.append("user_id", user_id);
+
+    // Add profile picture if a new file is uploaded
+    const fileInput = document.getElementById("file-input");
+    if (fileInput.files.length > 0) {
+        updatedData.append("profile_picture", fileInput.files[0]);
+    }
 
     // Post the data to the server
     fetch('/account', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
+        body: updatedData, // Send the FormData object
     })
     .then(response => {
         if (response.ok) {
@@ -74,13 +77,11 @@ function makeNonEditable() {
     document.getElementById('profile-label').style.display = "none";
 }
 
-// profile image part
-
-var acc = document.getElementById('acc');
+// Profile image preview
+var fileInput = document.getElementById('file-input');
 var image = document.getElementById('profile-image');
-var file = document.getElementById('file-input');
-file.onchange = function(){
-    var source = URL.createObjectURL(file.files[0]);
+
+fileInput.onchange = function() {
+    var source = URL.createObjectURL(fileInput.files[0]);
     image.style.backgroundImage = `url(${source})`;
-    acc.src = `${source}`
-}
+};

@@ -9,7 +9,7 @@
     <h1>Upload Your Profile Picture</h1>
     <form action="/upload" method="POST" enctype="multipart/form-data">
         <label for="profile_picture">Choose an image:</label>
-        <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
+        <input type="file" name="profile_picture" id="profile_picture" accept="image/*" required>
         <button type="submit">Upload</button>
     </form>
     {% with messages = get_flashed_messages() %}
