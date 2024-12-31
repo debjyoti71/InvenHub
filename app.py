@@ -405,7 +405,17 @@ def dashboard():
 
 @app.route('/settings', methods=['GET'])
 def settings():
-    return render_template('settings.html')  # HTML file for the settings page        
+    email = session.get('email')
+    if not email:
+        flash("User not logged in. Please log in first.", "danger")
+        return redirect(url_for('login'))
+
+    current_user = User.query.filter_by(email=email).first()
+    if not current_user:
+        flash("User not found. Please log in again.", "danger")
+        return redirect(url_for('login'))
+
+    return render_template('settings.html',user = current_user)  # HTML file for the settings page        
 
 @app.route('/add_store', methods=['GET'])
 def add_store_form():
