@@ -23,6 +23,7 @@ forcasting.py
 req.py
 copy_db.py
 tempCodeRunnerFile.py
+trend_data.csv
 
 # Ignore specific data files (e.g., dataset or user data)
 static/updated_kalimati_tarkari_dataset_modified.csv

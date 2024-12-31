@@ -1217,7 +1217,7 @@ def new_sale():
             print(f"Transaction: {t.id}, {t.customer_name}, {t.bill_number}, {t.type}, {t.cart}")
 
         # Render template with transactions
-        return render_template('new_sale.html', store_id=store_id, transactions=valid_transactions)
+        return render_template('new_sale.html',user = current_user, store_id=store_id, transactions=valid_transactions)
 
     elif request.method == 'POST':
         data = request.get_json()
@@ -1357,7 +1357,7 @@ def checkout():
                 products.append(product_details)
                 total_selling_price += int(quantity) * int(product.selling_price)
 
-        return render_template('cart.html', transaction=transaction, products=products, total_selling_price=total_selling_price)
+        return render_template('cart.html',user = current_user, transaction=transaction, products=products, total_selling_price=total_selling_price)
 
     elif request.method == 'POST':
         # Handle JSON data from the Fetch API
