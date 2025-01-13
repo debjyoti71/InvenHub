@@ -318,4 +318,7 @@ box-shadow:  -6px 6px 15px #a9c0d5,
     outline: none; /* Remove default focus outline */
     animation: pulse 1s infinite; /* Add pulse animation on focus */
   }
-  
+  #acc{
+    border-radius: 50%;
+    padding: unset;
+  }
