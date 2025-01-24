@@ -28,6 +28,7 @@ trend_data.csv
 # Ignore specific data files (e.g., dataset or user data)
 static/updated_kalimati_tarkari_dataset_modified.csv
 static/user_info.csv
+static/Yearly_Sales_Data.csv
 
 # Ignore cache and build files
 *.cache
