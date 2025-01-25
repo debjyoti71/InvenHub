@@ -1524,7 +1524,7 @@ def transaction():
                 Transaction.store_id == store_id,
                 func.lower(Transaction.transaction_type) == transaction_type,
             )
-            .order_by(func.coalesce(Transaction.last_updated, Transaction.transaction_date).desc())
+            .order_by(func.coalesce(Transaction.transaction_date).desc())
             .all()
         )
 
