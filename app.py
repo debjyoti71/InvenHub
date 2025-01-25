@@ -1536,7 +1536,7 @@ def transaction():
         processed_transactions = [
             {
                 "bill_number": t.bill_number,
-                "last_updated": t.last_updated.strftime('%Y-%m-%d %H:%M:%S') if t.last_updated else t.transaction_date.strftime('%Y-%m-%d %H:%M:%S'),
+                "last_updated": t.transaction_date.strftime('%Y-%m-%d %H:%M:%S'),
                 "customer_name": t.customer_name or "N/A",
                 "total_selling_price": t.total_selling_price or 0.0,
                 "payment_method": t.payment_method or "N/A",
