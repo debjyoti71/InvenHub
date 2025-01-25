@@ -1220,7 +1220,7 @@ def new_sale():
 
         # Add the valid transactions, including the (reused or new) empty transaction, to the list
         valid_transactions.insert(0, new_transaction)
-
+ 
         # Debug print transactions
         print(f"Returning transactions: {valid_transactions}")
         for t in valid_transactions:
