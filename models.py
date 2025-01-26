@@ -62,6 +62,7 @@ class Store(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     store_name = db.Column(db.String(255), nullable=False)
     store_address = db.Column(db.String(255), nullable=False)
+    lat_lan = db.Column(db.String(255), nullable=True)
     owner_name = db.Column(db.String(255), nullable=False)
     business_email = db.Column(db.String(255), nullable=False)
     gstNumber = db.Column(db.String(255), nullable=False)
@@ -146,5 +147,18 @@ class TransactionItem(db.Model):
     cost_price = db.Column(db.Integer, nullable=True)
     total_price = db.Column(db.Integer, nullable=True)  # selling_price * quantity
     total_cost_price = db.Column(db.Integer, nullable=True)  # cost_price * quantity
+
+class forcasting_value(db.Model):
+    __tablename__ = 'forcasting_value'
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    keyword = db.Column(db.String(50), nullable=True)
+    forecasting_value = db.Column(db.Float, nullable=False , default= 0 )
+    time = db.Column(db.Date, nullable=False)
+    temp = db.Column(db.Integer , nullable = True)
+    rain = db.Column(db.Integer , nullable = True)
+    trend_value = db.Column(db.Integer , nullable = True)
+    original_value = db.Column(db.Integer , nullable = True)
+    
 
 
