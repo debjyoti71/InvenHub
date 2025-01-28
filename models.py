@@ -153,7 +153,7 @@ class forcasting_value(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     keyword = db.Column(db.String(50), nullable=True)
-    forecasting_value = db.Column(db.Float, nullable=False , default= 0 )
+    forecasting_value = db.Column(db.Float, nullable=True  )
     time = db.Column(db.Date, nullable=False)
     temp = db.Column(db.Integer , nullable = True)
     rain = db.Column(db.Integer , nullable = True)

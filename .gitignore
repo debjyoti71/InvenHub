@@ -28,6 +28,7 @@ trend_data.csv
 req_test.py
 .cache.sqlite
 forcastvalue_add.py
+forcast_class_test1.py
 
 # Ignore specific data files (e.g., dataset or user data)
 static/updated_kalimati_tarkari_dataset_modified.csv
