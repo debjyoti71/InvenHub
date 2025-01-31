@@ -11,10 +11,14 @@ from io import BytesIO
 import time
 from config import Config  # Import your Config class
 import csv 
-from datetime import datetime ,timedelta
+import threading
+from datetime import datetime ,timedelta 
 from flask_migrate import Migrate
 import uuid
-from models import db, User, Store, Product , Temp_product, UserStore, Category, Transaction ,TransactionItem
+from models import db, User, Store, Product , Temp_product, UserStore, Category, Transaction ,TransactionItem , forcasting_value
+import data_req
+import forcasting
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -316,11 +320,79 @@ def reset_password():
             flash('An unexpected error occurred. Please try again later.', 'danger')
             return redirect(url_for('reset_password'))
 
-# Dashboard (only accessible to logged-in users)
+def run_forecasting(store_id, store, products):
+    with app.app_context():
+        print(f"Starting background forecast update for store {store_id}...")
+
+        today = datetime.today()
+        first_day_current_month = today.replace(day=1)
+        first_day_next_month = (first_day_current_month + timedelta(days=32)).replace(day=1)
+        last_day_this_month = first_day_next_month - timedelta(days=1)
+        last_two_days = [last_day_this_month.day - 1, last_day_this_month.day]
+
+        skip_product = []
+        if today.day in last_two_days:
+            if not store.forcast_last_update or store.forcast_last_update.month != today.month:
+                print(f"Running full forecast update for store {store_id}...")
+                for product in products:
+                    try:
+                        print(f"Updating forecast for Product ID: {product.id}")
+
+                        check_forcast_db(product.id)
+
+                        forecast = forcasting.Forecast(product.id)
+                        forecast.trend_data()
+                        forecast.forcast_data()
+
+                        get_data = data_req.data_Request(product.id)
+                        get_data.trend_data()
+                        get_data.get_weather_data()
+
+                    except Exception as e:
+                        print(f"Error updating forecast for Product ID: {product.id}. Error: {str(e)}")
+                        skip_product.append(product.id)
+                        continue
+                store.forcast_last_update = today
+                db.session.commit()
+                print(f"Forecast update completed for store {store_id}.")
+
+        if store.forcast_remaining:
+            print(f"Processing remaining forecasts for store {store_id}...")
+            for product_id in store.forcast_remaining:
+                try:
+                    product = Product.query.filter_by(id=product_id).first()
+                    if not product:
+                        print(f"Product ID {product_id} not found. Skipping...")
+                        continue
+
+                    print(f"Updating forecast for Product ID: {product.id}")
+
+                    check_forcast_db(product.id)
+
+                    forecast = forcasting.Forecast(product.id)
+                    forecast.trend_data()
+                    forecast.forcast_data()
+
+                    get_data = data_req.data_Request(product.id)
+                    get_data.trend_data()
+                    get_data.get_weather_data()
+                    
+                    store.forcast_remaining.remove(product_id)
+
+
+                except Exception as e:
+                    print(f"Error updating forecast for Product ID: {product.id}. Error: {str(e)}")
+                    store.forcast_remaining.append(product.id)
+
+                    continue
+
+            db.session.commit()
+            print(f"Remaining forecasts updated for store {store_id}.")
+
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if request.method == 'GET':
-        # Fetch the current user based on session
         email = session.get('email')
         if not email:
             flash("User not logged in. Please log in first.", "danger")
@@ -331,13 +403,15 @@ def dashboard():
             flash("User not found. Please log in again.", "danger")
             return redirect(url_for('login'))
 
-        # Fetch the user's associated store
         user_store = UserStore.query.filter_by(user_id=current_user.id).first()
         if not user_store:
             flash("No store associated with this user. Please join or create a store first.", "danger")
             return redirect(url_for('add_store_form'))
 
         store_id = user_store.store_id
+        store = Store.query.get(store_id)
+
+        print(f"Loading dashboard for store {store_id}...")
 
         # Fetch and aggregate transactions at the database level
         transactions_summary = (
@@ -351,7 +425,6 @@ def dashboard():
             .all()
         )
 
-        # Convert the aggregated data to a dictionary
         monthly_data = {
             record.month.strftime("%Y-%m"): {
                 "cost_price": record.total_cost_price or 0,
@@ -360,7 +433,6 @@ def dashboard():
             for record in transactions_summary
         }
 
-        # Fetch daily transactions (if needed)
         daily_transactions_summary = (
             db.session.query(
                 func.date_trunc('day', Transaction.transaction_date).label('day'),
@@ -380,19 +452,23 @@ def dashboard():
             for record in daily_transactions_summary
         }
 
-        # Fetch products and low stock data
+        # Fetch products and check forecast
         products = Product.query.join(Category).filter(Category.store_id == store_id).all()
+
+        # Run forecast updates in a separate thread
+        forecast_thread = threading.Thread(target=run_forecasting, args=(store_id, store, products))
+        forecast_thread.start()
+
         low_stock_data = {}
-        total_stock = 0
+        total_stock = sum(product.stock for product in products)
         for product in products:
-            total_stock += product.stock
             if product.stock <= product.low_stock:
                 low_stock_data[product.name] = product.stock
 
-        # Sort low stock data
         low_stock_data = dict(sorted(low_stock_data.items(), key=lambda item: item[1]))
 
-        # Render the dashboard
+        print(f"Dashboard loaded successfully for store {store_id}.")
+
         return render_template(
             'dashboard.html',
             daily_data=daily_data,
@@ -400,9 +476,55 @@ def dashboard():
             low_stock_data=low_stock_data,
             total_stock=total_stock,
             store_id=store_id,
-            user = current_user,
+            user=current_user,
         )
+        
+def check_forcast_db(product_id):
+    try:
+        today = datetime.today() # Adjust to prevent API range error
+        first_day_of_current_month = today.replace(day=1)
+        first_day_of_after_1year_month = first_day_of_current_month + timedelta(days=366)
+        current_month = first_day_of_current_month.strftime('%Y-%m-%d')
+        next_year_month = (first_day_of_after_1year_month).strftime('%Y-%m-%d')
+        next_year_month = next_year_month.replace(day=1)
 
+        print(f"Checking forecast for Product ID: {product_id}")
+        print(f"Current Month Start Date: {current_month}")
+        print(f"Forecast Target Date (Next Year): {next_year_month}")
+
+        fvc = forcasting_value.query.filter_by(time=current_month, product_id=product_id).first()
+        
+        if not fvc:
+            print(f"No forecast data found for product ID {product_id} in the current month.")
+            return
+
+        print(f"Fetched existing forecast record: {fvc.keyword}, {fvc.forecasting_value}, {fvc.temp}, {fvc.rain}, {fvc.trend_value}")
+
+        fv = forcasting_value.query.filter_by(time=next_year_month, product_id=product_id).first()
+
+        if fv:
+            print(f"Forecast for product ID {product_id} on {first_day_of_after_1year_month} already exists. Skipping creation.")
+            return
+
+        new_forecast = forcasting_value(
+            product_id=product_id,
+            keyword=fvc.keyword,
+            forecasting_value=None,
+            time=first_day_of_after_1year_month,
+            temp=fvc.temp,
+            rain=fvc.rain,
+            trend_value=fvc.trend_value,
+            original_value=None
+        )
+        
+        db.session.add(new_forecast)
+        db.session.commit()
+        print(f"New forecast created successfully for product ID: {product_id} on {next_year_month}.")
+
+    except Exception as e:
+        print(f"Error while creating forecast for product ID: {product_id}, Error: {e}")
+             
+        
 @app.route('/settings', methods=['GET'])
 def settings():
     email = session.get('email')
@@ -947,6 +1069,21 @@ def handle_product(form_data, category):
             barcode_quantity=form_data["barcode_quantity"]
         )
         db.session.add(product)
+        today = datetime.today().replace(day=15)
+
+        year = [(today + timedelta(days=i*30)).year for i in range(12)] 
+        for t in year:
+            new_forecast = forcasting_value(
+                            product_id=product.id,  # Product ID from the current product
+                            keyword=f"{category.name}",  # Assign keyword (in this case 'iphone')
+                            forecasting_value=0,  # Trend value as forecasting value
+                            time=t.replace(day=1),  # Start of the month
+                            temp=0,  # Monthly max temperature
+                            rain=0,  # Monthly rain sum
+                            trend_value=0,  # Trend value from PyTrends
+                            original_value=None  # Add any original value logic if needed
+                        )
+            db.session.add(new_forecast)
         print(f"New Product Added: {product.name}, Unique ID: {P_unique_id}")  # Debug
     db.session.commit()
     return product
@@ -1678,7 +1815,7 @@ def esp_api_print_barcode():
         # Log the error and return a message
         print(f"Error: {e}")
         return jsonify({"message": "Internal Server Error"}), 500
-        
+    
 @app.route('/6007')
 def view_users():
     if 'user' not in session:

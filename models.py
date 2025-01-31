@@ -68,6 +68,8 @@ class Store(db.Model):
     gstNumber = db.Column(db.String(255), nullable=False)
     store_type = db.Column(db.String(255), nullable=False, default='Retail')
     profit = db.Column(db.Float, nullable=False, default=0.0)
+    forcast_last_update = db.Column(db.Date, nullable=True)
+    forcast_remaining = db.Column(db.JSON, nullable=True, default=[])
     unique_code = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
 
     # Relationships
